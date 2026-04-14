@@ -16,24 +16,12 @@ const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
 // ── Security: Helmet (sets safe HTTP headers) ─────────────────
-// Protects against clickjacking, sniffing attacks etc.
+// CSP disabled to allow Firebase, Stripe and all scripts to work
+// Other protections (XSS filter, clickjacking etc) still active
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:  ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", "'unsafe-eval'",
-                   "js.stripe.com", "www.gstatic.com",
-                   "fonts.googleapis.com", "*.firebaseapp.com"],
-      styleSrc:    ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "*"],
-      fontSrc:     ["'self'", "fonts.gstatic.com", "*"],
-      imgSrc:      ["'self'", "data:", "blob:", "https:", "*"],
-      connectSrc:  ["'self'", "*"],
-      frameSrc:    ["'self'", "js.stripe.com", "*"],
-      workerSrc:   ["'self'", "blob:"],
-    },
-  },
+  contentSecurityPolicy:    false,  // Disabled — too restrictive for our stack
   crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginResourcePolicy: false,
 }));
 
 // ── Security: CORS (only allow your own domain) ───────────────
