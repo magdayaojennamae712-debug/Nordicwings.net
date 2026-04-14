@@ -13,14 +13,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SkyBook" />
   <link rel="apple-touch-icon" href="/icon-192.svg" />
+  <meta name="description" content="Search and book flights from hundreds of airlines worldwide. Fast, secure, and easy with SkyBook." />
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Stripe.js — loaded early so payment UI is ready -->
+  <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
 
-  <!-- Firebase SDK (v9 modular via CDN compat build) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -28,86 +29,85 @@
 <body>
 
   <!-- ═══════════════════════════════════════════════════════
-       HEADER / NAV
+       HEADER
   ════════════════════════════════════════════════════════ -->
   <header id="site-header">
     <div class="header-inner">
-      <!-- Logo -->
       <a href="#" class="logo" onclick="showPage('home')">
         <span class="logo-icon">✈</span> SkyBook
       </a>
-
-      <!-- Nav actions -->
       <nav class="header-nav">
-        <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">
-          My Bookings
-        </button>
+        <a href="#" class="nav-link" onclick="showPage('home')">Home</a>
+        <a href="#how-it-works" class="nav-link">How it Works</a>
+        <a href="#destinations" class="nav-link">Destinations</a>
+        <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">My Bookings</button>
         <button class="btn-ghost" id="nav-login" onclick="openAuthModal('login')">Sign In</button>
-        <button class="btn-primary" id="nav-signup" onclick="openAuthModal('signup')">Sign Up</button>
+        <button class="btn-primary" id="nav-signup" onclick="openAuthModal('signup')">Sign Up Free</button>
         <div id="nav-user" style="display:none;" class="user-chip">
           <span id="nav-username"></span>
           <button class="btn-ghost small" onclick="signOutUser()">Sign Out</button>
         </div>
       </nav>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#" onclick="showPage('home');toggleMobileMenu()">Home</a>
+      <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
+      <a href="#destinations" onclick="toggleMobileMenu()">Destinations</a>
+      <button onclick="openAuthModal('login');toggleMobileMenu()">Sign In</button>
+      <button onclick="openAuthModal('signup');toggleMobileMenu()">Sign Up Free</button>
     </div>
   </header>
 
   <!-- ═══════════════════════════════════════════════════════
-       PAGE: HOME — Hero + Search Form
+       PAGE: HOME
   ════════════════════════════════════════════════════════ -->
   <main id="page-home" class="page active">
 
-    <!-- Hero Banner -->
+    <!-- HERO SECTION -->
     <section class="hero">
-      <div class="hero-content">
-        <h1>Where do you want to fly?</h1>
-        <p>Search hundreds of airlines. Book in minutes.</p>
+      <div class="hero-bg">
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=80" alt="Airplane flying above clouds" class="hero-img" />
+        <div class="hero-overlay"></div>
       </div>
-    </section>
+      <div class="hero-content">
+        <div class="hero-badge">✈ Trusted by 10,000+ travelers</div>
+        <h1>Your Journey Starts <span class="hero-highlight">Here</span></h1>
+        <p>Search hundreds of airlines. Find the best prices. Book in minutes.</p>
+      </div>
 
-    <!-- Search Card -->
-    <section class="search-section">
+      <!-- SEARCH CARD -->
       <div class="search-card">
-
-        <!-- Trip type toggle -->
         <div class="trip-type-tabs">
-          <button class="tab-btn active" data-type="one-way" onclick="setTripType('one-way')">One Way</button>
-          <button class="tab-btn" data-type="round-trip" onclick="setTripType('round-trip')">Round Trip</button>
+          <button class="tab-btn active" data-type="one-way" onclick="setTripType('one-way')">✈ One Way</button>
+          <button class="tab-btn" data-type="round-trip" onclick="setTripType('round-trip')">⇄ Round Trip</button>
         </div>
 
         <div class="search-form">
-          <!-- Origin -->
           <div class="input-group autocomplete-wrap" id="origin-wrap">
             <label>From</label>
-            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off"
-              oninput="autocomplete('origin')" />
+            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('origin')" />
             <ul class="autocomplete-list" id="origin-list"></ul>
           </div>
 
-          <!-- Swap button -->
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
 
-          <!-- Destination -->
           <div class="input-group autocomplete-wrap" id="dest-wrap">
             <label>To</label>
-            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off"
-              oninput="autocomplete('dest')" />
+            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('dest')" />
             <ul class="autocomplete-list" id="dest-list"></ul>
           </div>
 
-          <!-- Departure date -->
           <div class="input-group">
             <label>Depart</label>
             <input type="date" id="depart-input" />
           </div>
 
-          <!-- Return date (shown only for round-trip) -->
           <div class="input-group" id="return-group" style="display:none;">
             <label>Return</label>
             <input type="date" id="return-input" />
           </div>
 
-          <!-- Passengers -->
           <div class="input-group">
             <label>Passengers</label>
             <select id="passengers-input">
@@ -119,38 +119,332 @@
             </select>
           </div>
 
-          <!-- Search button -->
           <button class="btn-search" onclick="searchFlights()">
-            <span id="search-btn-text">Search Flights</span>
+            <span id="search-btn-text">🔍 Search Flights</span>
             <span id="search-btn-spinner" class="spinner" style="display:none;"></span>
           </button>
         </div>
-
-        <!-- Error message -->
         <p class="search-error" id="search-error"></p>
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features-section">
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🌍</div>
-          <h3>Real Flights</h3>
-          <p>Live data from hundreds of airlines worldwide</p>
+    <!-- STATS SECTION -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Airlines Worldwide</div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3>Secure Booking</h3>
-          <p>Payments protected by Stripe — industry standard</p>
+        <div class="stat-item">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Happy Travelers</div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">📋</div>
-          <h3>Manage Trips</h3>
-          <p>View and cancel bookings anytime from your account</p>
+        <div class="stat-item">
+          <div class="stat-number">150+</div>
+          <div class="stat-label">Destinations</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Customer Support</div>
         </div>
       </div>
     </section>
+
+    <!-- POPULAR DESTINATIONS -->
+    <section class="destinations-section" id="destinations">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="section-badge">✈ Popular Routes</span>
+          <h2>Top Destinations</h2>
+          <p>Explore the world's most popular flight routes</p>
+        </div>
+        <div class="destinations-grid">
+          <div class="dest-card" onclick="quickSearch('HEL','LHR')">
+            <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" />
+            <div class="dest-info">
+              <h3>Helsinki → London</h3>
+              <p>HEL → LHR</p>
+              <span class="dest-price">From $180</span>
+            </div>
+          </div>
+          <div class="dest-card" onclick="quickSearch('HEL','DXB')">
+            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" />
+            <div class="dest-info">
+              <h3>Helsinki → Dubai</h3>
+              <p>HEL → DXB</p>
+              <span class="dest-price">From $320</span>
+            </div>
+          </div>
+          <div class="dest-card" onclick="quickSearch('HEL','JFK')">
+            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" />
+            <div class="dest-info">
+              <h3>Helsinki → New York</h3>
+              <p>HEL → JFK</p>
+              <span class="dest-price">From $450</span>
+            </div>
+          </div>
+          <div class="dest-card" onclick="quickSearch('HEL','BKK')">
+            <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" />
+            <div class="dest-info">
+              <h3>Helsinki → Bangkok</h3>
+              <p>HEL → BKK</p>
+              <span class="dest-price">From $390</span>
+            </div>
+          </div>
+          <div class="dest-card" onclick="quickSearch('HEL','BCN')">
+            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" />
+            <div class="dest-info">
+              <h3>Helsinki → Barcelona</h3>
+              <p>HEL → BCN</p>
+              <span class="dest-price">From $150</span>
+            </div>
+          </div>
+          <div class="dest-card" onclick="quickSearch('HEL','CDG')">
+            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" />
+            <div class="dest-info">
+              <h3>Helsinki → Paris</h3>
+              <p>HEL → CDG</p>
+              <span class="dest-price">From $160</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section" id="how-it-works">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="section-badge">🚀 Simple Process</span>
+          <h2>How SkyBook Works</h2>
+          <p>Book your perfect flight in just 3 easy steps</p>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <div class="step-icon">🔍</div>
+            <h3>Search Flights</h3>
+            <p>Enter your origin, destination and travel dates. We search hundreds of airlines instantly to find you the best options.</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <div class="step-icon">✈</div>
+            <h3>Choose Your Flight</h3>
+            <p>Compare prices, airlines, and departure times. Pick the flight that fits your schedule and budget perfectly.</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <div class="step-icon">🎉</div>
+            <h3>Book & Fly!</h3>
+            <p>Enter passenger details and pay securely with Stripe. Receive instant confirmation and manage your booking anytime.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features-section">
+      <div class="section-inner features-layout">
+        <div class="features-text">
+          <span class="section-badge">⭐ Why SkyBook</span>
+          <h2>The Smarter Way to Book Flights</h2>
+          <p>We combine real-time flight data with a beautifully simple booking experience — so you can focus on the adventure ahead.</p>
+          <div class="features-list">
+            <div class="feature-item">
+              <div class="feature-icon-box">🌍</div>
+              <div>
+                <h4>Real-Time Flight Data</h4>
+                <p>Live prices from 500+ airlines updated every minute</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon-box">🔒</div>
+              <div>
+                <h4>Secure Payments</h4>
+                <p>All transactions protected by Stripe — bank-level security</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon-box">📱</div>
+              <div>
+                <h4>Works on Any Device</h4>
+                <p>Book from your phone, tablet or computer — seamlessly</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon-box">📋</div>
+              <div>
+                <h4>Easy Booking Management</h4>
+                <p>View, modify or cancel bookings anytime from your account</p>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="document.getElementById('origin-input').focus(); document.getElementById('origin-input').scrollIntoView({behavior:'smooth'})">
+            Start Searching ✈
+          </button>
+        </div>
+        <div class="features-image">
+          <img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80" alt="Happy travelers at airport" />
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="testimonials-section">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="section-badge">💬 Reviews</span>
+          <h2>What Our Travelers Say</h2>
+          <p>Join thousands of happy customers who book with SkyBook</p>
+        </div>
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p>"Found an amazing deal to London in under 2 minutes! The booking process was so smooth and easy. Will definitely use SkyBook again!"</p>
+            <div class="testimonial-author">
+              <div class="author-avatar">M</div>
+              <div>
+                <strong>Maria K.</strong>
+                <span>Helsinki, Finland</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p>"Best flight booking app I've used. Clean design, great prices, and the payment was completely secure. Highly recommend!"</p>
+            <div class="testimonial-author">
+              <div class="author-avatar">J</div>
+              <div>
+                <strong>James T.</strong>
+                <span>London, UK</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p>"Booked my Dubai trip in minutes. The interface is beautiful and intuitive. SkyBook is now my go-to for all flight bookings!"</p>
+            <div class="testimonial-author">
+              <div class="author-avatar">S</div>
+              <div>
+                <strong>Sofia R.</strong>
+                <span>Stockholm, Sweden</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq-section">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="section-badge">❓ FAQ</span>
+          <h2>Frequently Asked Questions</h2>
+          <p>Everything you need to know about booking with SkyBook</p>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              How do I book a flight? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Simply enter your departure city, destination, and travel date in the search box above. Browse the available flights, select your preferred option, enter passenger details, and complete payment securely with your card.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              Is my payment information secure? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Absolutely. All payments are processed by Stripe, the world's leading payment platform used by millions of businesses. Your card details are never stored on our servers — they go directly to Stripe's secure servers.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              Can I cancel my booking? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Yes! Log in to your account and go to "My Bookings" to view and cancel your reservations. Please note that cancellation policies vary by airline and fare type.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              Do I need an account to book? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              You need a free SkyBook account to complete a booking. This allows you to manage your trips, view booking history, and receive booking confirmations. Creating an account takes less than 30 seconds!
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              What airlines does SkyBook cover? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              SkyBook searches over 500 airlines worldwide including major carriers like Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, and many more budget and regional airlines.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="cta-section">
+      <div class="cta-inner">
+        <h2>Ready to Take Off? ✈</h2>
+        <p>Join thousands of travelers booking smarter with SkyBook</p>
+        <div class="cta-buttons">
+          <button class="btn-cta-primary" onclick="openAuthModal('signup')">Create Free Account</button>
+          <button class="btn-cta-ghost" onclick="document.getElementById('origin-input').focus(); window.scrollTo({top:0,behavior:'smooth'})">Search Flights</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <span class="logo-icon">✈</span> SkyBook
+            </div>
+            <p>Making flight booking simple, fast and trustworthy for travelers worldwide.</p>
+            <div class="footer-social">
+              <a href="#" class="social-btn">f</a>
+              <a href="#" class="social-btn">in</a>
+              <a href="#" class="social-btn">tw</a>
+            </div>
+          </div>
+          <div class="footer-links">
+            <h4>Company</h4>
+            <a href="#">About Us</a>
+            <a href="#">How It Works</a>
+            <a href="#">Destinations</a>
+            <a href="#">Blog</a>
+          </div>
+          <div class="footer-links">
+            <h4>Support</h4>
+            <a href="#">Help Center</a>
+            <a href="#">Contact Us</a>
+            <a href="#">Cancellation Policy</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+          <div class="footer-links">
+            <h4>Book With Us</h4>
+            <a href="#" onclick="showPage('home')">Search Flights</a>
+            <a href="#" onclick="openAuthModal('signup')">Create Account</a>
+            <a href="#" onclick="openAuthModal('login')">Sign In</a>
+            <a href="#" onclick="showPage('dashboard')">My Bookings</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 SkyBook. All rights reserved.</p>
+          <p>Powered by real flight data · Secured by Stripe</p>
+        </div>
+      </div>
+    </footer>
   </main>
 
   <!-- ═══════════════════════════════════════════════════════
@@ -158,8 +452,6 @@
   ════════════════════════════════════════════════════════ -->
   <main id="page-results" class="page">
     <div class="page-inner">
-
-      <!-- Results header -->
       <div class="results-header">
         <button class="back-btn" onclick="showPage('home')">← Modify Search</button>
         <div class="results-title">
@@ -167,46 +459,34 @@
           <p id="results-subheading"></p>
         </div>
       </div>
-
-      <!-- Loading state -->
       <div id="results-loading" class="loading-state">
         <div class="spinner large"></div>
         <p>Searching flights...</p>
       </div>
-
-      <!-- No results -->
       <div id="results-empty" class="empty-state" style="display:none;">
         <div class="empty-icon">✈️</div>
         <h3>No flights found</h3>
         <p>Try different dates or airports</p>
         <button class="btn-primary" onclick="showPage('home')">Search Again</button>
       </div>
-
-      <!-- Flight cards list -->
       <div id="results-list" class="results-list" style="display:none;"></div>
     </div>
   </main>
 
   <!-- ═══════════════════════════════════════════════════════
-       PAGE: BOOKING — Passenger Details + Payment
+       PAGE: BOOKING
   ════════════════════════════════════════════════════════ -->
   <main id="page-booking" class="page">
     <div class="page-inner">
-
       <div class="results-header">
         <button class="back-btn" onclick="showPage('results')">← Back to Results</button>
         <h2>Complete Your Booking</h2>
       </div>
-
       <div class="booking-layout">
-
-        <!-- Passenger form -->
         <div class="booking-form-card">
           <h3>Passenger Details</h3>
           <div id="passenger-forms"></div>
-
           <div class="divider"></div>
-
           <h3>Contact Information</h3>
           <div class="form-row">
             <div class="form-group">
@@ -215,27 +495,21 @@
             </div>
             <div class="form-group">
               <label>Phone Number</label>
-              <input type="tel" id="contact-phone" placeholder="+1 234 567 8900" />
+              <input type="tel" id="contact-phone" placeholder="+358 40 123 4567" />
             </div>
           </div>
-
           <div class="divider"></div>
-
           <h3>Payment</h3>
           <div id="payment-element-container">
             <div id="payment-element"></div>
             <p class="payment-note">🔒 Your payment is secured by Stripe</p>
           </div>
-
           <p class="form-error" id="booking-error"></p>
-
           <button class="btn-book" id="pay-btn" onclick="submitBooking()">
             <span id="pay-btn-text">Confirm & Pay</span>
             <span id="pay-btn-spinner" class="spinner" style="display:none;"></span>
           </button>
         </div>
-
-        <!-- Flight summary sidebar -->
         <div class="booking-summary-card">
           <h3>Your Flight</h3>
           <div id="booking-flight-summary"></div>
@@ -265,7 +539,7 @@
   </main>
 
   <!-- ═══════════════════════════════════════════════════════
-       PAGE: DASHBOARD — My Bookings
+       PAGE: DASHBOARD
   ════════════════════════════════════════════════════════ -->
   <main id="page-dashboard" class="page">
     <div class="page-inner">
@@ -273,43 +547,34 @@
         <button class="back-btn" onclick="showPage('home')">← Home</button>
         <h2>My Bookings</h2>
       </div>
-
       <div id="dashboard-auth-prompt" class="empty-state" style="display:none;">
         <div class="empty-icon">🔒</div>
         <h3>Sign in to view your bookings</h3>
         <p>Create an account or sign in to manage your trips</p>
         <button class="btn-primary" onclick="openAuthModal('login')">Sign In</button>
       </div>
-
       <div id="dashboard-loading" class="loading-state" style="display:none;">
         <div class="spinner large"></div>
         <p>Loading your bookings...</p>
       </div>
-
       <div id="dashboard-empty" class="empty-state" style="display:none;">
         <div class="empty-icon">✈️</div>
         <h3>No bookings yet</h3>
         <p>Your upcoming and past trips will appear here</p>
         <button class="btn-primary" onclick="showPage('home')">Search Flights</button>
       </div>
-
       <div id="dashboard-list" class="bookings-list" style="display:none;"></div>
     </div>
   </main>
 
-  <!-- ═══════════════════════════════════════════════════════
-       MODAL: AUTH — Sign In / Sign Up
-  ════════════════════════════════════════════════════════ -->
+  <!-- AUTH MODAL -->
   <div id="auth-overlay" class="modal-overlay" onclick="closeAuthModal(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
-
       <div class="modal-tabs">
         <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
         <button class="modal-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
         <button class="modal-close" onclick="closeAuthModal()">✕</button>
       </div>
-
-      <!-- Sign In Form -->
       <div id="form-login" class="auth-form">
         <h2>Welcome back</h2>
         <p class="auth-subtitle">Sign in to your SkyBook account</p>
@@ -326,12 +591,8 @@
           <span id="login-btn-text">Sign In</span>
           <span id="login-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Don't have an account?
-          <a href="#" onclick="switchAuthTab('signup')">Sign up free</a>
-        </p>
+        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a></p>
       </div>
-
-      <!-- Sign Up Form -->
       <div id="form-signup" class="auth-form" style="display:none;">
         <h2>Create your account</h2>
         <p class="auth-subtitle">Join SkyBook and start booking flights</p>
@@ -352,16 +613,12 @@
           <span id="signup-btn-text">Create Account</span>
           <span id="signup-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Already have an account?
-          <a href="#" onclick="switchAuthTab('login')">Sign in</a>
-        </p>
+        <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Sign in</a></p>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       CANCEL CONFIRMATION DIALOG
-  ════════════════════════════════════════════════════════ -->
+  <!-- CANCEL DIALOG -->
   <div id="cancel-overlay" class="modal-overlay" style="display:none;" onclick="closeCancelModal(event)">
     <div class="modal-card small" onclick="event.stopPropagation()">
       <h3>Cancel Booking?</h3>
@@ -373,23 +630,36 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       FOOTER
-  ════════════════════════════════════════════════════════ -->
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-logo">
-        <span class="logo-icon">✈</span> SkyBook
-      </div>
-      <p class="footer-tagline">Making flight booking simple and trustworthy.</p>
-      <p class="footer-copy">© 2026 SkyBook. All rights reserved.</p>
-    </div>
-  </footer>
-
   <script src="script.js"></script>
-
-  <!-- Register Service Worker for PWA install on phones -->
   <script>
+    // FAQ toggle
+    function toggleFaq(btn) {
+      const answer = btn.nextElementSibling;
+      const icon   = btn.querySelector('.faq-icon');
+      const isOpen = answer.style.maxHeight;
+      document.querySelectorAll('.faq-answer').forEach(a => a.style.maxHeight = '');
+      document.querySelectorAll('.faq-icon').forEach(i => i.textContent = '+');
+      if (!isOpen) {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.textContent = '−';
+      }
+    }
+
+    // Quick search from destination cards
+    function quickSearch(from, to) {
+      document.getElementById('origin-input').value = from;
+      document.getElementById('origin-input').dataset.code = from;
+      document.getElementById('dest-input').value = to;
+      document.getElementById('dest-input').dataset.code = to;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Mobile menu
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('open');
+    }
+
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
