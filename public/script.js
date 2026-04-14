@@ -240,7 +240,7 @@ function renderFlightCards(flights) {
           <div class="route-line">
             <span class="route-duration">${duration}</span>
             <div class="route-bar"></div>
-            <span class="route-stops">${stops === 0 ? 'Nonstop' : stops + ' stop' + (stops > 1 ? 's' : '')}</span>
+            <span class="route-stops">${stops === 0 ? '✅ Nonstop' : stops + ' stop' + (stops > 1 ? 's' : '') + ' via ' + flight.itineraries[0].segments.slice(0,-1).map(s => s.arrival.iataCode).join(', ')}</span>
           </div>
           <div class="route-point">
             <div class="route-time">${formatTime(lastSeg.arrival.at)}</div>
@@ -325,19 +325,41 @@ async function setupBookingPage() {
   }
   document.getElementById('passenger-forms').innerHTML = formsHtml;
 
-  // Build flight summary sidebar
+  // Build full route string including stopovers
+  const allSegs   = selectedFlight.itineraries[0].segments;
+  const stopCodes = allSegs.slice(0, -1).map(s => s.arrival.iataCode);
+  const routeStr  = stopCodes.length > 0
+    ? `${seg.departure.iataCode} → ${stopCodes.join(' → ')} → ${lastSeg.arrival.iataCode}`
+    : `${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}`;
+
+  const stopLabel = stopCodes.length === 0
+    ? '<span style="color:#16a34a;font-size:.8rem;font-weight:600;">✅ Nonstop</span>'
+    : `<span style="color:#d97706;font-size:.8rem;font-weight:600;">🔄 ${stopCodes.length} stop via ${stopCodes.join(', ')}</span>`;
+
   document.getElementById('booking-flight-summary').innerHTML = `
     <div class="summary-flight-row">
       <div class="summary-route">${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}</div>
       <span class="booking-status status-confirmed" style="margin:0;">✈ Confirmed</span>
     </div>
-    <div class="summary-times">
+    ${stopLabel}
+    <div class="summary-times" style="margin-top:8px;">
       <strong>${formatTime(seg.departure.at)}</strong>
       <span style="color:#9ca3af;">→</span>
       <strong>${formatTime(lastSeg.arrival.at)}</strong>
     </div>
-    <div class="summary-duration">${formatDate(searchParams.departDate)} · ${formatDuration(selectedFlight.itineraries[0].duration)}</div>
-    <div class="summary-duration" style="margin-top:4px;">${seg.carrierCode}${seg.number}</div>
+    <div class="summary-duration">${formatDate(seg.departure.at)} · Total: ${formatDuration(selectedFlight.itineraries[0].duration)}</div>
+    <div class="summary-duration" style="margin-top:4px;">Operated by: ${seg.carrierCode} · Flight ${seg.carrierCode}${seg.number}</div>
+    ${stopCodes.length > 0 ? `
+    <div style="margin-top:12px;padding:10px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">
+      <div style="font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:6px;">✈ FLIGHT ITINERARY</div>
+      ${allSegs.map((s, idx) => `
+        <div style="font-size:.82rem;color:#374151;padding:4px 0;border-bottom:${idx < allSegs.length-1 ? '1px dashed #e5e7eb' : 'none'};">
+          <strong>${s.departure.iataCode}</strong> ${formatTime(s.departure.at)} → <strong>${s.arrival.iataCode}</strong> ${formatTime(s.arrival.at)}
+          <span style="color:#6b7280;"> · ${s.carrierCode}${s.number}</span>
+        </div>
+        ${idx < allSegs.length-1 ? `<div style="font-size:.78rem;color:#d97706;padding:3px 0 3px 8px;">🕐 Layover at ${s.arrival.iataCode}</div>` : ''}
+      `).join('')}
+    </div>` : ''}
   `;
 
   const taxAmount  = parseFloat(selectedFlight.price.fees?.[0]?.amount || (price * 0.1)).toFixed(2);

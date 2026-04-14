@@ -105,50 +105,124 @@ app.get('/api/flights/search', async (req, res) => {
 
   console.log(`Flight search: ${origin} (${resolvedOriginEntityId}) → ${destination} (${resolvedDestinationEntityId}) on ${departureDate}`);
 
-  // Helper: generate realistic demo flights as fallback
+  // Helper: generate realistic demo flights with correct stopovers and durations
   function generateDemoFlights(orig, dest, date, numAdults) {
-    const airlines = [
-      { code: 'EK', name: 'Emirates' },
-      { code: 'BA', name: 'British Airways' },
-      { code: 'LH', name: 'Lufthansa' },
-      { code: 'QR', name: 'Qatar Airways' },
-      { code: 'TK', name: 'Turkish Airlines' },
-      { code: 'AF', name: 'Air France' }
-    ];
-    const durations  = ['PT6H30M', 'PT7H15M', 'PT8H0M', 'PT5H45M', 'PT9H20M'];
-    const prices     = [320, 410, 289, 550, 375, 495, 260, 620];
-    const departures = ['06:00', '08:30', '11:15', '14:00', '16:45', '19:30', '22:00'];
 
-    return airlines.map((al, i) => {
-      const depTime  = `${date}T${departures[i % departures.length]}:00`;
-      const price    = prices[i % prices.length] * numAdults;
-      const dur      = durations[i % durations.length];
-      const durMatch = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-      const hrs      = parseInt(durMatch[1] || 0);
-      const mins     = parseInt(durMatch[2] || 0);
-      const arrDate  = new Date(depTime);
-      arrDate.setHours(arrDate.getHours() + hrs);
-      arrDate.setMinutes(arrDate.getMinutes() + mins);
+    // Real-world route data: total duration (minutes) + stopover airports
+    const routeData = {
+      // European short-haul (direct)
+      default_short: { totalMins: 180, stops: [], basePrice: 120 },
+      // Medium-haul (direct)
+      default_medium: { totalMins: 360, stops: [], basePrice: 280 },
+      // Long-haul (1 stop)
+      default_long: { totalMins: 840, stops: ['DXB'], basePrice: 520 },
+    };
+
+    // Known real routes with accurate data
+    const knownRoutes = {
+      'HEL-MNL': { totalMins: 960, stops: ['DXB','DOH','BKK'], basePrice: 650 },
+      'HEL-LHR': { totalMins: 195, stops: [], basePrice: 130 },
+      'HEL-DXB': { totalMins: 390, stops: [], basePrice: 310 },
+      'HEL-JFK': { totalMins: 570, stops: ['LHR'], basePrice: 480 },
+      'HEL-BKK': { totalMins: 810, stops: ['DXB'], basePrice: 590 },
+      'HEL-BCN': { totalMins: 300, stops: [], basePrice: 145 },
+      'HEL-CDG': { totalMins: 210, stops: [], basePrice: 138 },
+      'HEL-SIN': { totalMins: 870, stops: ['DXB'], basePrice: 620 },
+      'LHR-JFK': { totalMins: 435, stops: [], basePrice: 380 },
+      'LHR-DXB': { totalMins: 405, stops: [], basePrice: 290 },
+      'LHR-SYD': { totalMins: 1260, stops: ['SIN'], basePrice: 980 },
+      'CDG-JFK': { totalMins: 510, stops: [], basePrice: 420 },
+    };
+
+    const key    = `${orig}-${dest}`;
+    const revKey = `${dest}-${orig}`;
+    let route = knownRoutes[key] || knownRoutes[revKey];
+
+    // Estimate route type if not known
+    if (!route) {
+      const totalMins = Math.abs(orig.charCodeAt(0) - dest.charCodeAt(0)) * 15 + 180;
+      if (totalMins < 240)       route = { ...routeData.default_short, totalMins };
+      else if (totalMins < 480)  route = { ...routeData.default_medium, totalMins };
+      else                       route = { ...routeData.default_long, totalMins };
+    }
+
+    // Airlines with realistic flight numbers per route
+    const options = [
+      { code: 'EK', flightBase: 100, cabinPriceMod: 1.0  },
+      { code: 'QR', flightBase: 200, cabinPriceMod: 1.05 },
+      { code: 'BA', flightBase: 300, cabinPriceMod: 0.95 },
+      { code: 'LH', flightBase: 400, cabinPriceMod: 1.0  },
+      { code: 'TK', flightBase: 500, cabinPriceMod: 0.90 },
+      { code: 'AY', flightBase: 600, cabinPriceMod: 0.95 }, // Finnair
+    ];
+
+    const departureTimes = ['06:15', '08:30', '10:45', '13:00', '15:30', '18:00'];
+
+    return options.map((al, i) => {
+      const depTimeStr  = `${date}T${departureTimes[i % departureTimes.length]}:00`;
+      const depDate     = new Date(depTimeStr);
+      const basePrice   = route.basePrice * al.cabinPriceMod * numAdults;
+      const price       = Math.round(basePrice + (i % 3) * 40);
+      const isBusiness  = i === 1; // Second option is business class
+      const businessMod = isBusiness ? 2.8 : 1;
+      const finalPrice  = Math.round(price * businessMod);
+
+      // Build segments
+      const segments = [];
+
+      if (route.stops.length === 0) {
+        // Direct flight
+        const arrDate = new Date(depDate.getTime() + route.totalMins * 60000);
+        segments.push({
+          departure: { iataCode: orig, at: depDate.toISOString() },
+          arrival:   { iataCode: dest, at: arrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13),
+          duration: `PT${Math.floor(route.totalMins/60)}H${route.totalMins%60}M`
+        });
+      } else {
+        // Connecting flight — split total time across segments
+        const stopover   = route.stops[i % route.stops.length];
+        const seg1Mins   = Math.round(route.totalMins * 0.45);
+        const layoverMin = 90; // 1.5h layover
+        const seg2Mins   = route.totalMins - seg1Mins - layoverMin;
+
+        const midArrDate  = new Date(depDate.getTime() + seg1Mins * 60000);
+        const midDepDate  = new Date(midArrDate.getTime() + layoverMin * 60000);
+        const finalArrDate = new Date(midDepDate.getTime() + seg2Mins * 60000);
+
+        segments.push({
+          departure: { iataCode: orig,    at: depDate.toISOString() },
+          arrival:   { iataCode: stopover, at: midArrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13),
+          duration: `PT${Math.floor(seg1Mins/60)}H${seg1Mins%60}M`
+        });
+        segments.push({
+          departure: { iataCode: stopover, at: midDepDate.toISOString() },
+          arrival:   { iataCode: dest,     at: finalArrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13 + 1),
+          duration: `PT${Math.floor(seg2Mins/60)}H${seg2Mins%60}M`
+        });
+      }
+
+      const totalDurMins = route.totalMins;
 
       return {
         id: `demo-${i}`,
         price: {
-          grandTotal: price.toFixed(2),
+          grandTotal: finalPrice.toFixed(2),
           currency: 'USD',
-          fees: [{ amount: (price * 0.1).toFixed(2) }]
+          fees: [{ amount: (finalPrice * 0.10).toFixed(2) }]
         },
-        numberOfBookableSeats: Math.floor(Math.random() * 8) + 2,
+        numberOfBookableSeats: [9,4,7,2,6,8][i] || 5,
         itineraries: [{
-          duration: dur,
-          segments: [{
-            departure: { iataCode: orig, at: depTime },
-            arrival:   { iataCode: dest, at: arrDate.toISOString() },
-            carrierCode: al.code,
-            number: String(100 + i * 37)
-          }]
+          duration: `PT${Math.floor(totalDurMins/60)}H${totalDurMins%60}M`,
+          segments
         }],
         travelerPricings: [{
-          fareDetailsBySegment: [{ cabin: i === 3 ? 'BUSINESS' : 'ECONOMY' }]
+          fareDetailsBySegment: [{ cabin: isBusiness ? 'BUSINESS' : 'ECONOMY' }]
         }]
       };
     });
