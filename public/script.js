@@ -170,10 +170,10 @@ async function searchFlights() {
 
   // Validate
   errorEl.textContent = '';
-  if (!origin || origin.length !== 3) return setError(errorEl, 'Valitse kelvollinen lähtölentokenttä.');
-  if (!dest   || dest.length   !== 3) return setError(errorEl, 'Valitse kelvollinen määränpäälentokenttä.');
-  if (!departDate)                    return setError(errorEl, 'Valitse lähtöpäivämäärä.');
-  if (new Date(departDate) < new Date().setHours(0,0,0,0)) return setError(errorEl, 'Lähtöpäivämäärä ei voi olla menneisyydessä.');
+  if (!origin || origin.length !== 3) return setError(errorEl, 'Please select a valid departure airport.');
+  if (!dest   || dest.length   !== 3) return setError(errorEl, 'Please select a valid destination airport.');
+  if (!departDate)                    return setError(errorEl, 'Please select a departure date.');
+  if (new Date(departDate) < new Date().setHours(0,0,0,0)) return setError(errorEl, 'Departure date cannot be in the past.');
 
   // Save search params for display
   searchParams = { origin, dest, departDate, passengers: parseInt(passengers) };
@@ -185,7 +185,7 @@ async function searchFlights() {
   document.getElementById('results-empty').style.display   = 'none';
   document.getElementById('results-heading').textContent   = `${origin} → ${dest}`;
   document.getElementById('results-subheading').textContent =
-    `${formatDate(departDate)} · ${passengers} matkustaja${passengers > 1 ? 'a' : ''}`;
+    `${formatDate(departDate)} · ${passengers} passenger${passengers > 1 ? 's' : ''}`;
 
   // Set search button loading state
   toggleBtnLoading('search-btn-text', 'search-btn-spinner', true);
@@ -240,7 +240,7 @@ function renderFlightCards(flights) {
           <div class="route-line">
             <span class="route-duration">${duration}</span>
             <div class="route-bar"></div>
-            <span class="route-stops">${stops === 0 ? 'Suora' : stops + ' välilaskua'}</span>
+            <span class="route-stops">${stops === 0 ? 'Nonstop' : stops + ' stop' + (stops > 1 ? 's' : '')}</span>
           </div>
           <div class="route-point">
             <div class="route-time">${formatTime(lastSeg.arrival.at)}</div>
@@ -250,15 +250,15 @@ function renderFlightCards(flights) {
 
         <div class="flight-meta">
           <div class="flight-cabin">${cabin.charAt(0) + cabin.slice(1).toLowerCase()}</div>
-          ${seats ? `<div class="flight-seats">${seats} paikkaa jäljellä</div>` : ''}
+          ${seats ? `<div class="flight-seats">${seats} seats left</div>` : ''}
         </div>
 
         <div class="flight-price">
           <div class="price-amount">${currency === 'USD' ? '$' : currency}${price}</div>
-          <div class="price-label">per henkilö</div>
+          <div class="price-label">per person</div>
         </div>
 
-        <button class="btn-select">Valitse</button>
+        <button class="btn-select">Select</button>
       </div>
     `;
   }).join('');
@@ -300,25 +300,25 @@ async function setupBookingPage() {
   let formsHtml = '';
   for (let i = 1; i <= passengerCount; i++) {
     formsHtml += `
-      <p class="passenger-header">Matkustaja ${i}</p>
+      <p class="passenger-header">Passenger ${i}</p>
       <div class="form-row">
         <div class="form-group">
-          <label>Etunimi</label>
-          <input type="text" class="pax-first" placeholder="Etunimi" />
+          <label>First Name</label>
+          <input type="text" class="pax-first" placeholder="First name" />
         </div>
         <div class="form-group">
-          <label>Sukunimi</label>
-          <input type="text" class="pax-last" placeholder="Sukunimi" />
+          <label>Last Name</label>
+          <input type="text" class="pax-last" placeholder="Last name" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Syntymäpäivä</label>
+          <label>Date of Birth</label>
           <input type="date" class="pax-dob" />
         </div>
         <div class="form-group">
-          <label>Passi / Henkilötodistus</label>
-          <input type="text" class="pax-passport" placeholder="Passinumero" />
+          <label>Passport / ID</label>
+          <input type="text" class="pax-passport" placeholder="Passport number" />
         </div>
       </div>
     `;
@@ -329,7 +329,7 @@ async function setupBookingPage() {
   document.getElementById('booking-flight-summary').innerHTML = `
     <div class="summary-flight-row">
       <div class="summary-route">${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}</div>
-      <span class="booking-status status-confirmed" style="margin:0;">✈ Vahvistettu</span>
+      <span class="booking-status status-confirmed" style="margin:0;">✈ Confirmed</span>
     </div>
     <div class="summary-times">
       <strong>${formatTime(seg.departure.at)}</strong>
@@ -345,9 +345,9 @@ async function setupBookingPage() {
   const total      = price.toFixed(2);
 
   document.getElementById('price-breakdown').innerHTML = `
-    <div class="price-row"><span>Perushinta × ${passengerCount}</span><span>$${(baseAmount * passengerCount).toFixed(2)}</span></div>
-    <div class="price-row"><span>Verot ja maksut</span><span>$${(taxAmount * passengerCount).toFixed(2)}</span></div>
-    <div class="price-row total"><span>Yhteensä</span><span>$${(price * passengerCount).toFixed(2)}</span></div>
+    <div class="price-row"><span>Base fare × ${passengerCount}</span><span>$${(baseAmount * passengerCount).toFixed(2)}</span></div>
+    <div class="price-row"><span>Taxes & fees</span><span>$${(taxAmount * passengerCount).toFixed(2)}</span></div>
+    <div class="price-row total"><span>Total</span><span>$${(price * passengerCount).toFixed(2)}</span></div>
   `;
 
   // Setup Stripe payment element
@@ -381,7 +381,7 @@ async function setupStripePayment(amount, currency) {
     const paymentElement = stripeElements.create('payment');
     paymentElement.mount('#payment-element');
   } catch (err) {
-    document.getElementById('booking-error').textContent = 'Maksukaavaketta ei voitu ladata. Yritä uudelleen.';
+    document.getElementById('booking-error').textContent = 'Could not load payment form. Please try again.';
   }
 }
 
@@ -399,16 +399,16 @@ async function submitBooking() {
   const phone      = document.getElementById('contact-phone').value.trim();
 
   if (firstNames.some(n => !n) || lastNames.some(n => !n)) {
-    return setError(errorEl, 'Täytä kaikkien matkustajien nimet.');
+    return setError(errorEl, 'Please fill in all passenger names.');
   }
   if (!email || !email.includes('@')) {
-    return setError(errorEl, 'Syötä kelvollinen sähköpostiosoite.');
+    return setError(errorEl, 'Please enter a valid email address.');
   }
   if (!phone) {
-    return setError(errorEl, 'Syötä yhteystietopuhelinnumero.');
+    return setError(errorEl, 'Please enter a contact phone number.');
   }
   if (!stripeElements) {
-    return setError(errorEl, 'Maksukaavake ei ole vielä valmis. Odota hetki.');
+    return setError(errorEl, 'Payment form is not ready yet. Please wait a moment.');
   }
 
   toggleBtnLoading('pay-btn-text', 'pay-btn-spinner', true);
@@ -466,7 +466,7 @@ async function submitBooking() {
     showConfirmationPage(booking);
 
   } catch (err) {
-    setError(errorEl, 'Varaus epäonnistui: ' + (err.message || 'Yritä uudelleen.'));
+    setError(errorEl, 'Booking failed: ' + (err.message || 'Please try again.'));
   } finally {
     toggleBtnLoading('pay-btn-text', 'pay-btn-spinner', false);
     document.getElementById('pay-btn').disabled = false;
@@ -475,13 +475,13 @@ async function submitBooking() {
 
 function showConfirmationPage(booking) {
   document.getElementById('confirmation-details').innerHTML = `
-    <div><strong>Varausnumero:</strong> ${booking.bookingRef}</div>
-    <div><strong>Reitti:</strong> ${booking.flight.from} → ${booking.flight.to}</div>
-    <div><strong>Päivämäärä:</strong> ${formatDate(booking.flight.departTime)}</div>
-    <div><strong>Lähtö:</strong> ${formatTime(booking.flight.departTime)} · Saapuminen: ${formatTime(booking.flight.arriveTime)}</div>
-    <div><strong>Lento:</strong> ${booking.flight.flightNum}</div>
-    <div><strong>Matkustajat:</strong> ${booking.passengers.map(p => p.firstName + ' ' + p.lastName).join(', ')}</div>
-    <div><strong>Maksettu yhteensä:</strong> $${booking.totalPrice}</div>
+    <div><strong>Booking Reference:</strong> ${booking.bookingRef}</div>
+    <div><strong>Route:</strong> ${booking.flight.from} → ${booking.flight.to}</div>
+    <div><strong>Date:</strong> ${formatDate(booking.flight.departTime)}</div>
+    <div><strong>Departure:</strong> ${formatTime(booking.flight.departTime)} · Arrival: ${formatTime(booking.flight.arriveTime)}</div>
+    <div><strong>Flight:</strong> ${booking.flight.flightNum}</div>
+    <div><strong>Passengers:</strong> ${booking.passengers.map(p => p.firstName + ' ' + p.lastName).join(', ')}</div>
+    <div><strong>Total Paid:</strong> $${booking.totalPrice}</div>
   `;
   showPage('confirmation');
 }
@@ -530,24 +530,24 @@ async function loadDashboard() {
         <div class="booking-card" id="booking-${doc.id}">
           <div>
             <span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">
-              ${b.status === 'confirmed' ? 'Vahvistettu' : 'Peruutettu'}
+              ${b.status === 'confirmed' ? 'Confirmed' : 'Cancelled'}
             </span>
           </div>
           <div class="booking-info">
             <div class="booking-route">${b.flight.from} → ${b.flight.to}</div>
             <div class="booking-date-time">${formatDate(b.flight.departTime)} · ${formatTime(b.flight.departTime)} – ${formatTime(b.flight.arriveTime)}</div>
             <div class="booking-date-time">${b.flight.flightNum} · ${b.flight.duration}</div>
-            <div class="booking-ref">Varausnro: ${b.bookingRef}</div>
+            <div class="booking-ref">Ref: ${b.bookingRef}</div>
           </div>
           <div>
             <div class="booking-price">$${b.totalPrice}</div>
-            <div class="booking-price-label">${b.passengers.length} matkustaja${b.passengers.length > 1 ? 'a' : ''}</div>
+            <div class="booking-price-label">${b.passengers.length} passenger${b.passengers.length > 1 ? 's' : ''}</div>
           </div>
           ${b.status === 'confirmed' ? `
             <button class="btn-cancel" onclick="openCancelModal('${doc.id}')">
-              Peruuta
+              Cancel
             </button>
-          ` : '<span style="color:#9ca3af;font-size:.85rem;">Peruutettu</span>'}
+          ` : '<span style="color:#9ca3af;font-size:.85rem;">Cancelled</span>'}
         </div>
       `;
     });
@@ -576,7 +576,7 @@ async function confirmCancelBooking() {
 
   const btn = document.getElementById('confirm-cancel-btn');
   btn.disabled = true;
-  btn.textContent = 'Peruutetaan...';
+  btn.textContent = 'Cancelling...';
 
   try {
     await db.collection('bookings').doc(cancelBookingId).update({ status: 'cancelled' });
@@ -587,18 +587,18 @@ async function confirmCancelBooking() {
       const statusEl = card.querySelector('.booking-status');
       if (statusEl) {
         statusEl.className = 'booking-status status-cancelled';
-        statusEl.textContent = 'Peruutettu';
+        statusEl.textContent = 'Cancelled';
       }
       const cancelBtn = card.querySelector('.btn-cancel');
       if (cancelBtn) {
-        cancelBtn.outerHTML = '<span style="color:#9ca3af;font-size:.85rem;">Peruutettu</span>';
+        cancelBtn.outerHTML = '<span style="color:#9ca3af;font-size:.85rem;">Cancelled</span>';
       }
     }
   } catch (err) {
-    alert('Varausta ei voitu peruuttaa. Yritä uudelleen.');
+    alert('Could not cancel booking. Please try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Kyllä, peruuta';
+    btn.textContent = 'Yes, Cancel';
     document.getElementById('cancel-overlay').style.display = 'none';
     cancelBookingId = null;
   }
@@ -634,7 +634,7 @@ async function signInUser() {
   const password = document.getElementById('login-password').value;
   const errorEl  = document.getElementById('login-error');
 
-  if (!email || !password) return setError(errorEl, 'Syötä sähköpostisi ja salasanasi.');
+  if (!email || !password) return setError(errorEl, 'Please enter your email and password.');
 
   toggleBtnLoading('login-btn-text', 'login-btn-spinner', true);
 
@@ -661,9 +661,9 @@ async function signUpUser() {
   const password = document.getElementById('signup-password').value;
   const errorEl  = document.getElementById('signup-error');
 
-  if (!name)                   return setError(errorEl, 'Syötä koko nimesi.');
-  if (!email)                  return setError(errorEl, 'Syötä sähköpostisi.');
-  if (password.length < 6)     return setError(errorEl, 'Salasanan on oltava vähintään 6 merkkiä.');
+  if (!name)                   return setError(errorEl, 'Please enter your full name.');
+  if (!email)                  return setError(errorEl, 'Please enter your email.');
+  if (password.length < 6)     return setError(errorEl, 'Password must be at least 6 characters.');
 
   toggleBtnLoading('signup-btn-text', 'signup-btn-spinner', true);
 
@@ -692,14 +692,14 @@ async function signOutUser() {
 // Map Firebase error codes to friendly messages
 function friendlyAuthError(code) {
   const map = {
-    'auth/user-not-found':      'Tällä sähköpostilla ei löydy tiliä.',
-    'auth/wrong-password':      'Väärä salasana. Yritä uudelleen.',
-    'auth/email-already-in-use':'Tällä sähköpostilla on jo tili.',
-    'auth/invalid-email':       'Syötä kelvollinen sähköpostiosoite.',
-    'auth/weak-password':       'Salasana on liian heikko. Käytä vähintään 6 merkkiä.',
-    'auth/too-many-requests':   'Liian monta yritystä. Yritä myöhemmin uudelleen.'
+    'auth/user-not-found':      'No account found with this email.',
+    'auth/wrong-password':      'Incorrect password. Please try again.',
+    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/invalid-email':       'Please enter a valid email address.',
+    'auth/weak-password':       'Password is too weak. Use at least 6 characters.',
+    'auth/too-many-requests':   'Too many attempts. Please try again later.'
   };
-  return map[code] || 'Jokin meni pieleen. Yritä uudelleen.';
+  return map[code] || 'Something went wrong. Please try again.';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -723,14 +723,14 @@ function toggleBtnLoading(textId, spinnerId, loading) {
 function formatDate(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  return d.toLocaleDateString('fi-FI', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 // Format ISO datetime → "14:35"
 function formatTime(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  return d.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
 // Format ISO 8601 duration (PT2H35M) → "2h 35m"
