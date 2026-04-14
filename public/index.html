@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBook — Etsi ja varaa lentoja</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stripe.js — ladataan ajoissa, jotta maksukäyttöliittymä on valmis -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Firebase SDK (v9 modular via CDN compat build) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       YLÄTUNNISTE / NAV
+  ════════════════════════════════════════════════════════ -->
+  <header id="site-header">
+    <div class="header-inner">
+      <!-- Logo -->
+      <a href="#" class="logo" onclick="showPage('home')">
+        <span class="logo-icon">✈</span> SkyBook
+      </a>
+
+      <!-- Nav-toiminnot -->
+      <nav class="header-nav">
+        <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">
+          Omat varaukset
+        </button>
+        <button class="btn-ghost" id="nav-login" onclick="openAuthModal('login')">Kirjaudu</button>
+        <button class="btn-primary" id="nav-signup" onclick="openAuthModal('signup')">Rekisteröidy</button>
+        <div id="nav-user" style="display:none;" class="user-chip">
+          <span id="nav-username"></span>
+          <button class="btn-ghost small" onclick="signOutUser()">Kirjaudu ulos</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIVU: ETUSIVU — Hero + Hakukaavake
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-home" class="page active">
+
+    <!-- Hero-banneri -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Minne haluat lentää?</h1>
+        <p>Etsi satoja lentoyhtiöitä. Varaa minuuteissa.</p>
+      </div>
+    </section>
+
+    <!-- Hakukortti -->
+    <section class="search-section">
+      <div class="search-card">
+
+        <!-- Matkatyyppi -->
+        <div class="trip-type-tabs">
+          <button class="tab-btn active" data-type="one-way" onclick="setTripType('one-way')">Meno</button>
+          <button class="tab-btn" data-type="round-trip" onclick="setTripType('round-trip')">Meno-paluu</button>
+        </div>
+
+        <div class="search-form">
+          <!-- Lähtöpaikka -->
+          <div class="input-group autocomplete-wrap" id="origin-wrap">
+            <label>Mistä</label>
+            <input type="text" id="origin-input" placeholder="Kaupunki tai lentokenttä" autocomplete="off"
+              oninput="autocomplete('origin')" />
+            <ul class="autocomplete-list" id="origin-list"></ul>
+          </div>
+
+          <!-- Vaihtonäppäin -->
+          <button class="swap-btn" onclick="swapAirports()" title="Vaihda lentokentät">⇄</button>
+
+          <!-- Määränpää -->
+          <div class="input-group autocomplete-wrap" id="dest-wrap">
+            <label>Minne</label>
+            <input type="text" id="dest-input" placeholder="Kaupunki tai lentokenttä" autocomplete="off"
+              oninput="autocomplete('dest')" />
+            <ul class="autocomplete-list" id="dest-list"></ul>
+          </div>
+
+          <!-- Lähtöpäivä -->
+          <div class="input-group">
+            <label>Lähtö</label>
+            <input type="date" id="depart-input" />
+          </div>
+
+          <!-- Paluupäivä (näkyy vain meno-paluussa) -->
+          <div class="input-group" id="return-group" style="display:none;">
+            <label>Paluu</label>
+            <input type="date" id="return-input" />
+          </div>
+
+          <!-- Matkustajat -->
+          <div class="input-group">
+            <label>Matkustajat</label>
+            <select id="passengers-input">
+              <option value="1">1 Aikuinen</option>
+              <option value="2">2 Aikuista</option>
+              <option value="3">3 Aikuista</option>
+              <option value="4">4 Aikuista</option>
+              <option value="5">5 Aikuista</option>
+            </select>
+          </div>
+
+          <!-- Hakupainike -->
+          <button class="btn-search" onclick="searchFlights()">
+            <span id="search-btn-text">Hae lentoja</span>
+            <span id="search-btn-spinner" class="spinner" style="display:none;"></span>
+          </button>
+        </div>
+
+        <!-- Virheviesti -->
+        <p class="search-error" id="search-error"></p>
+      </div>
+    </section>
+
+    <!-- Ominaisuudet-osio -->
+    <section class="features-section">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3>Oikeat lennot</h3>
+          <p>Reaaliaikainen data sadoilta lentoyhtiöiltä maailmanlaajuisesti</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Turvallinen varaus</h3>
+          <p>Maksut suojattu Stripellä — alan standardi</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Hallinnoi matkoja</h3>
+          <p>Tarkastele ja peruuta varauksia milloin tahansa tililtäsi</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIVU: HAKUTULOKSET
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-results" class="page">
+    <div class="page-inner">
+
+      <!-- Tulosten otsikko -->
+      <div class="results-header">
+        <button class="back-btn" onclick="showPage('home')">← Muokkaa hakua</button>
+        <div class="results-title">
+          <h2 id="results-heading">Saatavilla olevat lennot</h2>
+          <p id="results-subheading"></p>
+        </div>
+      </div>
+
+      <!-- Lataus -->
+      <div id="results-loading" class="loading-state">
+        <div class="spinner large"></div>
+        <p>Haetaan lentoja...</p>
+      </div>
+
+      <!-- Ei tuloksia -->
+      <div id="results-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">✈️</div>
+        <h3>Lentoja ei löydy</h3>
+        <p>Kokeile eri päivämääriä tai lentokenttiä</p>
+        <button class="btn-primary" onclick="showPage('home')">Hae uudelleen</button>
+      </div>
+
+      <!-- Lentokortit -->
+      <div id="results-list" class="results-list" style="display:none;"></div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIVU: VARAUS — Matkustajatiedot + Maksu
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-booking" class="page">
+    <div class="page-inner">
+
+      <div class="results-header">
+        <button class="back-btn" onclick="showPage('results')">← Takaisin tuloksiin</button>
+        <h2>Viimeistele varauksesi</h2>
+      </div>
+
+      <div class="booking-layout">
+
+        <!-- Matkustajan lomake -->
+        <div class="booking-form-card">
+          <h3>Matkustajan tiedot</h3>
+          <div id="passenger-forms"></div>
+
+          <div class="divider"></div>
+
+          <h3>Yhteystiedot</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sähköpostiosoite</label>
+              <input type="email" id="contact-email" placeholder="sinä@sähköposti.fi" />
+            </div>
+            <div class="form-group">
+              <label>Puhelinnumero</label>
+              <input type="tel" id="contact-phone" placeholder="+358 40 123 4567" />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Maksu</h3>
+          <div id="payment-element-container">
+            <!-- Stripe-maksuelementti kiinnitetään tähän -->
+            <div id="payment-element"></div>
+            <p class="payment-note">🔒 Maksusi on suojattu Stripellä</p>
+          </div>
+
+          <!-- Maksuvirhe -->
+          <p class="form-error" id="booking-error"></p>
+
+          <button class="btn-book" id="pay-btn" onclick="submitBooking()">
+            <span id="pay-btn-text">Vahvista ja maksa</span>
+            <span id="pay-btn-spinner" class="spinner" style="display:none;"></span>
+          </button>
+        </div>
+
+        <!-- Lennon yhteenveto sivupalkki -->
+        <div class="booking-summary-card">
+          <h3>Sinun lentosi</h3>
+          <div id="booking-flight-summary"></div>
+
+          <div class="divider"></div>
+
+          <div class="price-breakdown" id="price-breakdown"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIVU: VAHVISTUS
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-confirmation" class="page">
+    <div class="page-inner confirmation-inner">
+      <div class="confirmation-card">
+        <div class="confirmation-icon">✅</div>
+        <h2>Varaus vahvistettu!</h2>
+        <p class="confirmation-msg">Lentosi on varattu onnistuneesti. Tarkista sähköpostisi lisätietoja varten.</p>
+
+        <div class="confirmation-details" id="confirmation-details"></div>
+
+        <div class="confirmation-actions">
+          <button class="btn-primary" onclick="showPage('dashboard')">Näytä varaukseni</button>
+          <button class="btn-ghost" onclick="showPage('home')">Varaa toinen lento</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIVU: HALLINTAPANEELI — Omat varaukset
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-dashboard" class="page">
+    <div class="page-inner">
+      <div class="results-header">
+        <button class="back-btn" onclick="showPage('home')">← Etusivu</button>
+        <h2>Omat varaukset</h2>
+      </div>
+
+      <!-- Ei kirjautunut -->
+      <div id="dashboard-auth-prompt" class="empty-state" style="display:none;">
+        <div class="empty-icon">🔒</div>
+        <h3>Kirjaudu sisään nähdäksesi varauksesi</h3>
+        <p>Luo tili tai kirjaudu sisään hallinnoidaksesi matkojasi</p>
+        <button class="btn-primary" onclick="openAuthModal('login')">Kirjaudu sisään</button>
+      </div>
+
+      <!-- Lataus -->
+      <div id="dashboard-loading" class="loading-state" style="display:none;">
+        <div class="spinner large"></div>
+        <p>Ladataan varauksiasi...</p>
+      </div>
+
+      <!-- Ei varauksia -->
+      <div id="dashboard-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">✈️</div>
+        <h3>Ei varauksia vielä</h3>
+        <p>Tulevat ja menneet matkasi näkyvät täällä</p>
+        <button class="btn-primary" onclick="showPage('home')">Hae lentoja</button>
+      </div>
+
+      <!-- Varauslista -->
+      <div id="dashboard-list" class="bookings-list" style="display:none;"></div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODAALI: KIRJAUTUMINEN / REKISTERÖITYMINEN
+  ════════════════════════════════════════════════════════ -->
+  <div id="auth-overlay" class="modal-overlay" onclick="closeAuthModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+
+      <!-- Välilehdet -->
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">Kirjaudu</button>
+        <button class="modal-tab" id="tab-signup" onclick="switchAuthTab('signup')">Rekisteröidy</button>
+        <button class="modal-close" onclick="closeAuthModal()">✕</button>
+      </div>
+
+      <!-- Kirjautumislomake -->
+      <div id="form-login" class="auth-form">
+        <h2>Tervetuloa takaisin</h2>
+        <p class="auth-subtitle">Kirjaudu SkyBook-tilillesi</p>
+
+        <div class="form-group">
+          <label>Sähköposti</label>
+          <input type="email" id="login-email" placeholder="sinä@sähköposti.fi" />
+        </div>
+        <div class="form-group">
+          <label>Salasana</label>
+          <input type="password" id="login-password" placeholder="Salasanasi" />
+        </div>
+
+        <p class="form-error" id="login-error"></p>
+        <button class="btn-primary full-width" onclick="signInUser()">
+          <span id="login-btn-text">Kirjaudu sisään</span>
+          <span id="login-btn-spinner" class="spinner" style="display:none;"></span>
+        </button>
+
+        <p class="auth-switch">Ei tiliä vielä?
+          <a href="#" onclick="switchAuthTab('signup')">Rekisteröidy ilmaiseksi</a>
+        </p>
+      </div>
+
+      <!-- Rekisteröitymislomake -->
+      <div id="form-signup" class="auth-form" style="display:none;">
+        <h2>Luo tilisi</h2>
+        <p class="auth-subtitle">Liity SkyBookiin ja aloita lentojen varaus</p>
+
+        <div class="form-group">
+          <label>Koko nimi</label>
+          <input type="text" id="signup-name" placeholder="Jennamae Saarela" />
+        </div>
+        <div class="form-group">
+          <label>Sähköposti</label>
+          <input type="email" id="signup-email" placeholder="sinä@sähköposti.fi" />
+        </div>
+        <div class="form-group">
+          <label>Salasana</label>
+          <input type="password" id="signup-password" placeholder="Väh. 6 merkkiä" />
+        </div>
+
+        <p class="form-error" id="signup-error"></p>
+        <button class="btn-primary full-width" onclick="signUpUser()">
+          <span id="signup-btn-text">Luo tili</span>
+          <span id="signup-btn-spinner" class="spinner" style="display:none;"></span>
+        </button>
+
+        <p class="auth-switch">Onko sinulla jo tili?
+          <a href="#" onclick="switchAuthTab('login')">Kirjaudu sisään</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PERUUTUSVAHVISTUSIKKUNA
+  ════════════════════════════════════════════════════════ -->
+  <div id="cancel-overlay" class="modal-overlay" style="display:none;" onclick="closeCancelModal(event)">
+    <div class="modal-card small" onclick="event.stopPropagation()">
+      <h3>Peruuta varaus?</h3>
+      <p>Haluatko varmasti peruuttaa tämän varauksen? Tätä toimintoa ei voi kumota.</p>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeCancelModal()">Pidä varaus</button>
+        <button class="btn-danger" id="confirm-cancel-btn" onclick="confirmCancelBooking()">Kyllä, peruuta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ALATUNNISTE
+  ════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span class="logo-icon">✈</span> SkyBook
+      </div>
+      <p class="footer-tagline">Tehdään lentobooking yksinkertaiseksi ja luotettavaksi.</p>
+      <p class="footer-copy">© 2026 SkyBook. Kaikki oikeudet pidätetään.</p>
+    </div>
+  </footer>
+
+  <!-- Sovelluksen logiikka -->
+  <script src="script.js"></script>
+</body>
+</html>
