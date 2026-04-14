@@ -16,20 +16,24 @@ const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
 // ── Security: Helmet (sets safe HTTP headers) ─────────────────
-// Protects against XSS, clickjacking, sniffing attacks etc.
+// Protects against clickjacking, sniffing attacks etc.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", "js.stripe.com", "www.gstatic.com", "fonts.googleapis.com"],
-      styleSrc:    ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
-      fontSrc:     ["'self'", "fonts.gstatic.com"],
-      imgSrc:      ["'self'", "data:", "images.unsplash.com", "*.unsplash.com"],
-      connectSrc:  ["'self'", "*.stripe.com", "*.firebaseio.com", "*.googleapis.com"],
-      frameSrc:    ["'self'", "js.stripe.com"],
+      defaultSrc:  ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+      scriptSrc:   ["'self'", "'unsafe-inline'", "'unsafe-eval'",
+                   "js.stripe.com", "www.gstatic.com",
+                   "fonts.googleapis.com", "*.firebaseapp.com"],
+      styleSrc:    ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "*"],
+      fontSrc:     ["'self'", "fonts.gstatic.com", "*"],
+      imgSrc:      ["'self'", "data:", "blob:", "https:", "*"],
+      connectSrc:  ["'self'", "*"],
+      frameSrc:    ["'self'", "js.stripe.com", "*"],
+      workerSrc:   ["'self'", "blob:"],
     },
   },
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
 // ── Security: CORS (only allow your own domain) ───────────────
