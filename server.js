@@ -5,17 +5,102 @@
 // ============================================================
 
 require('dotenv').config();
-const express = require('express');
-const cors    = require('cors');
-const stripe  = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const rateLimit = require('express-rate-limit');
+const stripe    = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+const isProd = process.env.NODE_ENV === 'production';
+
+// ── Security: Helmet (sets safe HTTP headers) ─────────────────
+// Protects against XSS, clickjacking, sniffing attacks etc.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:  ["'self'"],
+      scriptSrc:   ["'self'", "'unsafe-inline'", "js.stripe.com", "www.gstatic.com", "fonts.googleapis.com"],
+      styleSrc:    ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+      fontSrc:     ["'self'", "fonts.gstatic.com"],
+      imgSrc:      ["'self'", "data:", "images.unsplash.com", "*.unsplash.com"],
+      connectSrc:  ["'self'", "*.stripe.com", "*.firebaseio.com", "*.googleapis.com"],
+      frameSrc:    ["'self'", "js.stripe.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// ── Security: CORS (only allow your own domain) ───────────────
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://skybookfi.com',
+  'https://www.skybookfi.com',
+  'https://skybookficom-production.up.railway.app'
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// ── Security: Rate Limiting ────────────────────────────────────
+// General limiter: max 100 requests per 15 minutes per IP
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests. Please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict limiter for payment routes: max 10 per 15 minutes
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many payment attempts. Please try again later.' },
+});
+
+// Flight search limiter: max 30 searches per 15 minutes
+const searchLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: 'Too many searches. Please slow down and try again.' },
+});
+
+app.use(generalLimiter);
 
 // ── Middleware ───────────────────────────────────────────────
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));   // Serves index.html, style.css, script.js
+app.use(express.json({ limit: '10kb' })); // Limit body size to prevent attacks
+app.use(express.static('public'));
+
+// ── Security: Input Sanitizer ─────────────────────────────────
+// Strips dangerous characters from inputs
+function sanitize(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>'"`;]/g, '').trim().substring(0, 200);
+}
+
+// Validate IATA airport code (must be 2-4 uppercase letters)
+function isValidAirportCode(code) {
+  return /^[A-Z]{2,4}$/.test(code);
+}
+
+// Validate date format YYYY-MM-DD
+function isValidDate(dateStr) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const date = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return date >= today; // Must be today or future
+}
 
 // ── RapidAPI / Sky Scrapper config ───────────────────────────
 const RAPIDAPI_KEY  = process.env.RAPIDAPI_KEY;
@@ -76,11 +161,26 @@ app.get('/api/airports/search', async (req, res) => {
 // Query params: origin, destination, departureDate, adults
 //               originEntityId, destinationEntityId
 // ============================================================
-app.get('/api/flights/search', async (req, res) => {
+app.get('/api/flights/search', searchLimiter, async (req, res) => {
   const { origin, destination, departureDate, adults, originEntityId, destinationEntityId } = req.query;
 
-  if (!origin || !destination || !departureDate) {
-    return res.status(400).json({ error: 'Anna lähtö, määränpää ja päivämäärä.' });
+  // Validate and sanitize all inputs
+  const cleanOrigin = sanitize(origin || '').toUpperCase();
+  const cleanDest   = sanitize(destination || '').toUpperCase();
+  const cleanDate   = sanitize(departureDate || '');
+  const cleanAdults = Math.min(Math.max(parseInt(adults) || 1, 1), 9);
+
+  if (!cleanOrigin || !cleanDest || !cleanDate) {
+    return res.status(400).json({ error: 'Please provide origin, destination, and date.' });
+  }
+  if (!isValidAirportCode(cleanOrigin)) {
+    return res.status(400).json({ error: 'Invalid departure airport code.' });
+  }
+  if (!isValidAirportCode(cleanDest)) {
+    return res.status(400).json({ error: 'Invalid destination airport code.' });
+  }
+  if (!isValidDate(cleanDate)) {
+    return res.status(400).json({ error: 'Invalid or past date provided.' });
   }
 
   // Auto-lookup entityId if missing — tries exact match first, then first result
@@ -305,20 +405,28 @@ app.get('/api/flights/search', async (req, res) => {
 // our server.
 // Body: { amount (USD), currency, flightDetails }
 // ============================================================
-app.post('/api/payments/create-intent', async (req, res) => {
+app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
   const { amount, currency = 'usd', flightDetails } = req.body;
 
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ error: 'Virheellinen maksusumma.' });
+  // Validate amount — must be a positive number, max $50,000
+  const cleanAmount = parseFloat(amount);
+  if (!cleanAmount || cleanAmount <= 0 || cleanAmount > 50000) {
+    return res.status(400).json({ error: 'Invalid payment amount.' });
+  }
+
+  // Validate currency
+  const allowedCurrencies = ['usd', 'eur', 'gbp'];
+  const cleanCurrency = (currency || 'usd').toLowerCase();
+  if (!allowedCurrencies.includes(cleanCurrency)) {
+    return res.status(400).json({ error: 'Invalid currency.' });
   }
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount:   Math.round(amount * 100), // Stripe uses cents
-      currency: currency.toLowerCase(),
+      amount:   Math.round(cleanAmount * 100), // Stripe uses cents
+      currency: cleanCurrency,
       automatic_payment_methods: { enabled: true },
       metadata: {
-        // Store a short summary for your Stripe dashboard
         flight: JSON.stringify(flightDetails || {}).substring(0, 500)
       }
     });
@@ -330,7 +438,21 @@ app.post('/api/payments/create-intent', async (req, res) => {
   }
 });
 
+// ── Global error handler (hides details from users) ───────────
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message);
+  res.status(500).json({
+    error: isProd ? 'Something went wrong. Please try again.' : err.message
+  });
+});
+
+// ── 404 handler ───────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found.' });
+});
+
 // ── Start server ─────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`✈️  SkyBook is running → http://localhost:${PORT}`);
+  console.log(`🔒 Security: Helmet + Rate limiting + Input validation enabled`);
 });
