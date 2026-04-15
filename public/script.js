@@ -540,8 +540,18 @@ async function submitBooking() {
   if (!phone) {
     return setError(errorEl, 'Please enter a contact phone number.');
   }
+  // If Stripe elements not loaded yet, try to load it now
   if (!stripeElements) {
-    return setError(errorEl, 'Payment form is not ready yet. Please wait a moment.');
+    setError(errorEl, 'Loading payment form... please wait.');
+    await setupStripePayment(
+      parseFloat(selectedFlight.price.grandTotal) * (searchParams.passengers || 1),
+      selectedFlight.price.currency || 'USD'
+    );
+    // Give it 2 seconds to mount
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!stripeElements) {
+      return setError(errorEl, 'Payment form could not load. Please refresh the page and try again.');
+    }
   }
 
   toggleBtnLoading('pay-btn-text', 'pay-btn-spinner', true);
