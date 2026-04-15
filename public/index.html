@@ -125,6 +125,19 @@
           </button>
         </div>
         <p class="search-error" id="search-error"></p>
+
+        <!-- Quick Route Buttons -->
+        <div class="quick-routes">
+          <span class="quick-label">✈ Popular routes:</span>
+          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','LHR','London')">Helsinki → London</button>
+          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','DXB','Dubai')">Helsinki → Dubai</button>
+          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BKK','Bangkok')">Helsinki → Bangkok</button>
+          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','JFK','New York')">Helsinki → New York</button>
+          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BCN','Barcelona')">Helsinki → Barcelona</button>
+          <button class="quick-btn" onclick="quickFill('LHR','London','DXB','Dubai')">London → Dubai</button>
+          <button class="quick-btn" onclick="quickFill('MNL','Manila','HEL','Helsinki')">Manila → Helsinki</button>
+          <button class="quick-btn" onclick="quickFill('DVO','Davao','MNL','Manila')">Davao → Manila</button>
+        </div>
       </div>
     </section>
 
@@ -652,6 +665,24 @@
       document.getElementById('dest-input').value = to;
       document.getElementById('dest-input').dataset.code = to;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Quick fill from popular route buttons
+    function quickFill(fromCode, fromName, toCode, toName) {
+      const originInput = document.getElementById('origin-input');
+      const destInput   = document.getElementById('dest-input');
+      originInput.value            = `${fromCode} — ${fromName}`;
+      originInput.dataset.code     = fromCode;
+      originInput.dataset.entityId = '';
+      destInput.value              = `${toCode} — ${toName}`;
+      destInput.dataset.code       = toCode;
+      destInput.dataset.entityId   = '';
+      // Set default date to 2 weeks from today
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      document.getElementById('depart-input').value = d.toISOString().split('T')[0];
+      // Scroll to search
+      document.querySelector('.search-card').scrollIntoView({ behavior: 'smooth' });
     }
 
     // Mobile menu

@@ -307,6 +307,28 @@ img { max-width: 100%; display: block; }
 
 .search-error { color: var(--danger); font-size: .88rem; margin-top: 12px; }
 
+/* ── Quick Route Buttons ──────────────────────────────────── */
+.quick-routes {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center; margin-top: 16px;
+  padding-top: 16px; border-top: 1px solid var(--border);
+}
+.quick-label {
+  font-size: .78rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+}
+.quick-btn {
+  background: var(--blue-light); color: var(--blue);
+  border: 1px solid #bfdbfe; border-radius: 20px;
+  padding: 5px 14px; font-size: .82rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+  white-space: nowrap;
+}
+.quick-btn:hover {
+  background: var(--blue); color: white;
+  border-color: var(--blue); transform: translateY(-1px);
+}
+
 /* ── Stats Section ────────────────────────────────────────── */
 .stats-section {
   background: var(--navy); padding: 40px 24px;

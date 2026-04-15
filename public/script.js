@@ -162,17 +162,42 @@ async function searchFlights() {
   const passengers  = document.getElementById('passengers-input').value;
   const errorEl     = document.getElementById('search-error');
 
-  // Get IATA/Sky codes (from dataset if set by autocomplete, otherwise try input value directly)
-  const origin           = originInput.dataset.code     || originInput.value.split('—')[0].trim().toUpperCase();
-  const dest             = destInput.dataset.code       || destInput.value.split('—')[0].trim().toUpperCase();
-  const originEntityId   = originInput.dataset.entityId || '';
-  const destEntityId     = destInput.dataset.entityId   || '';
+  // City name to IATA code map — so customers can type city names freely!
+  const cityToCode = {
+    'HELSINKI':'HEL','LONDON':'LHR','DUBAI':'DXB','NEW YORK':'JFK',
+    'PARIS':'CDG','AMSTERDAM':'AMS','BANGKOK':'BKK','SINGAPORE':'SIN',
+    'SYDNEY':'SYD','TOKYO':'NRT','ROME':'FCO','MADRID':'MAD',
+    'BERLIN':'BER','MUNICH':'MUC','VIENNA':'VIE','ZURICH':'ZRH',
+    'BARCELONA':'BCN','LISBON':'LIS','OSLO':'OSL','STOCKHOLM':'ARN',
+    'COPENHAGEN':'CPH','DUBLIN':'DUB','BRUSSELS':'BRU','WARSAW':'WAW',
+    'PRAGUE':'PRG','BUDAPEST':'BUD','ATHENS':'ATH','ISTANBUL':'IST',
+    'CAIRO':'CAI','JOHANNESBURG':'JNB','NAIROBI':'NBO','LAGOS':'LOS',
+    'MUMBAI':'BOM','DELHI':'DEL','HONG KONG':'HKG','BEIJING':'PEK',
+    'SHANGHAI':'PVG','SEOUL':'ICN','KUALA LUMPUR':'KUL','JAKARTA':'CGK',
+    'MANILA':'MNL','DAVAO':'DVO','CEBU':'CEB','LOS ANGELES':'LAX',
+    'CHICAGO':'ORD','TORONTO':'YYZ','MEXICO CITY':'MEX','SAO PAULO':'GRU',
+    'BUENOS AIRES':'EZE','DOHA':'DOH','ABU DHABI':'AUH','RIYADH':'RUH',
+    'FRANKFURT':'FRA','MILAN':'MXP','NICE':'NCE','LYON':'LYS',
+  };
+
+  // Resolve code from input — try dataset first, then direct code, then city name lookup
+  function resolveCode(input, datasetCode) {
+    if (datasetCode) return datasetCode;
+    const raw = input.value.split('—')[0].trim().toUpperCase();
+    if (/^[A-Z]{3}$/.test(raw)) return raw; // Already a 3-letter code
+    return cityToCode[raw] || raw.substring(0, 3); // Try city name lookup
+  }
+
+  const origin         = resolveCode(originInput, originInput.dataset.code);
+  const dest           = resolveCode(destInput,   destInput.dataset.code);
+  const originEntityId = originInput.dataset.entityId || '';
+  const destEntityId   = destInput.dataset.entityId   || '';
 
   // Validate
   errorEl.textContent = '';
-  if (!origin || origin.length !== 3) return setError(errorEl, 'Please select a valid departure airport.');
-  if (!dest   || dest.length   !== 3) return setError(errorEl, 'Please select a valid destination airport.');
-  if (!departDate)                    return setError(errorEl, 'Please select a departure date.');
+  if (!origin || origin.length < 2) return setError(errorEl, 'Please enter a departure city or airport.');
+  if (!dest   || dest.length   < 2) return setError(errorEl, 'Please enter a destination city or airport.');
+  if (!departDate)                   return setError(errorEl, 'Please select a departure date.');
   if (new Date(departDate) < new Date().setHours(0,0,0,0)) return setError(errorEl, 'Departure date cannot be in the past.');
 
   // Save search params for display
