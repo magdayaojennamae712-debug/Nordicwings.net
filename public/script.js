@@ -816,6 +816,7 @@ function showAgencyPage() {
   // Agencies list — top row are real booking partners
   const agencies = [
     { name: 'Skyscanner',     rating: 4.8, reviews: 52400, price: price,    perks: '✓ Real flights · Best price guarantee · Trusted worldwide', direct: false, stars: 5, highlight: true },
+    { name: 'Jetradar',       rating: 4.7, reviews: 41800, price: price+1,  perks: '✓ Compare 728 airlines · Earn cashback · Best deals',      direct: false, stars: 5, highlight: true },
     { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
     { name: 'Kayak',          rating: 4.6, reviews: 31200, price: price+4,  perks: '✓ Compare 100s of airlines · Price alerts',                 direct: false, stars: 5, highlight: false },
     { name: 'Trip.com',       rating: 4.7, reviews: 3821,  price: price+5,  perks: '✓ Pay now or pay later · 24/7 support',                    direct: false, stars: 5, highlight: false },
@@ -906,6 +907,7 @@ function openPartnerLink(agencyName) {
   const links = {
     // ── Real booking search engines (top partners) ──
     'Skyscanner':     `https://www.skyscanner.net/transport/flights/${orig}/${dest}/${date.replace(/-/g,'')}/?adults=${pass}&cabinclass=economy&ref=home`,
+    'Jetradar':       `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=719573`,
     'Google Flights': `https://www.google.com/flights#flt=${orig}.${dest}.${date};c:EUR;e:1;sd:1;t:f`,
     'Kayak':          `https://www.kayak.com/flights/${orig}-${dest}/${date}/${pass}adults`,
     // ── Affiliate / OTA partners ──
