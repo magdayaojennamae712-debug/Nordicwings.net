@@ -210,9 +210,6 @@ img { max-width: 100%; display: block; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 80px 24px 40px;
-  overflow: visible;
-}
-.hero-bg {
   overflow: hidden;
 }
 
@@ -297,11 +294,12 @@ img { max-width: 100%; display: block; }
 
 .autocomplete-wrap { position: relative; }
 .autocomplete-list {
-  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  position: fixed;
   background: white; border: 1px solid #dde3f0;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15); list-style: none; z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2); list-style: none; z-index: 9999;
   max-height: 320px; overflow-y: auto; padding: 6px 0;
+  min-width: 280px;
 }
 .autocomplete-list li {
   padding: 10px 16px; cursor: pointer;

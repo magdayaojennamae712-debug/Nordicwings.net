@@ -135,6 +135,13 @@ const POPULAR_AIRPORTS = [
 ];
 
 function renderAcList(listEl, airports, field) {
+  // Position fixed dropdown under the input
+  const inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
+  const rect = inputEl.getBoundingClientRect();
+  listEl.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
+  listEl.style.left = (rect.left + window.scrollX) + 'px';
+  listEl.style.width = rect.width + 'px';
+
   if (!airports.length) { listEl.innerHTML = '<li class="ac-noresult">No results found</li>'; return; }
   listEl.innerHTML = airports.slice(0, 7).map(a => `
     <li onclick="selectAirport('${field}', '${a.iataCode}', '${escape(a.cityName || a.name)}', '${a.entityId || ''}')">
@@ -1180,9 +1187,9 @@ function renderAdminTable(bookings) {
         <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
       </td>
       <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '\u2014'}</td>
       <td>${b.passengers?.length || 1} pax</td>
-      <td><strong>$${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><strong>$$${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
       <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
     </tr>
   `).join('');
