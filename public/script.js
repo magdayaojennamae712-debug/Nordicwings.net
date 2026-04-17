@@ -485,11 +485,48 @@ function generateClientFlights(orig, dest, date, numAdults) {
   const key = orig+'-'+dest;
   const rev = dest+'-'+orig;
   let route = knownRoutes[key] || knownRoutes[rev];
+
   if (!route) {
-    const hubs = ['HEL','LHR','CDG','AMS','FRA','JFK','LAX','NRT','SIN','DXB','ICN','BKK','KUL','DEL'];
-    route = (hubs.includes(orig)||hubs.includes(dest))
-      ? {totalMins:540,stops:['DXB'],basePrice:380,airlines:['EK','QR','TK','BA','LH','AY']}
-      : {totalMins:150,stops:[],basePrice:110,airlines:['LH','BA','AF','KL','TK','AY']};
+    // Detect region by airport prefix patterns
+    const finlandAirports = ['HEL','OUL','TMP','TKU','JYV','KUO','JOE','RVN','KEM','IVL','KAJ','VAA','MHQ'];
+    const phAirports      = ['MNL','DVO','CEB','ILO','BCD','KLO','ZAM','GES','DGT','MPH','PPS','TAG'];
+    const euAirports      = ['LHR','LGW','CDG','AMS','FRA','MUC','BER','MAD','BCN','FCO','MXP','ARN','CPH','OSL','WAW','VIE','ZRH','ATH','IST','BRU','DUB'];
+    const usAirports      = ['JFK','LAX','ORD','ATL','DFW','DEN','SFO','SEA','MIA','BOS','LAS'];
+    const asiaAirports    = ['BKK','SIN','KUL','NRT','HND','ICN','PEK','PVG','HKG','TPE','DEL','BOM'];
+    const gulfAirports    = ['DXB','AUH','DOH','RUH','KWI','BAH','MCT'];
+
+    const origFI = finlandAirports.includes(orig);
+    const destFI = finlandAirports.includes(dest);
+    const origPH = phAirports.includes(orig);
+    const destPH = phAirports.includes(dest);
+    const origEU = euAirports.includes(orig);
+    const destEU = euAirports.includes(dest);
+
+    // Finnish domestic (non-HEL) airports to/from international — route via HEL+DXB
+    if ((origFI && !['HEL'].includes(orig)) && (destPH || asiaAirports.includes(dest))) {
+      route = {totalMins:1080, stops:['HEL','DXB'], basePrice:680, airlines:['AY','EK','QR','TK','PR','AY']};
+    } else if ((destFI && !['HEL'].includes(dest)) && (origPH || asiaAirports.includes(orig))) {
+      route = {totalMins:1080, stops:['DXB','HEL'], basePrice:680, airlines:['AY','EK','QR','TK','PR','AY']};
+    } else if ((origFI || origEU) && destPH) {
+      route = {totalMins:960, stops:['DXB'], basePrice:650, airlines:['AY','EK','QR','TK','PR','LH']};
+    } else if (origPH && (destFI || destEU)) {
+      route = {totalMins:960, stops:['DXB'], basePrice:650, airlines:['PR','EK','QR','TK','AY','LH']};
+    } else if (origPH && destPH) {
+      // Philippine domestic
+      route = {totalMins:75, stops:[], basePrice:32, airlines:['PR','5J','Z2','PR','5J','Z2']};
+    } else if (origFI && destFI) {
+      // Finnish domestic
+      route = {totalMins:70, stops:[], basePrice:65, airlines:['AY','AY','AY','AY','AY','AY']};
+    } else if ((origEU || origFI) && usAirports.includes(dest)) {
+      route = {totalMins:570, stops:['LHR'], basePrice:480, airlines:['AY','BA','LH','AF','KL','TK']};
+    } else if ((origEU || origFI) && gulfAirports.includes(dest)) {
+      route = {totalMins:390, stops:[], basePrice:300, airlines:['AY','EK','QR','TK','LH','BA']};
+    } else if ((origEU || origFI) && asiaAirports.includes(dest)) {
+      route = {totalMins:750, stops:['DXB'], basePrice:520, airlines:['AY','EK','QR','TK','SQ','LH']};
+    } else {
+      // Generic international fallback — realistic long haul
+      route = {totalMins:600, stops:['DXB'], basePrice:420, airlines:['EK','QR','TK','AY','LH','BA']};
+    }
   }
   const times=['06:15','08:30','10:45','13:00','15:30','18:00'];
   const pmods=[1.0,2.8,0.95,1.0,0.90,0.95];
