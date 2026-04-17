@@ -465,6 +465,21 @@ function renderFlightList(flights) {
     const dealBadge = parseFloat(flight.price.grandTotal) <= minPrice * 1.05
       ? '<div class="badge-best">Best price</div>' : '';
 
+    // Baggage & meal info based on airline type and cabin
+    const budgetAirlines = ['FR','U2','W6','DY','PC','XW','VY','FD','AK','QZ','JT','ID','SJ'];
+    const isBudget = budgetAirlines.includes(code);
+    const isBiz = cabin === 'BUSINESS';
+    const baggage = isBiz
+      ? '🧳 2× 32kg checked · 18kg cabin'
+      : isBudget
+        ? '🎒 Cabin bag only (10kg) · Checked bag: add-on'
+        : '🧳 23kg checked · 8kg cabin included';
+    const meal = isBiz
+      ? '🍽️ Full meal · Drinks · Lounge access'
+      : isBudget
+        ? '🥤 Buy on board'
+        : '🍱 Meal included';
+
     return `
       <div class="fc" onclick="selectFlight(${i})" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
         <div class="fc-airline">
@@ -500,6 +515,8 @@ function renderFlightList(flights) {
 
         <div class="fc-cabin-col">
           <div class="fc-cabin">${cabin === 'BUSINESS' ? '💼 Business' : '✈ Economy'}</div>
+          <div class="fc-baggage">${baggage}</div>
+          <div class="fc-meal">${meal}</div>
         </div>
 
         <div class="fc-right">

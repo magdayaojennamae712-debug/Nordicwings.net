@@ -920,8 +920,10 @@ img { max-width: 100%; display: block; }
 }
 
 /* Cabin column */
-.fc-cabin-col { text-align: center; }
-.fc-cabin { font-size: .75rem; color: var(--text-muted); font-weight: 600; }
+.fc-cabin-col { text-align: left; min-width: 190px; }
+.fc-cabin { font-size: .75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+.fc-baggage { font-size: .72rem; color: #555; margin-top: 4px; }
+.fc-meal    { font-size: .72rem; color: #555; margin-top: 2px; }
 
 /* Price column */
 .fc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
