@@ -785,37 +785,40 @@ function showAgencyPage() {
   document.getElementById('agency-route-sub').textContent =
     `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
 
-  // Agencies list
+  // Agencies list — top row are real booking partners
   const agencies = [
-    { name: 'NordicWings Direct', rating: 4.9, reviews: 1240, price: price,      perks: '✓ Instant confirmation · No hidden fees', direct: true,  stars: 5 },
-    { name: 'Trip.com',       rating: 4.7, reviews: 3821, price: price+5,    perks: '✓ Pay now or pay later · 24/7 support',   direct: false, stars: 5 },
-    { name: 'Mytrip',         rating: 4.3, reviews: 456,  price: price+8,    perks: '✓ Pay now or pay later',                  direct: false, stars: 4 },
-    { name: 'Ticket.fi',      rating: 2.8, reviews: 108,  price: price+10,   perks: '',                                        direct: false, stars: 3 },
-    { name: 'Flightnetwork',  rating: 4.2, reviews: 518,  price: price+14,   perks: '✓ 24/7 customer support',                 direct: false, stars: 4 },
-    { name: 'Gotogate',       rating: 3.8, reviews: 124,  price: price+18,   perks: '✓ Support in your language',              direct: false, stars: 4 },
-    { name: 'Travelis',       rating: 4.6, reviews: 224,  price: price+20,   perks: '✓ Pay now or later',                      direct: false, stars: 5 },
-    { name: 'Flysmarter.fi',  rating: 3.6, reviews: 42,   price: price+23,   perks: '✓ Pay now or pay later',                  direct: false, stars: 4 },
-    { name: 'lastminute.com', rating: 3.7, reviews: 118,  price: price+31,   perks: '✓ Customer support',                      direct: false, stars: 4 },
+    { name: 'Skyscanner',     rating: 4.8, reviews: 52400, price: price,    perks: '✓ Real flights · Best price guarantee · Trusted worldwide', direct: false, stars: 5, highlight: true },
+    { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
+    { name: 'Kayak',          rating: 4.6, reviews: 31200, price: price+4,  perks: '✓ Compare 100s of airlines · Price alerts',                 direct: false, stars: 5, highlight: false },
+    { name: 'Trip.com',       rating: 4.7, reviews: 3821,  price: price+5,  perks: '✓ Pay now or pay later · 24/7 support',                    direct: false, stars: 5, highlight: false },
+    { name: 'Mytrip',         rating: 4.3, reviews: 456,   price: price+8,  perks: '✓ Pay now or pay later',                                   direct: false, stars: 4, highlight: false },
+    { name: 'Gotogate',       rating: 3.8, reviews: 124,   price: price+14, perks: '✓ Support in your language',                               direct: false, stars: 4, highlight: false },
+    { name: 'lastminute.com', rating: 3.7, reviews: 118,   price: price+22, perks: '✓ Customer support',                                       direct: false, stars: 4, highlight: false },
   ];
 
-  document.getElementById('agencies-list').innerHTML = agencies.map((a, i) => `
-    <div class="agency-row ${a.direct ? 'nordicwings-direct' : ''}"
+  document.getElementById('agencies-list').innerHTML = `
+    <div class="agency-disclaimer">
+      ℹ️ <strong>Estimated prices shown.</strong> Clicking a partner will open their site with live, real prices for this route. Prices may vary by date and availability.
+    </div>
+  ` + agencies.map((a, i) => `
+    <div class="agency-row ${a.direct ? 'nordicwings-direct' : ''} ${a.highlight ? 'agency-highlight' : ''}"
          onclick="${a.direct ? 'proceedToBooking()' : `openPartnerLink('${a.name}')`}">
       <div class="agency-name-wrap">
         <div class="agency-name">
           ${a.name}
           ${a.direct ? '<span class="agency-badge badge-direct">Book Direct</span>' : '<span class="agency-badge badge-partner">Partner</span>'}
+          ${a.highlight ? '<span class="agency-badge badge-top">⭐ Top Pick</span>' : ''}
         </div>
         <div class="agency-stars">
-          ${'★'.repeat(a.stars)}<span class="agency-rating">${a.rating}/5 · ${a.reviews} reviews</span>
+          ${'★'.repeat(a.stars)}<span class="agency-rating">${a.rating}/5 · ${a.reviews.toLocaleString()} reviews</span>
         </div>
         ${a.perks ? `<div class="agency-perks">${a.perks}</div>` : ''}
       </div>
       <div>
         <div class="agency-price">${sym}${a.price.toFixed(0)}</div>
-        <div class="agency-price-sub">per person · total</div>
+        <div class="agency-price-sub">est. per person</div>
       </div>
-      <button class="agency-btn ${a.direct ? 'direct' : ''}">${a.direct ? 'Book Now' : 'Select'}</button>
+      <button class="agency-btn ${a.direct ? 'direct' : ''}">${a.direct ? 'Book Now' : 'View Deal'}</button>
     </div>
   `).join('');
 
@@ -873,6 +876,11 @@ function openPartnerLink(agencyName) {
 
   // Affiliate deep links — earn commission when users book!
   const links = {
+    // ── Real booking search engines (top partners) ──
+    'Skyscanner':     `https://www.skyscanner.net/transport/flights/${orig}/${dest}/${date.replace(/-/g,'')}/?adults=${pass}&cabinclass=economy&ref=home`,
+    'Google Flights': `https://www.google.com/flights#flt=${orig}.${dest}.${date};c:EUR;e:1;sd:1;t:f`,
+    'Kayak':          `https://www.kayak.com/flights/${orig}-${dest}/${date}/${pass}adults`,
+    // ── Affiliate / OTA partners ──
     'Trip.com':      `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
     'Mytrip':        `https://www.mytrip.com/flights/${orig.toLowerCase()}-${dest.toLowerCase()}/?marker=${TP}`,
     'Ticket.fi':     `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
@@ -884,7 +892,7 @@ function openPartnerLink(agencyName) {
   };
 
   // Fallback
-  const fallback = `https://www.trip.com/?${TC}`;
+  const fallback = `https://www.skyscanner.net/transport/flights/${orig}/${dest}/${date.replace(/-/g,'')}/?adults=${pass}`;
   const url = links[agencyName] || fallback;
 
   window.open(url, '_blank');

@@ -796,8 +796,15 @@ img { max-width: 100%; display: block; }
   display: inline-block; font-size: .7rem; font-weight: 700;
   padding: 2px 8px; border-radius: 10px; margin-left: 6px;
 }
-.badge-direct { background: #dbeafe; color: var(--blue); }
+.badge-direct  { background: #dbeafe; color: var(--blue); }
 .badge-partner { background: #f0fdf4; color: #15803d; }
+.badge-top     { background: #fef3c7; color: #b45309; }
+.agency-highlight { border-left: 3px solid var(--blue); }
+.agency-disclaimer {
+  font-size: .8rem; color: var(--text-muted); background: #f8fafc;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px 14px; margin-bottom: 10px;
+}
 .agency-stars { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
 .agency-star { color: var(--gold); font-size: .85rem; }
 .agency-rating { font-size: .8rem; color: var(--text-muted); font-weight: 600; }
