@@ -116,6 +116,48 @@ function showPage(pageId) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// QUICK SEARCH — called from popular destination cards
+// Pre-fills origin/destination and triggers search
+// ─────────────────────────────────────────────────────────────
+function filterRoutes(region, btn) {
+  document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.dest-card').forEach(card => {
+    if (region === 'all' || card.dataset.region === region) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+function quickSearch(orig, dest) {
+  // Fill origin input
+  const originInput = document.getElementById('origin-input');
+  const destInput   = document.getElementById('dest-input');
+  const dateInput   = document.getElementById('depart-input');
+
+  originInput.value = orig;
+  originInput.dataset.code = orig;
+  destInput.value   = dest;
+  destInput.dataset.code = dest;
+
+  // Set date to 30 days from today if not already set
+  if (!dateInput.value) {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    dateInput.value = d.toISOString().split('T')[0];
+  }
+
+  // Scroll to search form and trigger search
+  showPage('home');
+  setTimeout(() => {
+    document.querySelector('.search-box') && document.querySelector('.search-box').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => searchFlights(), 400);
+  }, 100);
+}
+
+// ─────────────────────────────────────────────────────────────
 // TRIP TYPE (one-way / round-trip)
 // ─────────────────────────────────────────────────────────────
 function setTripType(type) {

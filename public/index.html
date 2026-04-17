@@ -330,54 +330,118 @@
           <h2>Top Destinations</h2>
           <p>Explore the world's most popular flight routes</p>
         </div>
-        <div class="destinations-grid">
-          <div class="dest-card" onclick="quickSearch('HEL','LHR')">
+        <!-- Route filter tabs -->
+        <div class="route-tabs">
+          <button class="route-tab active" onclick="filterRoutes('all',this)">🌍 All</button>
+          <button class="route-tab" onclick="filterRoutes('europe',this)">🇪🇺 Europe</button>
+          <button class="route-tab" onclick="filterRoutes('asia',this)">🌏 Asia</button>
+          <button class="route-tab" onclick="filterRoutes('americas',this)">🌎 Americas</button>
+          <button class="route-tab" onclick="filterRoutes('mideast',this)">🌙 Middle East</button>
+        </div>
+
+        <div class="destinations-grid" id="destinations-grid">
+          <!-- Europe -->
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','LHR')">
             <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" />
-            <div class="dest-info">
-              <h3>Helsinki → London</h3>
-              <p>HEL → LHR</p>
-              <span class="dest-price">From $180</span>
-            </div>
+            <div class="dest-info"><h3>Helsinki → London</h3><p>HEL → LHR · 3h 15m</p><span class="dest-price">From €130</span></div>
           </div>
-          <div class="dest-card" onclick="quickSearch('HEL','DXB')">
-            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" />
-            <div class="dest-info">
-              <h3>Helsinki → Dubai</h3>
-              <p>HEL → DXB</p>
-              <span class="dest-price">From $320</span>
-            </div>
-          </div>
-          <div class="dest-card" onclick="quickSearch('HEL','JFK')">
-            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" />
-            <div class="dest-info">
-              <h3>Helsinki → New York</h3>
-              <p>HEL → JFK</p>
-              <span class="dest-price">From $450</span>
-            </div>
-          </div>
-          <div class="dest-card" onclick="quickSearch('HEL','BKK')">
-            <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" />
-            <div class="dest-info">
-              <h3>Helsinki → Bangkok</h3>
-              <p>HEL → BKK</p>
-              <span class="dest-price">From $390</span>
-            </div>
-          </div>
-          <div class="dest-card" onclick="quickSearch('HEL','BCN')">
-            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" />
-            <div class="dest-info">
-              <h3>Helsinki → Barcelona</h3>
-              <p>HEL → BCN</p>
-              <span class="dest-price">From $150</span>
-            </div>
-          </div>
-          <div class="dest-card" onclick="quickSearch('HEL','CDG')">
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','CDG')">
             <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" />
-            <div class="dest-info">
-              <h3>Helsinki → Paris</h3>
-              <p>HEL → CDG</p>
-              <span class="dest-price">From $160</span>
-            </div>
+            <div class="dest-info"><h3>Helsinki → Paris</h3><p>HEL → CDG · 3h 30m</p><span class="dest-price">From €138</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','BCN')">
+            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" />
+            <div class="dest-info"><h3>Helsinki → Barcelona</h3><p>HEL → BCN · 5h 0m</p><span class="dest-price">From €145</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','AMS')">
+            <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" />
+            <div class="dest-info"><h3>Helsinki → Amsterdam</h3><p>HEL → AMS · 3h 15m</p><span class="dest-price">From €125</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','FCO')">
+            <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" />
+            <div class="dest-info"><h3>Helsinki → Rome</h3><p>HEL → FCO · 4h 30m</p><span class="dest-price">From €142</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','WAW')">
+            <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" />
+            <div class="dest-info"><h3>Helsinki → Warsaw</h3><p>HEL → WAW · 2h 30m</p><span class="dest-price">From €98</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','MAD')">
+            <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400&q=80" alt="Madrid" />
+            <div class="dest-info"><h3>Helsinki → Madrid</h3><p>HEL → MAD · 5h 15m</p><span class="dest-price">From €148</span></div>
+          </div>
+          <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','ATH')">
+            <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&q=80" alt="Athens" />
+            <div class="dest-info"><h3>Helsinki → Athens</h3><p>HEL → ATH · 4h 30m</p><span class="dest-price">From €155</span></div>
+          </div>
+
+          <!-- Asia -->
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','BKK')">
+            <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" />
+            <div class="dest-info"><h3>Helsinki → Bangkok</h3><p>HEL → BKK · 13h 30m</p><span class="dest-price">From €390</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','MNL')">
+            <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Manila" />
+            <div class="dest-info"><h3>Helsinki → Manila</h3><p>HEL → MNL · 16h 0m</p><span class="dest-price">From €450</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','SIN')">
+            <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&q=80" alt="Singapore" />
+            <div class="dest-info"><h3>Helsinki → Singapore</h3><p>HEL → SIN · 14h 30m</p><span class="dest-price">From €420</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','NRT')">
+            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&q=80" alt="Tokyo" />
+            <div class="dest-info"><h3>Helsinki → Tokyo</h3><p>HEL → NRT · 14h 30m</p><span class="dest-price">From €480</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','DPS')">
+            <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80" alt="Bali" />
+            <div class="dest-info"><h3>Helsinki → Bali</h3><p>HEL → DPS · 16h 0m</p><span class="dest-price">From €510</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','KUL')">
+            <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400&q=80" alt="Kuala Lumpur" />
+            <div class="dest-info"><h3>Helsinki → Kuala Lumpur</h3><p>HEL → KUL · 13h 0m</p><span class="dest-price">From €400</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','DVO')">
+            <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Davao" />
+            <div class="dest-info"><h3>Manila → Davao</h3><p>MNL → DVO · 1h 30m</p><span class="dest-price">From €38</span></div>
+          </div>
+          <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','CEB')">
+            <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Cebu" />
+            <div class="dest-info"><h3>Manila → Cebu</h3><p>MNL → CEB · 1h 0m</p><span class="dest-price">From €28</span></div>
+          </div>
+
+          <!-- Americas -->
+          <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','JFK')">
+            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" />
+            <div class="dest-info"><h3>Helsinki → New York</h3><p>HEL → JFK · 9h 30m</p><span class="dest-price">From €480</span></div>
+          </div>
+          <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','LAX')">
+            <img src="https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=400&q=80" alt="Los Angeles" />
+            <div class="dest-info"><h3>Helsinki → Los Angeles</h3><p>HEL → LAX · 11h 30m</p><span class="dest-price">From €540</span></div>
+          </div>
+          <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','MIA')">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80" alt="Miami" />
+            <div class="dest-info"><h3>Helsinki → Miami</h3><p>HEL → MIA · 11h 0m</p><span class="dest-price">From €520</span></div>
+          </div>
+          <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','CUN')">
+            <img src="https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=400&q=80" alt="Cancun" />
+            <div class="dest-info"><h3>Helsinki → Cancun</h3><p>HEL → CUN · 13h 0m</p><span class="dest-price">From €580</span></div>
+          </div>
+
+          <!-- Middle East -->
+          <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DXB')">
+            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" />
+            <div class="dest-info"><h3>Helsinki → Dubai</h3><p>HEL → DXB · 6h 30m</p><span class="dest-price">From €310</span></div>
+          </div>
+          <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DOH')">
+            <img src="https://images.unsplash.com/photo-1546412414-e1885259563a?w=400&q=80" alt="Doha" />
+            <div class="dest-info"><h3>Helsinki → Doha</h3><p>HEL → DOH · 6h 0m</p><span class="dest-price">From €290</span></div>
+          </div>
+          <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','IST')">
+            <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&q=80" alt="Istanbul" />
+            <div class="dest-info"><h3>Helsinki → Istanbul</h3><p>HEL → IST · 3h 45m</p><span class="dest-price">From €160</span></div>
+          </div>
+          <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','TLV')">
+            <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=400&q=80" alt="Tel Aviv" />
+            <div class="dest-info"><h3>Helsinki → Tel Aviv</h3><p>HEL → TLV · 4h 0m</p><span class="dest-price">From €220</span></div>
           </div>
         </div>
       </div>

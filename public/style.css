@@ -377,9 +377,20 @@ img { max-width: 100%; display: block; }
 
 /* ── Destinations ─────────────────────────────────────────── */
 .destinations-section { padding: 80px 0; background: white; }
+.route-tabs {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; justify-content: center;
+}
+.route-tab {
+  background: #f1f5f9; border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 8px 18px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: all .15s; font-family: inherit; color: var(--text-muted);
+}
+.route-tab:hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
+.route-tab.active { background: var(--blue); color: white; border-color: var(--blue); }
 .destinations-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
 }
+.dest-card.hidden { display: none; }
 .dest-card {
   border-radius: var(--radius); overflow: hidden;
   box-shadow: var(--shadow-md); cursor: pointer;
