@@ -232,14 +232,14 @@
         <div class="search-form">
           <div class="input-group autocomplete-wrap" id="origin-wrap">
             <label>From</label>
-            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('origin')" />
+            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="autocomplete('origin')" />
           </div>
 
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
 
           <div class="input-group autocomplete-wrap" id="dest-wrap">
             <label>To</label>
-            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('dest')" />
+            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="autocomplete('dest')" />
           </div>
 
           <div class="input-group">
@@ -1133,5 +1133,38 @@
   <!-- Autocomplete dropdowns live at body level to avoid overflow:hidden clipping -->
   <ul class="autocomplete-list" id="origin-list" style="display:none;"></ul>
   <ul class="autocomplete-list" id="dest-list" style="display:none;"></ul>
+  <!-- Native datalist for airport suggestions -->
+  <datalist id="airports-datalist">
+    <option value="HEL">Helsinki, Finland</option>
+    <option value="LHR">London Heathrow, UK</option>
+    <option value="DXB">Dubai International, UAE</option>
+    <option value="BKK">Bangkok Suvarnabhumi, Thailand</option>
+    <option value="JFK">New York JFK, USA</option>
+    <option value="MNL">Manila Ninoy Aquino, Philippines</option>
+    <option value="NRT">Tokyo Narita, Japan</option>
+    <option value="BCN">Barcelona El Prat, Spain</option>
+    <option value="CDG">Paris Charles de Gaulle, France</option>
+    <option value="AMS">Amsterdam Schiphol, Netherlands</option>
+    <option value="SIN">Singapore Changi, Singapore</option>
+    <option value="SYD">Sydney Kingsford Smith, Australia</option>
+    <option value="YYZ">Toronto Pearson, Canada</option>
+    <option value="FRA">Frankfurt Airport, Germany</option>
+    <option value="MAD">Madrid Barajas, Spain</option>
+    <option value="ICN">Seoul Incheon, South Korea</option>
+    <option value="IST">Istanbul Airport, Turkey</option>
+    <option value="DEL">New Delhi Indira Gandhi, India</option>
+    <option value="HKG">Hong Kong International, China</option>
+    <option value="DOH">Doha Hamad International, Qatar</option>
+    <option value="KUL">Kuala Lumpur International, Malaysia</option>
+    <option value="CGK">Jakarta Soekarno-Hatta, Indonesia</option>
+    <option value="LAX">Los Angeles International, USA</option>
+    <option value="ORD">Chicago OHare, USA</option>
+    <option value="MIA">Miami International, USA</option>
+    <option value="DAV">Davao Francisco Bangoy, Philippines</option>
+    <option value="CEB">Cebu Mactan, Philippines</option>
+    <option value="BKI">Kota Kinabalu, Malaysia</option>
+    <option value="CGP">Chittagong, Bangladesh</option>
+    <option value="CMB">Colombo Bandaranaike, Sri Lanka</option>
+  </datalist>
 </body>
 </html>
