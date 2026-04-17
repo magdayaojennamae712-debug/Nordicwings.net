@@ -135,11 +135,11 @@ const POPULAR_AIRPORTS = [
 ];
 
 function renderAcList(listEl, airports, field) {
-  // Position fixed dropdown under the input
+  // Position fixed dropdown under the input (fixed = viewport coords, no scroll offset)
   const inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
   const rect = inputEl.getBoundingClientRect();
-  listEl.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
-  listEl.style.left = (rect.left + window.scrollX) + 'px';
+  listEl.style.top  = (rect.bottom + 4) + 'px';
+  listEl.style.left = rect.left + 'px';
   listEl.style.width = rect.width + 'px';
 
   if (!airports.length) { listEl.innerHTML = '<li class="ac-noresult">No results found</li>'; return; }
@@ -1190,7 +1190,7 @@ function renderAdminTable(bookings) {
       <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '\u2014'}</td>
       <td>${b.passengers?.length || 1} pax</td>
       <td><strong>$$${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
-      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}"${b.status || 'unknown'}</span></td>
     </tr>
   `).join('');
 }
