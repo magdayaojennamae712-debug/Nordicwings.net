@@ -125,15 +125,24 @@ async function skyFetch(path, params) {
   const url = new URL(`https://${RAPIDAPI_HOST}${path}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      'X-RapidAPI-Key':  RAPIDAPI_KEY,
-      'X-RapidAPI-Host': RAPIDAPI_HOST
-    }
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-  if (!res.ok) throw new Error(`Sky Scrapper error: ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(url.toString(), {
+      headers: {
+        'X-RapidAPI-Key':  RAPIDAPI_KEY,
+        'X-RapidAPI-Host': RAPIDAPI_HOST
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`Sky Scrapper error: ${res.status}`);
+    return res.json();
+  } catch (err) {
+    clearTimeout(timeout);
+    throw err;
+  }
 }
 
 // ============================================================
