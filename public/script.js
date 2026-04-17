@@ -896,10 +896,10 @@ function openPartnerLink(agencyName) {
   const dest = last.arrival.iataCode;
   const date = seg.departure.at ? seg.departure.at.split('T')[0] : '';
   const pass = searchParams.passengers || 1;
-  const marker = '519037'; // Your Travelpayouts marker
+  const marker = '719573'; // Your Travelpayouts marker
 
   // Your affiliate IDs
-  const TP  = '519037';          // Travelpayouts marker
+  const TP  = '719573';          // Travelpayouts marker
   const TC  = 'Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D15634670'; // Trip.com
 
   // Affiliate deep links — earn commission when users book!
