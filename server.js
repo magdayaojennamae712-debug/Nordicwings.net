@@ -206,183 +206,6 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Invalid or past date provided.' });
   }
 
-  // ── FAST PATH: return demo flights immediately, no external API needed ──
-  function generateDemoFlightsFast(orig, dest, date, numAdults) {
-
-    // ── WORLDWIDE AIRPORT → COUNTRY MAP ──────────────────────
-    const airportCountry = {
-      'HEL':'FI','OUL':'FI','TMP':'FI','TKU':'FI','JYV':'FI','KUO':'FI','JOE':'FI','RVN':'FI','KEM':'FI','IVL':'FI','KAJ':'FI','VAA':'FI','MHQ':'FI',
-      'MNL':'PH','DVO':'PH','CEB':'PH','ILO':'PH','BCD':'PH','KLO':'PH','ZAM':'PH','GES':'PH','DGT':'PH','MPH':'PH','PPS':'PH','TAG':'PH',
-      'JFK':'US','LAX':'US','ORD':'US','ATL':'US','DFW':'US','DEN':'US','SFO':'US','SEA':'US','MIA':'US','BOS':'US','LAS':'US','PHX':'US','MSP':'US','DTW':'US','EWR':'US','IAH':'US','IAD':'US','CLT':'US','MCO':'US','PHL':'US',
-      'LHR':'GB','LGW':'GB','MAN':'GB','STN':'GB','BHX':'GB','EDI':'GB','GLA':'GB','LTN':'GB','BRS':'GB',
-      'CDG':'FR','ORY':'FR','NCE':'FR','LYS':'FR','MRS':'FR','TLS':'FR','NTE':'FR','BOD':'FR','LIL':'FR',
-      'FRA':'DE','MUC':'DE','BER':'DE','DUS':'DE','HAM':'DE','STR':'DE','CGN':'DE','LEJ':'DE','NUE':'DE',
-      'AMS':'NL','EIN':'NL','RTM':'NL',
-      'MAD':'ES','BCN':'ES','PMI':'ES','AGP':'ES','VLC':'ES','SVQ':'ES','BIO':'ES','ALC':'ES',
-      'FCO':'IT','MXP':'IT','LIN':'IT','VCE':'IT','NAP':'IT','PMO':'IT','CTA':'IT','BGY':'IT',
-      'ARN':'SE','GOT':'SE','MMX':'SE',
-      'CPH':'DK','AAL':'DK','BLL':'DK',
-      'OSL':'NO','BGO':'NO','TRD':'NO','SVG':'NO',
-      'DXB':'AE','AUH':'AE','SHJ':'AE',
-      'BKK':'TH','HKT':'TH','CNX':'TH',
-      'SIN':'SG',
-      'KUL':'MY','LGK':'MY','PEN':'MY',
-      'NRT':'JP','HND':'JP','KIX':'JP','NGO':'JP','ITM':'JP','CTS':'JP','FUK':'JP',
-      'ICN':'KR','GMP':'KR','PUS':'KR',
-      'HKG':'HK',
-      'PEK':'CN','SHA':'CN','PVG':'CN','CAN':'CN','CTU':'CN','SZX':'CN',
-      'DEL':'IN','BOM':'IN','MAA':'IN','BLR':'IN','CCU':'IN','HYD':'IN',
-      'SYD':'AU','MEL':'AU','BNE':'AU','PER':'AU','ADL':'AU',
-      'AKL':'NZ','CHC':'NZ','WLG':'NZ',
-      'YYZ':'CA','YVR':'CA','YUL':'CA','YYC':'CA',
-      'GRU':'BR','GIG':'BR','SSA':'BR','BSB':'BR',
-      'EZE':'AR','AEP':'AR',
-      'MEX':'MX','CUN':'MX','GDL':'MX',
-      'BOG':'CO','MDE':'CO',
-      'JNB':'ZA','CPT':'ZA',
-      'NBO':'KE',
-      'ADD':'ET',
-      'LOS':'NG',
-      'CAI':'EG',
-      'IST':'TR','SAW':'TR','ADB':'TR',
-      'DOH':'QA',
-      'RUH':'SA','JED':'SA','DMM':'SA',
-      'TLV':'IL',
-      'VIE':'AT','GRZ':'AT',
-      'ZRH':'CH','GVA':'CH',
-      'LIS':'PT','OPO':'PT',
-      'ATH':'GR','SKG':'GR',
-      'WAW':'PL','KRK':'PL',
-      'BUD':'HU',
-      'PRG':'CZ',
-      'DUB':'IE',
-      'BRU':'BE',
-      'MLE':'MV',
-      'CMB':'LK',
-      'KTM':'NP',
-      'DPS':'ID','CGK':'ID',
-      'SGN':'VN','HAN':'VN',
-    };
-
-    const domesticConfig = {
-      'FI': { airlines:['AY','AY','AY','AY','AY','AY'], price:[45,95],  mins:60 },
-      'PH': { airlines:['PR','5J','Z2','PR','5J','Z2'], price:[25,70],  mins:70 },
-      'US': { airlines:['AA','UA','DL','WN','B6','AS'], price:[80,280], mins:180 },
-      'GB': { airlines:['BA','EI','BE','BA','FR','LM'], price:[50,180], mins:75 },
-      'AU': { airlines:['QF','VA','JQ','QF','VA','JQ'], price:[60,200], mins:120 },
-      'IN': { airlines:['AI','6E','SG','G8','AI','6E'], price:[30,120], mins:90 },
-      'JP': { airlines:['JL','NH','BC','GK','JL','NH'], price:[60,180], mins:80 },
-      'CN': { airlines:['CA','MU','CZ','HU','3U','ZH'], price:[50,180], mins:120 },
-    };
-
-    const knownRoutes = {
-      'HEL-LHR': { totalMins: 195, stops: [], basePrice: 130, airlines: ['AY','BA','SK','LH','U2','FR'] },
-      'HEL-CDG': { totalMins: 210, stops: [], basePrice: 138, airlines: ['AY','AF','LH','BA','SK','U2'] },
-      'HEL-AMS': { totalMins: 195, stops: [], basePrice: 125, airlines: ['AY','KL','LH','BA','SK','U2'] },
-      'HEL-FRA': { totalMins: 185, stops: [], basePrice: 122, airlines: ['AY','LH','BA','AF','SK','U2'] },
-      'HEL-BCN': { totalMins: 300, stops: [], basePrice: 145, airlines: ['AY','VY','FR','IB','U2','SK'] },
-      'HEL-MAD': { totalMins: 315, stops: [], basePrice: 148, airlines: ['AY','IB','FR','VY','LH','BA'] },
-      'HEL-FCO': { totalMins: 270, stops: [], basePrice: 142, airlines: ['AY','AZ','FR','LH','BA','U2'] },
-      'HEL-ATH': { totalMins: 270, stops: [], basePrice: 155, airlines: ['AY','A3','LH','BA','FR','SK'] },
-      'HEL-IST': { totalMins: 225, stops: [], basePrice: 160, airlines: ['AY','TK','LH','BA','FR','PC'] },
-      'HEL-VIE': { totalMins: 175, stops: [], basePrice: 118, airlines: ['AY','OS','LH','BA','SK','U2'] },
-      'HEL-ZRH': { totalMins: 200, stops: [], basePrice: 135, airlines: ['AY','LX','LH','BA','SK','U2'] },
-      'HEL-ARN': { totalMins: 60,  stops: [], basePrice: 55,  airlines: ['AY','SK','DY','SK','AY','DY'] },
-      'HEL-CPH': { totalMins: 90,  stops: [], basePrice: 72,  airlines: ['AY','SK','DY','SK','AY','DY'] },
-      'HEL-OSL': { totalMins: 105, stops: [], basePrice: 78,  airlines: ['AY','SK','DY','SK','AY','DY'] },
-      'HEL-WAW': { totalMins: 150, stops: [], basePrice: 98,  airlines: ['AY','LO','FR','LH','SK','U2'] },
-      'HEL-BUD': { totalMins: 185, stops: [], basePrice: 112, airlines: ['AY','W6','LH','BA','FR','SK'] },
-      'HEL-PRG': { totalMins: 175, stops: [], basePrice: 108, airlines: ['AY','OK','LH','BA','FR','W6'] },
-      'HEL-DUB': { totalMins: 195, stops: [], basePrice: 130, airlines: ['AY','EI','FR','BA','SK','LH'] },
-      'HEL-DXB': { totalMins: 390, stops: [], basePrice: 310,  airlines: ['AY','EK','QR','TK','LH','FZ'] },
-      'HEL-BKK': { totalMins: 810, stops: ['DXB'], basePrice: 590, airlines: ['AY','EK','TG','QR','TK','LH'] },
-      'HEL-SIN': { totalMins: 870, stops: ['DXB'], basePrice: 620, airlines: ['AY','SQ','EK','QR','TK','LH'] },
-      'HEL-MNL': { totalMins: 960, stops: ['DXB'], basePrice: 650, airlines: ['AY','EK','QR','TK','PR','LH'] },
-      'HEL-JFK': { totalMins: 570, stops: ['LHR'], basePrice: 480, airlines: ['AY','BA','LH','AF','KL','TK'] },
-      'HEL-LAX': { totalMins: 690, stops: ['LHR'], basePrice: 540, airlines: ['AY','BA','LH','AF','KL','AA'] },
-      'HEL-NRT': { totalMins: 870, stops: ['HKG'], basePrice: 680, airlines: ['AY','JL','NH','KL','LH','BA'] },
-      'HEL-PEK': { totalMins: 780, stops: [], basePrice: 580,  airlines: ['AY','CA','LH','KL','BA','AF'] },
-      'MNL-DVO': { totalMins: 90,  stops: [], basePrice: 38,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
-      'DVO-MNL': { totalMins: 90,  stops: [], basePrice: 38,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
-      'MNL-CEB': { totalMins: 60,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
-      'CEB-MNL': { totalMins: 60,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
-      'LHR-JFK': { totalMins: 435, stops: [], basePrice: 380, airlines: ['BA','VS','AA','UA','DL','U2'] },
-      'LHR-DXB': { totalMins: 405, stops: [], basePrice: 290, airlines: ['BA','EK','QR','TK','LH','FZ'] },
-      'DXB-SIN': { totalMins: 420, stops: [], basePrice: 250, airlines: ['EK','SQ','QR','TK','FZ','MH'] },
-      'DXB-BKK': { totalMins: 390, stops: [], basePrice: 220, airlines: ['EK','TG','QR','TK','FZ','MH'] },
-      'BKK-SIN': { totalMins: 135, stops: [], basePrice: 80,  airlines: ['TG','SQ','FD','AK','MH','QZ'] },
-      'SIN-MNL': { totalMins: 195, stops: [], basePrice: 110, airlines: ['SQ','PR','5J','CX','MH','QZ'] },
-      'AMS-JFK': { totalMins: 525, stops: [], basePrice: 400, airlines: ['KL','UA','DL','AA','BA','AF'] },
-    };
-
-    const key   = `${orig}-${dest}`;
-    const revKey= `${dest}-${orig}`;
-    let route   = knownRoutes[key] || knownRoutes[revKey];
-
-    if (!route) {
-      const origC = airportCountry[orig];
-      const destC = airportCountry[dest];
-      const isDom = origC && destC && origC === destC;
-      if (isDom && domesticConfig[origC]) {
-        const cfg = domesticConfig[origC];
-        route = { totalMins: cfg.mins + 20, stops: [], basePrice: cfg.price[0] + 20, airlines: cfg.airlines };
-      } else if (isDom) {
-        route = { totalMins: 90, stops: [], basePrice: 70, airlines: ['AY','LH','BA','AF','KL','TK'] };
-      } else {
-        const hubs = ['HEL','LHR','CDG','AMS','FRA','JFK','LAX','NRT','SIN','DXB','ICN','BKK','KUL','DEL','BOM'];
-        route = (hubs.includes(orig)||hubs.includes(dest))
-          ? { totalMins: 600, stops: ['DXB'], basePrice: 420, airlines: ['EK','QR','TK','BA','LH','AY'] }
-          : { totalMins: 180, stops: [], basePrice: 120, airlines: ['LH','BA','AF','KL','TK','AY'] };
-      }
-    }
-
-    const airlineCodes   = route.airlines || ['AY','LH','BA','AF','KL','TK'];
-    const flightBases    = [100,200,300,400,500,600];
-    const priceMods      = [1.0, 2.8, 0.95, 1.0, 0.90, 0.95];
-    const departureTimes = ['06:15','08:30','10:45','13:00','15:30','18:00'];
-
-    const options = airlineCodes.map((code, idx) => ({
-      code, flightBase: flightBases[idx]||100+idx*100, cabinPriceMod: priceMods[idx]||1.0,
-    }));
-
-    return options.map((al, i) => {
-      const depTimeStr  = `${date}T${departureTimes[i % departureTimes.length]}:00`;
-      const depDate     = new Date(depTimeStr);
-      const isBusiness  = i === 1;
-      const basePrice   = route.basePrice * al.cabinPriceMod * numAdults;
-      const finalPrice  = Math.round((basePrice + (i % 3) * 40) * (isBusiness ? 2.8 : 1));
-      const totalMins   = route.totalMins;
-      const segments    = [];
-
-      if (route.stops.length === 0) {
-        const arrDate = new Date(depDate.getTime() + totalMins * 60000);
-        segments.push({ departure:{iataCode:orig, at:depDate.toISOString()}, arrival:{iataCode:dest, at:arrDate.toISOString()}, carrierCode:al.code, number:String(al.flightBase+i*13), duration:`PT${Math.floor(totalMins/60)}H${totalMins%60}M` });
-      } else {
-        const stopover   = route.stops[i % route.stops.length];
-        const seg1Mins   = Math.round(totalMins * 0.45);
-        const seg2Mins   = totalMins - seg1Mins - 90;
-        const midArr     = new Date(depDate.getTime() + seg1Mins * 60000);
-        const midDep     = new Date(midArr.getTime() + 90 * 60000);
-        const finalArr   = new Date(midDep.getTime() + seg2Mins * 60000);
-        segments.push({ departure:{iataCode:orig,    at:depDate.toISOString()}, arrival:{iataCode:stopover, at:midArr.toISOString()}, carrierCode:al.code, number:String(al.flightBase+i*13),   duration:`PT${Math.floor(seg1Mins/60)}H${seg1Mins%60}M` });
-        segments.push({ departure:{iataCode:stopover,at:midDep.toISOString()}, arrival:{iataCode:dest,     at:finalArr.toISOString()},carrierCode:al.code, number:String(al.flightBase+i*13+1), duration:`PT${Math.floor(seg2Mins/60)}H${seg2Mins%60}M` });
-      }
-
-      return {
-        id: `demo-${i}`,
-        price: { grandTotal: finalPrice.toFixed(2), currency:'EUR', fees:[{amount:(finalPrice*0.10).toFixed(2)}] },
-        numberOfBookableSeats: [9,4,7,2,6,8][i]||5,
-        itineraries: [{ duration:`PT${Math.floor(totalMins/60)}H${totalMins%60}M`, segments }],
-        travelerPricings: [{ fareDetailsBySegment:[{ cabin: isBusiness ? 'BUSINESS' : 'ECONOMY' }] }]
-      };
-    });
-  }
-
-  // Return demo flights IMMEDIATELY — no external API call needed
-  const fastDemo = generateDemoFlightsFast(cleanOrigin, cleanDest, cleanDate, cleanAdults);
-  console.log(`Fast demo flights for ${cleanOrigin}->${cleanDest}: ${fastDemo.length} results`);
-  return res.json(fastDemo);
-
   // Auto-lookup entityId if missing — tries exact match first, then first result
   async function getEntityId(skyId) {
     try {
@@ -647,4 +470,273 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
       'DVO-CEB': { totalMins: 55,  stops: [], basePrice: 25,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
       'CEB-DVO': { totalMins: 55,  stops: [], basePrice: 25,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
       'MNL-ILO': { totalMins: 55,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
- 
+      'MNL-BCD': { totalMins: 60,  stops: [], basePrice: 30,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      // ── Popular international ──────────────────────────────────
+      'LHR-JFK': { totalMins: 435, stops: [], basePrice: 380, airlines: ['BA','VS','AA','UA','DL','U2'] },
+      'LHR-DXB': { totalMins: 405, stops: [], basePrice: 290, airlines: ['BA','EK','QR','TK','LH','FZ'] },
+      'LHR-SYD': { totalMins: 1260,stops: ['SIN'], basePrice: 980, airlines: ['BA','QF','SQ','EK','QR','TK'] },
+      'CDG-JFK': { totalMins: 510, stops: [], basePrice: 420, airlines: ['AF','UA','AA','DL','BA','KL'] },
+      'DXB-SIN': { totalMins: 420, stops: [], basePrice: 250, airlines: ['EK','SQ','QR','TK','FZ','MH'] },
+      'DXB-BKK': { totalMins: 390, stops: [], basePrice: 220, airlines: ['EK','TG','QR','TK','FZ','MH'] },
+      'BKK-SIN': { totalMins: 135, stops: [], basePrice: 80,  airlines: ['TG','SQ','FD','AK','MH','QZ'] },
+      'SIN-MNL': { totalMins: 195, stops: [], basePrice: 110, airlines: ['SQ','PR','5J','CX','MH','QZ'] },
+      'SIN-NRT': { totalMins: 420, stops: [], basePrice: 310, airlines: ['SQ','JL','NH','CX','MH','TG'] },
+      'AMS-JFK': { totalMins: 525, stops: [], basePrice: 400, airlines: ['KL','UA','DL','AA','BA','AF'] },
+    };
+
+    const key    = `${orig}-${dest}`;
+    const revKey = `${dest}-${orig}`;
+    let route = knownRoutes[key] || knownRoutes[revKey];
+
+    // Smart fallback — detect route type from airport codes
+    if (!route) {
+      const origCountry = airportCountry[orig];
+      const destCountry = airportCountry[dest];
+      const isDomestic  = origCountry && destCountry && origCountry === destCountry;
+
+      if (isDomestic && domesticConfig[origCountry]) {
+        // True domestic flight — use country-specific config
+        const cfg = domesticConfig[origCountry];
+        const mins = cfg.mins + Math.floor(Math.random() * 30);
+        const price = cfg.price[0] + Math.floor(Math.random() * (cfg.price[1] - cfg.price[0]));
+        route = { totalMins: mins, stops: [], basePrice: price, airlines: cfg.airlines };
+      } else if (isDomestic) {
+        // Domestic but country not in config — generic short haul
+        route = { totalMins: 90, stops: [], basePrice: 70, airlines: ['AY','LH','BA','AF','KL','TK'] };
+      } else {
+        // International — estimate by hubs
+        const majorHubs = ['HEL','LHR','CDG','AMS','FRA','JFK','LAX','SYD','NRT','SIN','DXB','ICN','PEK','PVG','BKK','KUL','DEL','BOM','GRU','MEX','JNB'];
+        const isLongHaul = majorHubs.includes(orig) || majorHubs.includes(dest);
+        if (isLongHaul) {
+          route = { totalMins: 600, stops: ['DXB'], basePrice: 420, airlines: ['EK','QR','TK','BA','LH','AY'] };
+        } else {
+          route = { totalMins: 180, stops: [], basePrice: 120, airlines: ['LH','BA','AF','KL','TK','AY'] };
+        }
+      }
+    }
+
+    // Use route-specific airlines
+    const airlineCodes = route.airlines || ['AY','LH','BA','AF','KL','TK'];
+    const flightBases  = [100,200,300,400,500,600];
+    const priceMods    = [1.0, 2.8, 0.95, 1.0, 0.90, 0.95]; // index 1 = business class
+
+    const options = airlineCodes.map((code, idx) => ({
+      code,
+      flightBase:    flightBases[idx] || 100 + idx * 100,
+      cabinPriceMod: priceMods[idx]   || 1.0,
+    }));
+
+    const departureTimes = ['06:15', '08:30', '10:45', '13:00', '15:30', '18:00'];
+
+    return options.map((al, i) => {
+      const depTimeStr  = `${date}T${departureTimes[i % departureTimes.length]}:00`;
+      const depDate     = new Date(depTimeStr);
+      const basePrice   = route.basePrice * al.cabinPriceMod * numAdults;
+      const price       = Math.round(basePrice + (i % 3) * 40);
+      const isBusiness  = i === 1; // Second option is business class
+      const businessMod = isBusiness ? 2.8 : 1;
+      const finalPrice  = Math.round(price * businessMod);
+
+      // Build segments
+      const segments = [];
+
+      if (route.stops.length === 0) {
+        // Direct flight
+        const arrDate = new Date(depDate.getTime() + route.totalMins * 60000);
+        segments.push({
+          departure: { iataCode: orig, at: depDate.toISOString() },
+          arrival:   { iataCode: dest, at: arrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13),
+          duration: `PT${Math.floor(route.totalMins/60)}H${route.totalMins%60}M`
+        });
+      } else {
+        // Connecting flight — split total time across segments
+        const stopover   = route.stops[i % route.stops.length];
+        const seg1Mins   = Math.round(route.totalMins * 0.45);
+        const layoverMin = 90; // 1.5h layover
+        const seg2Mins   = route.totalMins - seg1Mins - layoverMin;
+
+        const midArrDate  = new Date(depDate.getTime() + seg1Mins * 60000);
+        const midDepDate  = new Date(midArrDate.getTime() + layoverMin * 60000);
+        const finalArrDate = new Date(midDepDate.getTime() + seg2Mins * 60000);
+
+        segments.push({
+          departure: { iataCode: orig,    at: depDate.toISOString() },
+          arrival:   { iataCode: stopover, at: midArrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13),
+          duration: `PT${Math.floor(seg1Mins/60)}H${seg1Mins%60}M`
+        });
+        segments.push({
+          departure: { iataCode: stopover, at: midDepDate.toISOString() },
+          arrival:   { iataCode: dest,     at: finalArrDate.toISOString() },
+          carrierCode: al.code,
+          number: String(al.flightBase + i * 13 + 1),
+          duration: `PT${Math.floor(seg2Mins/60)}H${seg2Mins%60}M`
+        });
+      }
+
+      const totalDurMins = route.totalMins;
+
+      return {
+        id: `demo-${i}`,
+        price: {
+          grandTotal: finalPrice.toFixed(2),
+          currency: 'EUR',
+          fees: [{ amount: (finalPrice * 0.10).toFixed(2) }]
+        },
+        numberOfBookableSeats: [9,4,7,2,6,8][i] || 5,
+        itineraries: [{
+          duration: `PT${Math.floor(totalDurMins/60)}H${totalDurMins%60}M`,
+          segments
+        }],
+        travelerPricings: [{
+          fareDetailsBySegment: [{ cabin: isBusiness ? 'BUSINESS' : 'ECONOMY' }]
+        }]
+      };
+    });
+  }
+
+  // Always use demo as safe fallback
+  const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+
+  // Return demo flights immediately — skip slow external API
+  return res.json(demoFlights);
+
+  try {
+    const data = await skyFetch('/api/v2/flights/searchFlights', {
+      originSkyId:           cleanOrigin,
+      destinationSkyId:      cleanDest,
+      originEntityId:        resolvedOriginEntityId,
+      destinationEntityId:   resolvedDestinationEntityId,
+      date:                  cleanDate,
+      adults:                cleanAdults,
+      currency:              'EUR',
+      market:                'en-US',
+      countryCode:           'FI',
+      cabinClass:            'economy'
+    });
+
+    console.log('Flight search response status:', data?.status);
+    console.log('Itineraries count:', data?.data?.itineraries?.length || 0);
+
+    const itineraries = data?.data?.itineraries || [];
+    if (!itineraries.length) {
+      console.log('API returned 0 flights — using demo data');
+      return res.json(demoFlights);
+    }
+
+    const flights = [];
+    for (let i = 0; i < Math.min(itineraries.length, 15); i++) {
+      try {
+        const it  = itineraries[i];
+        const leg = it.legs[0];
+        if (!leg) continue;
+        const price = it.price?.raw || 0;
+
+        flights.push({
+          id: `flight-${i}`,
+          price: {
+            grandTotal: price.toFixed(2),
+            currency:   'EUR',
+            fees:       [{ amount: (price * 0.1).toFixed(2) }]
+          },
+          numberOfBookableSeats: it.isSelfTransfer ? null : 9,
+          itineraries: [{
+            duration: `PT${Math.floor(leg.durationInMinutes / 60)}H${leg.durationInMinutes % 60}M`,
+            segments: (leg.segments || []).map(seg => ({
+              departure: { iataCode: seg.origin?.displayCode || '', at: seg.departure || '' },
+              arrival:   { iataCode: seg.destination?.displayCode || '', at: seg.arrival || '' },
+              carrierCode: seg.marketingCarrier?.alternateId || seg.operatingCarrier?.alternateId || 'XX',
+              number:      seg.flightNumber || ''
+            }))
+          }],
+          travelerPricings: [{
+            fareDetailsBySegment: [{ cabin: it.tags?.includes('business') ? 'BUSINESS' : 'ECONOMY' }]
+          }]
+        });
+      } catch (mapErr) {
+        console.error('Error mapping flight:', mapErr.message);
+      }
+    }
+
+    if (!flights.length) {
+      console.log('All flights failed to map — using demo data');
+      return res.json(demoFlights);
+    }
+
+    return res.json(flights);
+  } catch (err) {
+    console.error('Flight search error:', err.message);
+    console.log('Returning demo flights as fallback');
+    return res.json(demoFlights);
+  }
+});
+
+// ============================================================
+// ROUTE: POST /api/payments/create-intent
+// Creates a Stripe PaymentIntent on the server side.
+// The client secret is sent back to the browser so Stripe.js
+// can complete the payment securely — card data NEVER touches
+// our server.
+// Body: { amount (USD), currency, flightDetails }
+// ============================================================
+app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
+  const { amount, currency = 'usd', flightDetails } = req.body;
+
+  // Validate amount — must be a positive number, max $50,000
+  const cleanAmount = parseFloat(amount);
+  if (!cleanAmount || cleanAmount <= 0 || cleanAmount > 50000) {
+    return res.status(400).json({ error: 'Invalid payment amount.' });
+  }
+
+  // Validate currency
+  const allowedCurrencies = ['usd', 'eur', 'gbp'];
+  const cleanCurrency = (currency || 'usd').toLowerCase();
+  if (!allowedCurrencies.includes(cleanCurrency)) {
+    return res.status(400).json({ error: 'Invalid currency.' });
+  }
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount:   Math.round(cleanAmount * 100), // Stripe uses cents
+      currency: cleanCurrency,
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        flight: JSON.stringify(flightDetails || {}).substring(0, 500)
+      }
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error('Stripe error:', err.message);
+    res.status(500).json({ error: 'Maksun asetus epäonnistui. Yritä uudelleen.' });
+  }
+});
+
+// ── Global error handler (hides details from users) ───────────
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message);
+  res.status(500).json({
+    error: isProd ? 'Something went wrong. Please try again.' : err.message
+  });
+});
+
+// ── 404 handler — catch common attack probe paths ─────────────
+app.use((req, res) => {
+  const path = req.path.toLowerCase();
+  // Log suspicious probe attempts
+  const probes = ['.php', '.asp', '.aspx', 'wp-admin', 'xmlrpc', '.env', 'config.json', 'admin/', '/.git', '/backup'];
+  if (probes.some(p => path.includes(p))) {
+    console.warn(`⚠️  Suspicious probe blocked: ${req.method} ${req.path} from ${req.ip}`);
+    return res.status(404).json({ error: 'Not found.' });
+  }
+  res.status(404).json({ error: 'Not found.' });
+});
+
+// ── Start server ─────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log('NordicWings is running on port ' + PORT);
+  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
+});
