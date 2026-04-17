@@ -1,7 +1,7 @@
-// SkyBook Service Worker
+// NordicWings Service Worker
 // Caches app files so it works offline and loads faster
 
-const CACHE_NAME = 'skybook-v1';
+const CACHE_NAME = 'nordicwings-v1';
 const ASSETS = [
   '/',
   '/index.html',

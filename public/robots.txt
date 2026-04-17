@@ -1,0 +1,14 @@
+# NordicWings — robots.txt
+# Tells Google and all search engines which pages to index
+
+User-agent: *
+Allow: /
+
+# Block private/API routes from indexing
+Disallow: /api/
+Disallow: /api/flights/
+Disallow: /api/airports/
+Disallow: /api/payments/
+
+# Sitemap location — helps Google find all pages faster
+Sitemap: https://nordicwings.net/sitemap.xml

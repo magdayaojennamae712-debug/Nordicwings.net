@@ -1,7 +1,7 @@
 {
-  "name": "SkyBook — Find & Book Flights",
-  "short_name": "SkyBook",
-  "description": "Search and book flights easily with SkyBook",
+  "name": "NordicWings — Find & Book Flights",
+  "short_name": "NordicWings",
+  "description": "Search and book flights easily with NordicWings",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

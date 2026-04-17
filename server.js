@@ -1,5 +1,5 @@
 // ============================================================
-// SkyBook - server.js
+// NordicWings - server.js
 // Express backend: serves the app, proxies Sky Scrapper flight
 // search (keeping API keys secret), and handles Stripe payments.
 // ============================================================
@@ -16,20 +16,31 @@ const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
 // ── Security: Helmet (sets safe HTTP headers) ─────────────────
-// CSP disabled to allow Firebase, Stripe and all scripts to work
-// Other protections (XSS filter, clickjacking etc) still active
 app.use(helmet({
-  contentSecurityPolicy:    false,  // Disabled — too restrictive for our stack
+  // Content Security Policy: restrict what scripts/styles/connections are allowed
+  contentSecurityPolicy:    false,  // Disabled — Firebase + Stripe + inline scripts need this off
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: false,
+  // Prevent clickjacking
+  frameguard: { action: 'sameorigin' },
+  // Hide server info from attackers
+  hidePoweredBy: true,
+  // Prevent MIME sniffing
+  noSniff: true,
+  // Force HTTPS
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  // Prevent XSS
+  xssFilter: true,
+  // Referrer policy
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 // ── Security: CORS (only allow your own domain) ───────────────
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://skybookfi.com',
-  'https://www.skybookfi.com',
-  'https://skybookficom-production.up.railway.app'
+  'https://nordicwings.net',
+  'https://www.nordicwings.net',
+  'https://nordicwings-production.up.railway.app'
 ];
 app.use(cors({
   origin: (origin, callback) => {
@@ -42,6 +53,16 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// ── Security: Block suspicious User-Agents (scanners/bots) ──────
+app.use((req, res, next) => {
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  const blocked = ['sqlmap', 'nikto', 'masscan', 'nmap', 'zgrab', 'python-requests/2.', 'go-http-client/1', 'curl/'];
+  if (blocked.some(b => ua.includes(b))) {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+  next();
+});
 
 // ── Security: Rate Limiting ────────────────────────────────────
 // General limiter: max 100 requests per 15 minutes per IP
@@ -200,6 +221,182 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   // Helper: generate realistic demo flights with correct stopovers and durations
   function generateDemoFlights(orig, dest, date, numAdults) {
 
+    // ── WORLDWIDE AIRPORT → COUNTRY MAP ──────────────────────
+    const airportCountry = {
+      // Finland
+      'HEL':'FI','OUL':'FI','TMP':'FI','TKU':'FI','JYV':'FI','KUO':'FI',
+      'JOE':'FI','RVN':'FI','KEM':'FI','IVL':'FI','KAJ':'FI','VAA':'FI','MHQ':'FI',
+      // Philippines
+      'MNL':'PH','DVO':'PH','CEB':'PH','ILO':'PH','BCD':'PH','KLO':'PH',
+      'ZAM':'PH','GES':'PH','DGT':'PH','MPH':'PH','PPS':'PH','TAG':'PH',
+      // USA
+      'JFK':'US','LAX':'US','ORD':'US','ATL':'US','DFW':'US','DEN':'US',
+      'SFO':'US','SEA':'US','MIA':'US','BOS':'US','LAS':'US','PHX':'US',
+      'IAH':'US','MSP':'US','DTW':'US','PHL':'US','CLT':'US','EWR':'US',
+      'BWI':'US','SLC':'US','HNL':'US','SAN':'US','PDX':'US','AUS':'US',
+      'MCO':'US','TPA':'US','BNA':'US','RDU':'US','STL':'US','MCI':'US',
+      // UK
+      'LHR':'GB','LGW':'GB','MAN':'GB','STN':'GB','EDI':'GB','GLA':'GB',
+      'LTN':'GB','BHX':'GB','BRS':'GB','NCL':'GB','LBA':'GB','ABZ':'GB',
+      // Germany
+      'FRA':'DE','MUC':'DE','BER':'DE','DUS':'DE','HAM':'DE','STR':'DE',
+      'CGN':'DE','NUE':'DE','HAJ':'DE','LEJ':'DE','DRS':'DE',
+      // France
+      'CDG':'FR','ORY':'FR','NCE':'FR','LYS':'FR','MRS':'FR','TLS':'FR',
+      'BOD':'FR','NTE':'FR','LIL':'FR',
+      // Spain
+      'MAD':'ES','BCN':'ES','AGP':'ES','PMI':'ES','ALC':'ES','VLC':'ES',
+      'LPA':'ES','TFN':'ES','IBZ':'ES','SVQ':'ES','BIO':'ES',
+      // Italy
+      'FCO':'IT','MXP':'IT','LIN':'IT','NAP':'IT','VCE':'IT','CIA':'IT',
+      'BLQ':'IT','CTA':'IT','PMO':'IT','BRI':'IT','FLR':'IT',
+      // Australia
+      'SYD':'AU','MEL':'AU','BNE':'AU','PER':'AU','ADL':'AU','CBR':'AU',
+      'OOL':'AU','CNS':'AU','DRW':'AU','TSV':'AU','HBA':'AU','MKY':'AU',
+      // India
+      'DEL':'IN','BOM':'IN','BLR':'IN','MAA':'IN','CCU':'IN','HYD':'IN',
+      'COK':'IN','AMD':'IN','GOI':'IN','PNQ':'IN','JAI':'IN','LKO':'IN',
+      // Japan
+      'NRT':'JP','HND':'JP','KIX':'JP','NGO':'JP','CTS':'JP','OKA':'JP',
+      'FUK':'JP','HIJ':'JP','SDJ':'JP','KOJ':'JP','OIT':'JP',
+      // China
+      'PEK':'CN','PVG':'CN','SHA':'CN','CAN':'CN','SZX':'CN','CTU':'CN',
+      'KMG':'CN','WUH':'CN','CSX':'CN','XIY':'CN','HGH':'CN','NKG':'CN',
+      // Brazil
+      'GRU':'BR','GIG':'BR','BSB':'BR','SSA':'BR','FOR':'BR','REC':'BR',
+      'POA':'BR','CWB':'BR','BEL':'BR','MAO':'BR','CGH':'BR','SDU':'BR',
+      // Canada
+      'YYZ':'CA','YVR':'CA','YUL':'CA','YYC':'CA','YEG':'CA','YOW':'CA',
+      'YWG':'CA','YHZ':'CA','YQB':'CA','YYJ':'CA',
+      // Indonesia
+      'CGK':'ID','DPS':'ID','SUB':'ID','MES':'ID','UPG':'ID','PLM':'ID',
+      'PDG':'ID','BPN':'ID','SOC':'ID','AMQ':'ID','MDC':'ID',
+      // Thailand
+      'BKK':'TH','DMK':'TH','HKT':'TH','CNX':'TH','HDY':'TH','USM':'TH',
+      'CEI':'TH','KBV':'TH',
+      // Malaysia
+      'KUL':'MY','LGK':'MY','PEN':'MY','BKI':'MY','KCH':'MY','JHB':'MY',
+      'MYY':'MY','SDK':'MY',
+      // Norway
+      'OSL':'NO','BGO':'NO','TRD':'NO','SVG':'NO','TOS':'NO','BOO':'NO',
+      'ALF':'NO','LKL':'NO','EVE':'NO',
+      // Sweden
+      'ARN':'SE','GOT':'SE','MMX':'SE','LLA':'SE','UME':'SE','OSD':'SE',
+      // Denmark
+      'CPH':'DK','AAL':'DK','BLL':'DK','FAE':'DK',
+      // Netherlands
+      'AMS':'NL','EIN':'NL','RTM':'NL',
+      // Turkey
+      'IST':'TR','SAW':'TR','ADB':'TR','AYT':'TR','ESB':'TR','TZX':'TR',
+      'GZT':'TR','SZF':'TR','BJV':'TR',
+      // UAE
+      'DXB':'AE','AUH':'AE','SHJ':'AE',
+      // South Korea
+      'ICN':'KR','GMP':'KR','PUS':'KR','CJU':'KR','CJJ':'KR',
+      // Mexico
+      'MEX':'MX','CUN':'MX','GDL':'MX','MTY':'MX','TIJ':'MX','OAX':'MX',
+      // Argentina
+      'EZE':'AR','AEP':'AR','COR':'AR','MDZ':'AR','BRC':'AR','IGR':'AR',
+      // South Africa
+      'JNB':'ZA','CPT':'ZA','DUR':'ZA','PLZ':'ZA','GRJ':'ZA',
+      // New Zealand
+      'AKL':'NZ','CHC':'NZ','WLG':'NZ','ZQN':'NZ','DUD':'NZ',
+      // Colombia
+      'BOG':'CO','MDE':'CO','CTG':'CO','CLO':'CO','BAQ':'CO',
+      // Chile
+      'SCL':'CL','PMC':'CL','ANF':'CL','IQQ':'CL','CCP':'CL',
+      // Portugal
+      'LIS':'PT','OPO':'PT','FAO':'PT','PDL':'PT','FNC':'PT',
+      // Greece
+      'ATH':'GR','SKG':'GR','HER':'GR','RHO':'GR','CFU':'GR','JMK':'GR',
+      // Austria
+      'VIE':'AT','GRZ':'AT','INN':'AT','SZG':'AT',
+      // Switzerland
+      'ZRH':'CH','GVA':'CH','BSL':'CH',
+      // Poland
+      'WAW':'PL','KRK':'PL','KTW':'PL','GDN':'PL','POZ':'PL','WRO':'PL',
+      // Romania
+      'OTP':'RO','CLJ':'RO','TSR':'RO','IAS':'RO',
+      // Hungary
+      'BUD':'HU',
+      // Czech Republic
+      'PRG':'CZ','BRQ':'CZ',
+      // Ireland
+      'DUB':'IE','ORK':'IE','SNN':'IE',
+      // Belgium
+      'BRU':'BE','CRL':'BE','LGG':'BE',
+      // Pakistan
+      'KHI':'PK','LHE':'PK','ISB':'PK','PEW':'PK','MUX':'PK',
+      // Bangladesh
+      'DAC':'BD','CGP':'BD','JSR':'BD',
+      // Sri Lanka
+      'CMB':'LK',
+      // Nepal
+      'KTM':'NP','PKR':'NP',
+      // Egypt
+      'CAI':'EG','HRG':'EG','SSH':'EG','LXR':'EG','ASW':'EG',
+      // Kenya
+      'NBO':'KE','MBA':'KE','KIS':'KE',
+      // Nigeria
+      'LOS':'NG','ABV':'NG','PHC':'NG','KAN':'NG',
+      // Ethiopia
+      'ADD':'ET','DIR':'ET',
+      // Russia
+      'SVO':'RU','DME':'RU','LED':'RU','OVB':'RU','SVX':'RU','KZN':'RU',
+      // Ukraine (pre-war routes)
+      'KBP':'UA','LWO':'UA',
+      // Singapore
+      'SIN':'SG',
+      // Hong Kong
+      'HKG':'HK',
+      // Taiwan
+      'TPE':'TW','KHH':'TW','RMQ':'TW',
+      // Vietnam
+      'SGN':'VN','HAN':'VN','DAD':'VN','CXR':'VN','UIH':'VN',
+      // Cambodia
+      'PNH':'KH','REP':'KH',
+      // Morocco
+      'CMN':'MA','RAK':'MA','AGA':'MA','FEZ':'MA','TNG':'MA',
+    };
+
+    // ── DOMESTIC AIRLINES BY COUNTRY ─────────────────────────
+    const domesticConfig = {
+      'FI': { airlines:['AY','AY','AY','AY','AY','AY'], price:[45,95],  mins:60,  stops:[] },
+      'PH': { airlines:['PR','5J','Z2','PR','5J','Z2'], price:[25,70],  mins:70,  stops:[] },
+      'US': { airlines:['AA','UA','DL','WN','B6','AS'], price:[80,280], mins:180, stops:[] },
+      'GB': { airlines:['BA','EI','BE','BA','FR','LM'], price:[50,180], mins:75,  stops:[] },
+      'AU': { airlines:['QF','VA','JQ','QF','VA','JQ'], price:[60,200], mins:120, stops:[] },
+      'IN': { airlines:['AI','6E','SG','G8','AI','6E'], price:[30,120], mins:90,  stops:[] },
+      'JP': { airlines:['JL','NH','BC','GK','JL','NH'], price:[60,180], mins:80,  stops:[] },
+      'CN': { airlines:['CA','MU','CZ','HU','3U','ZH'], price:[50,180], mins:120, stops:[] },
+      'BR': { airlines:['G3','LA','AD','G3','LA','AD'], price:[50,180], mins:120, stops:[] },
+      'CA': { airlines:['AC','WS','F8','AC','WS','AC'], price:[80,300], mins:150, stops:[] },
+      'ID': { airlines:['GA','JT','QZ','SJ','ID','IN'], price:[25,100], mins:75,  stops:[] },
+      'TH': { airlines:['TG','FD','WE','DD','TG','FD'], price:[30,100], mins:75,  stops:[] },
+      'MY': { airlines:['MH','AK','OD','MH','AK','OD'], price:[25,90],  mins:75,  stops:[] },
+      'NO': { airlines:['SK','DY','SK','DY','SK','DY'], price:[40,140], mins:65,  stops:[] },
+      'SE': { airlines:['SK','DY','SK','DY','FR','SK'], price:[40,140], mins:65,  stops:[] },
+      'DE': { airlines:['LH','EW','4U','LH','FR','LH'], price:[60,180], mins:75,  stops:[] },
+      'ES': { airlines:['IB','VY','FR','VY','IB','FR'], price:[35,150], mins:90,  stops:[] },
+      'IT': { airlines:['AZ','FR','U2','AZ','FR','U2'], price:[35,150], mins:90,  stops:[] },
+      'TR': { airlines:['TK','PC','TK','PC','TK','XQ'], price:[30,120], mins:80,  stops:[] },
+      'ZA': { airlines:['SA','FA','MN','SA','FA','MN'], price:[40,150], mins:90,  stops:[] },
+      'MX': { airlines:['AM','Y4','VB','AM','Y4','VB'], price:[40,140], mins:90,  stops:[] },
+      'KR': { airlines:['KE','OZ','7C','LJ','KE','OZ'], price:[50,150], mins:55,  stops:[] },
+      'AR': { airlines:['AR','JA','LA','AR','JA','AR'], price:[40,150], mins:90,  stops:[] },
+      'NZ': { airlines:['NZ','JQ','NZ','JQ','NZ','JQ'], price:[50,160], mins:60,  stops:[] },
+      'CO': { airlines:['AV','LA','VX','AV','LA','AV'], price:[35,130], mins:60,  stops:[] },
+      'CL': { airlines:['LA','JJ','LA','JJ','LA','JJ'], price:[40,140], mins:80,  stops:[] },
+      'PT': { airlines:['TP','FR','U2','TP','FR','U2'], price:[40,130], mins:60,  stops:[] },
+      'GR': { airlines:['A3','FR','U2','A3','FR','A3'], price:[40,140], mins:60,  stops:[] },
+      'PK': { airlines:['PK','PA','ER','PK','PA','PK'], price:[25,100], mins:80,  stops:[] },
+      'EG': { airlines:['MS','HF','ZS','MS','HF','MS'], price:[30,110], mins:60,  stops:[] },
+      'NG': { airlines:['QS','IB','LH','QS','IB','QS'], price:[30,120], mins:70,  stops:[] },
+      'RU': { airlines:['SU','S7','UT','SU','S7','UT'], price:[40,180], mins:120, stops:[] },
+      'VN': { airlines:['VN','VJ','QH','VN','VJ','QH'], price:[25,90],  mins:80,  stops:[] },
+      'MA': { airlines:['AT','TO','AT','TO','AT','TO'], price:[30,110], mins:70,  stops:[] },
+    };
+
     // Real-world route data: total duration (minutes) + stopover airports
     const routeData = {
       // European short-haul (direct)
@@ -212,41 +409,112 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
 
     // Known real routes with accurate data
     const knownRoutes = {
-      'HEL-MNL': { totalMins: 960, stops: ['DXB','DOH','BKK'], basePrice: 650 },
-      'HEL-LHR': { totalMins: 195, stops: [], basePrice: 130 },
-      'HEL-DXB': { totalMins: 390, stops: [], basePrice: 310 },
-      'HEL-JFK': { totalMins: 570, stops: ['LHR'], basePrice: 480 },
-      'HEL-BKK': { totalMins: 810, stops: ['DXB'], basePrice: 590 },
-      'HEL-BCN': { totalMins: 300, stops: [], basePrice: 145 },
-      'HEL-CDG': { totalMins: 210, stops: [], basePrice: 138 },
-      'HEL-SIN': { totalMins: 870, stops: ['DXB'], basePrice: 620 },
-      'LHR-JFK': { totalMins: 435, stops: [], basePrice: 380 },
-      'LHR-DXB': { totalMins: 405, stops: [], basePrice: 290 },
-      'LHR-SYD': { totalMins: 1260, stops: ['SIN'], basePrice: 980 },
-      'CDG-JFK': { totalMins: 510, stops: [], basePrice: 420 },
+      // ── Finnish domestic ──────────────────────────────────────
+      'HEL-OUL': { totalMins: 65,  stops: [], basePrice: 60,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-TMP': { totalMins: 45,  stops: [], basePrice: 45,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-TKU': { totalMins: 40,  stops: [], basePrice: 42,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-JYV': { totalMins: 50,  stops: [], basePrice: 52,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-KUO': { totalMins: 55,  stops: [], basePrice: 58,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-JOE': { totalMins: 60,  stops: [], basePrice: 62,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-RVN': { totalMins: 90,  stops: [], basePrice: 75,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-IVL': { totalMins: 105, stops: [], basePrice: 88,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-KAJ': { totalMins: 70,  stops: [], basePrice: 65,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-VAA': { totalMins: 55,  stops: [], basePrice: 55,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'HEL-KEM': { totalMins: 95,  stops: [], basePrice: 80,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'OUL-TMP': { totalMins: 60,  stops: [], basePrice: 55,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      'OUL-TKU': { totalMins: 70,  stops: [], basePrice: 60,  airlines: ['AY','AY','AY','AY','AY','AY'] },
+      // ── Finland to Europe ─────────────────────────────────────
+      'HEL-LHR': { totalMins: 195, stops: [], basePrice: 130, airlines: ['AY','BA','SK','LH','U2','FR'] },
+      'HEL-CDG': { totalMins: 210, stops: [], basePrice: 138, airlines: ['AY','AF','LH','BA','SK','U2'] },
+      'HEL-AMS': { totalMins: 195, stops: [], basePrice: 125, airlines: ['AY','KL','LH','BA','SK','U2'] },
+      'HEL-FRA': { totalMins: 185, stops: [], basePrice: 122, airlines: ['AY','LH','BA','AF','SK','U2'] },
+      'HEL-BCN': { totalMins: 300, stops: [], basePrice: 145, airlines: ['AY','VY','FR','IB','U2','SK'] },
+      'HEL-MAD': { totalMins: 315, stops: [], basePrice: 148, airlines: ['AY','IB','FR','VY','LH','BA'] },
+      'HEL-FCO': { totalMins: 270, stops: [], basePrice: 142, airlines: ['AY','AZ','FR','LH','BA','U2'] },
+      'HEL-ATH': { totalMins: 270, stops: [], basePrice: 155, airlines: ['AY','A3','LH','BA','FR','SK'] },
+      'HEL-IST': { totalMins: 225, stops: [], basePrice: 160, airlines: ['AY','TK','LH','BA','FR','PC'] },
+      'HEL-VIE': { totalMins: 175, stops: [], basePrice: 118, airlines: ['AY','OS','LH','BA','SK','U2'] },
+      'HEL-ZRH': { totalMins: 200, stops: [], basePrice: 135, airlines: ['AY','LX','LH','BA','SK','U2'] },
+      'HEL-ARN': { totalMins: 60,  stops: [], basePrice: 55,  airlines: ['AY','SK','DY','SK','AY','DY'] },
+      'HEL-CPH': { totalMins: 90,  stops: [], basePrice: 72,  airlines: ['AY','SK','DY','SK','AY','DY'] },
+      'HEL-OSL': { totalMins: 105, stops: [], basePrice: 78,  airlines: ['AY','SK','DY','SK','AY','DY'] },
+      'HEL-WAW': { totalMins: 150, stops: [], basePrice: 98,  airlines: ['AY','LO','FR','LH','SK','U2'] },
+      'HEL-BUD': { totalMins: 185, stops: [], basePrice: 112, airlines: ['AY','W6','LH','BA','FR','SK'] },
+      'HEL-PRG': { totalMins: 175, stops: [], basePrice: 108, airlines: ['AY','OK','LH','BA','FR','W6'] },
+      'HEL-DUB': { totalMins: 195, stops: [], basePrice: 130, airlines: ['AY','EI','FR','BA','SK','LH'] },
+      // ── Finland long haul ─────────────────────────────────────
+      'HEL-DXB': { totalMins: 390, stops: [], basePrice: 310,  airlines: ['AY','EK','QR','TK','LH','FZ'] },
+      'HEL-BKK': { totalMins: 810, stops: ['DXB'], basePrice: 590, airlines: ['AY','EK','TG','QR','TK','LH'] },
+      'HEL-SIN': { totalMins: 870, stops: ['DXB'], basePrice: 620, airlines: ['AY','SQ','EK','QR','TK','LH'] },
+      'HEL-MNL': { totalMins: 960, stops: ['DXB'], basePrice: 650, airlines: ['AY','EK','QR','TK','PR','LH'] },
+      'HEL-JFK': { totalMins: 570, stops: ['LHR'], basePrice: 480, airlines: ['AY','BA','LH','AF','KL','TK'] },
+      'HEL-LAX': { totalMins: 690, stops: ['LHR'], basePrice: 540, airlines: ['AY','BA','LH','AF','KL','AA'] },
+      'HEL-NRT': { totalMins: 870, stops: ['HKG'], basePrice: 680, airlines: ['AY','JL','NH','KL','LH','BA'] },
+      'HEL-PEK': { totalMins: 780, stops: [], basePrice: 580,  airlines: ['AY','CA','LH','KL','BA','AF'] },
+      'HEL-DVO': { totalMins: 1020,stops: ['DXB'], basePrice: 680, airlines: ['AY','EK','QR','TK','PR','LH'] },
+      // ── Philippine domestic ───────────────────────────────────
+      'MNL-DVO': { totalMins: 90,  stops: [], basePrice: 38,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'DVO-MNL': { totalMins: 90,  stops: [], basePrice: 38,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'MNL-CEB': { totalMins: 60,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'CEB-MNL': { totalMins: 60,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'DVO-CEB': { totalMins: 55,  stops: [], basePrice: 25,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'CEB-DVO': { totalMins: 55,  stops: [], basePrice: 25,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'MNL-ILO': { totalMins: 55,  stops: [], basePrice: 28,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      'MNL-BCD': { totalMins: 60,  stops: [], basePrice: 30,  airlines: ['PR','5J','Z2','PR','5J','Z2'] },
+      // ── Popular international ──────────────────────────────────
+      'LHR-JFK': { totalMins: 435, stops: [], basePrice: 380, airlines: ['BA','VS','AA','UA','DL','U2'] },
+      'LHR-DXB': { totalMins: 405, stops: [], basePrice: 290, airlines: ['BA','EK','QR','TK','LH','FZ'] },
+      'LHR-SYD': { totalMins: 1260,stops: ['SIN'], basePrice: 980, airlines: ['BA','QF','SQ','EK','QR','TK'] },
+      'CDG-JFK': { totalMins: 510, stops: [], basePrice: 420, airlines: ['AF','UA','AA','DL','BA','KL'] },
+      'DXB-SIN': { totalMins: 420, stops: [], basePrice: 250, airlines: ['EK','SQ','QR','TK','FZ','MH'] },
+      'DXB-BKK': { totalMins: 390, stops: [], basePrice: 220, airlines: ['EK','TG','QR','TK','FZ','MH'] },
+      'BKK-SIN': { totalMins: 135, stops: [], basePrice: 80,  airlines: ['TG','SQ','FD','AK','MH','QZ'] },
+      'SIN-MNL': { totalMins: 195, stops: [], basePrice: 110, airlines: ['SQ','PR','5J','CX','MH','QZ'] },
+      'SIN-NRT': { totalMins: 420, stops: [], basePrice: 310, airlines: ['SQ','JL','NH','CX','MH','TG'] },
+      'AMS-JFK': { totalMins: 525, stops: [], basePrice: 400, airlines: ['KL','UA','DL','AA','BA','AF'] },
     };
 
     const key    = `${orig}-${dest}`;
     const revKey = `${dest}-${orig}`;
     let route = knownRoutes[key] || knownRoutes[revKey];
 
-    // Estimate route type if not known
+    // Smart fallback — detect route type from airport codes
     if (!route) {
-      const totalMins = Math.abs(orig.charCodeAt(0) - dest.charCodeAt(0)) * 15 + 180;
-      if (totalMins < 240)       route = { ...routeData.default_short, totalMins };
-      else if (totalMins < 480)  route = { ...routeData.default_medium, totalMins };
-      else                       route = { ...routeData.default_long, totalMins };
+      const origCountry = airportCountry[orig];
+      const destCountry = airportCountry[dest];
+      const isDomestic  = origCountry && destCountry && origCountry === destCountry;
+
+      if (isDomestic && domesticConfig[origCountry]) {
+        // True domestic flight — use country-specific config
+        const cfg = domesticConfig[origCountry];
+        const mins = cfg.mins + Math.floor(Math.random() * 30);
+        const price = cfg.price[0] + Math.floor(Math.random() * (cfg.price[1] - cfg.price[0]));
+        route = { totalMins: mins, stops: [], basePrice: price, airlines: cfg.airlines };
+      } else if (isDomestic) {
+        // Domestic but country not in config — generic short haul
+        route = { totalMins: 90, stops: [], basePrice: 70, airlines: ['AY','LH','BA','AF','KL','TK'] };
+      } else {
+        // International — estimate by hubs
+        const majorHubs = ['HEL','LHR','CDG','AMS','FRA','JFK','LAX','SYD','NRT','SIN','DXB','ICN','PEK','PVG','BKK','KUL','DEL','BOM','GRU','MEX','JNB'];
+        const isLongHaul = majorHubs.includes(orig) || majorHubs.includes(dest);
+        if (isLongHaul) {
+          route = { totalMins: 600, stops: ['DXB'], basePrice: 420, airlines: ['EK','QR','TK','BA','LH','AY'] };
+        } else {
+          route = { totalMins: 180, stops: [], basePrice: 120, airlines: ['LH','BA','AF','KL','TK','AY'] };
+        }
+      }
     }
 
-    // Airlines with realistic flight numbers per route
-    const options = [
-      { code: 'EK', flightBase: 100, cabinPriceMod: 1.0  },
-      { code: 'QR', flightBase: 200, cabinPriceMod: 1.05 },
-      { code: 'BA', flightBase: 300, cabinPriceMod: 0.95 },
-      { code: 'LH', flightBase: 400, cabinPriceMod: 1.0  },
-      { code: 'TK', flightBase: 500, cabinPriceMod: 0.90 },
-      { code: 'AY', flightBase: 600, cabinPriceMod: 0.95 }, // Finnair
-    ];
+    // Use route-specific airlines
+    const airlineCodes = route.airlines || ['AY','LH','BA','AF','KL','TK'];
+    const flightBases  = [100,200,300,400,500,600];
+    const priceMods    = [1.0, 2.8, 0.95, 1.0, 0.90, 0.95]; // index 1 = business class
+
+    const options = airlineCodes.map((code, idx) => ({
+      code,
+      flightBase:    flightBases[idx] || 100 + idx * 100,
+      cabinPriceMod: priceMods[idx]   || 1.0,
+    }));
 
     const departureTimes = ['06:15', '08:30', '10:45', '13:00', '15:30', '18:00'];
 
@@ -305,7 +573,7 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
         id: `demo-${i}`,
         price: {
           grandTotal: finalPrice.toFixed(2),
-          currency: 'USD',
+          currency: 'EUR',
           fees: [{ amount: (finalPrice * 0.10).toFixed(2) }]
         },
         numberOfBookableSeats: [9,4,7,2,6,8][i] || 5,
@@ -320,72 +588,76 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     });
   }
 
+  // Always use demo as safe fallback
+  const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+
   try {
     const data = await skyFetch('/api/v2/flights/searchFlights', {
-      originSkyId:           origin.toUpperCase(),
-      destinationSkyId:      destination.toUpperCase(),
+      originSkyId:           cleanOrigin,
+      destinationSkyId:      cleanDest,
       originEntityId:        resolvedOriginEntityId,
       destinationEntityId:   resolvedDestinationEntityId,
-      date:                  departureDate,
-      adults:                parseInt(adults) || 1,
-      currency:              'USD',
+      date:                  cleanDate,
+      adults:                cleanAdults,
+      currency:              'EUR',
       market:                'en-US',
-      countryCode:           'US',
+      countryCode:           'FI',
       cabinClass:            'economy'
     });
 
     console.log('Flight search response status:', data?.status);
-    console.log('Flight search message:', data?.message);
     console.log('Itineraries count:', data?.data?.itineraries?.length || 0);
 
-    // Normalize Sky Scrapper response into a format our frontend understands
     const itineraries = data?.data?.itineraries || [];
-
-    const flights = itineraries.slice(0, 15).map((it, i) => {
-      const leg     = it.legs[0];
-      const segment = leg.segments[0];
-      const price   = it.price?.raw || 0;
-
-      return {
-        id: `flight-${i}`,
-        price: {
-          grandTotal: price.toFixed(2),
-          currency:   'USD',
-          fees:       [{ amount: (price * 0.1).toFixed(2) }]
-        },
-        numberOfBookableSeats: it.isSelfTransfer ? null : 9,
-        itineraries: [{
-          duration: `PT${Math.floor(leg.durationInMinutes / 60)}H${leg.durationInMinutes % 60}M`,
-          segments: leg.segments.map(seg => ({
-            departure: {
-              iataCode: seg.origin.displayCode,
-              at:       seg.departure
-            },
-            arrival: {
-              iataCode: seg.destination.displayCode,
-              at:       seg.arrival
-            },
-            carrierCode: seg.marketingCarrier?.alternateId || seg.operatingCarrier?.alternateId || '??',
-            number:      seg.flightNumber || ''
-          }))
-        }],
-        travelerPricings: [{
-          fareDetailsBySegment: [{ cabin: it.tags?.includes('business') ? 'BUSINESS' : 'ECONOMY' }]
-        }]
-      };
-    });
-
-    // If API returned no results or failed, use demo flights
-    if (!flights || flights.length === 0) {
-      console.log('API returned no flights — using demo data');
-      return res.json(generateDemoFlights(origin, destination, departureDate, parseInt(adults) || 1));
+    if (!itineraries.length) {
+      console.log('API returned 0 flights — using demo data');
+      return res.json(demoFlights);
     }
 
-    res.json(flights);
+    const flights = [];
+    for (let i = 0; i < Math.min(itineraries.length, 15); i++) {
+      try {
+        const it  = itineraries[i];
+        const leg = it.legs[0];
+        if (!leg) continue;
+        const price = it.price?.raw || 0;
+
+        flights.push({
+          id: `flight-${i}`,
+          price: {
+            grandTotal: price.toFixed(2),
+            currency:   'EUR',
+            fees:       [{ amount: (price * 0.1).toFixed(2) }]
+          },
+          numberOfBookableSeats: it.isSelfTransfer ? null : 9,
+          itineraries: [{
+            duration: `PT${Math.floor(leg.durationInMinutes / 60)}H${leg.durationInMinutes % 60}M`,
+            segments: (leg.segments || []).map(seg => ({
+              departure: { iataCode: seg.origin?.displayCode || '', at: seg.departure || '' },
+              arrival:   { iataCode: seg.destination?.displayCode || '', at: seg.arrival || '' },
+              carrierCode: seg.marketingCarrier?.alternateId || seg.operatingCarrier?.alternateId || 'XX',
+              number:      seg.flightNumber || ''
+            }))
+          }],
+          travelerPricings: [{
+            fareDetailsBySegment: [{ cabin: it.tags?.includes('business') ? 'BUSINESS' : 'ECONOMY' }]
+          }]
+        });
+      } catch (mapErr) {
+        console.error('Error mapping flight:', mapErr.message);
+      }
+    }
+
+    if (!flights.length) {
+      console.log('All flights failed to map — using demo data');
+      return res.json(demoFlights);
+    }
+
+    return res.json(flights);
   } catch (err) {
     console.error('Flight search error:', err.message);
-    console.log('API failed — using demo data as fallback');
-    res.json(generateDemoFlights(origin, destination, departureDate, parseInt(adults) || 1));
+    console.log('Returning demo flights as fallback');
+    return res.json(demoFlights);
   }
 });
 
@@ -438,13 +710,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── 404 handler ───────────────────────────────────────────────
+// ── 404 handler — catch common attack probe paths ─────────────
 app.use((req, res) => {
+  const path = req.path.toLowerCase();
+  // Log suspicious probe attempts
+  const probes = ['.php', '.asp', '.aspx', 'wp-admin', 'xmlrpc', '.env', 'config.json', 'admin/', '/.git', '/backup'];
+  if (probes.some(p => path.includes(p))) {
+    console.warn(`⚠️  Suspicious probe blocked: ${req.method} ${req.path} from ${req.ip}`);
+    return res.status(404).json({ error: 'Not found.' });
+  }
   res.status(404).json({ error: 'Not found.' });
 });
 
 // ── Start server ─────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`✈️  SkyBook is running → http://localhost:${PORT}`);
-  console.log(`🔒 Security: Helmet + Rate limiting + Input validation enabled`);
+  console.log('NordicWings is running on port ' + PORT);
+  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
 });

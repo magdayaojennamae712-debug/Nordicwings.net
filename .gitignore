@@ -1,17 +1,36 @@
+# NordicWings .gitignore — protects secrets from GitHub
+
+# NEVER commit secrets
+.env
+.env.local
+.env.production
+.env.staging
+*.pem
+*.key
+serviceAccountKey.json
+firebase-adminsdk*.json
+
 # Dependencies
 node_modules/
 
-# Environment variables — NEVER commit this!
-.env
-
-# OS files
+# OS junk
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Logs
 *.log
 npm-debug.log*
 
-# Build artifacts
+# Build
 dist/
 build/
+.cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Large image files
+public/skybook_*.png
+public/nordicwings_*.png
