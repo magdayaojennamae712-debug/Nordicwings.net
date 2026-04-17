@@ -101,11 +101,8 @@ function setTripType(type) {
 
 // ─────────────────────────────────────────────────────────────
 // AIRPORT AUTOCOMPLETE
-// Calls /api/airports/search with the user's typed keyword
-// ─────────────────────────────────────────────────────────────
-let autocompleteTimers = {}; // Debounce timers per field
+let autocompleteTimers = {};
 
-// Built-in popular airports fallback (shown instantly, before API responds)
 const POPULAR_AIRPORTS = [
   { iataCode:'HEL', entityId:'95673644', name:'Helsinki-Vantaa Airport', cityName:'Helsinki', countryName:'Finland' },
   { iataCode:'LHR', entityId:'95565050', name:'Heathrow Airport', cityName:'London', countryName:'United Kingdom' },
@@ -121,7 +118,7 @@ const POPULAR_AIRPORTS = [
   { iataCode:'SYD', entityId:'95673825', name:'Sydney Kingsford Smith Airport', cityName:'Sydney', countryName:'Australia' },
   { iataCode:'YYZ', entityId:'95565071', name:'Toronto Pearson International', cityName:'Toronto', countryName:'Canada' },
   { iataCode:'FRA', entityId:'95565046', name:'Frankfurt Airport', cityName:'Frankfurt', countryName:'Germany' },
-  { iataCode:'MAD', entityId:'95565047', name:'Adolfo Suárez Madrid-Barajas', cityName:'Madrid', countryName:'Spain' },
+  { iataCode:'MAD', entityId:'95565047', name:'Adolfo Suarez Madrid-Barajas', cityName:'Madrid', countryName:'Spain' },
   { iataCode:'ICN', entityId:'95673822', name:'Incheon International Airport', cityName:'Seoul', countryName:'South Korea' },
   { iataCode:'IST', entityId:'95565060', name:'Istanbul Airport', cityName:'Istanbul', countryName:'Turkey' },
   { iataCode:'DEL', entityId:'95673826', name:'Indira Gandhi International', cityName:'New Delhi', countryName:'India' },
@@ -130,57 +127,59 @@ const POPULAR_AIRPORTS = [
   { iataCode:'KUL', entityId:'95673824', name:'Kuala Lumpur International', cityName:'Kuala Lumpur', countryName:'Malaysia' },
   { iataCode:'CGK', entityId:'95673828', name:'Soekarno-Hatta International', cityName:'Jakarta', countryName:'Indonesia' },
   { iataCode:'LAX', entityId:'95565072', name:'Los Angeles International', cityName:'Los Angeles', countryName:'USA' },
-  { iataCode:'ORD', entityId:'95565073', name:'O\'Hare International Airport', cityName:'Chicago', countryName:'USA' },
+  { iataCode:'ORD', entityId:'95565073', name:'OHare International Airport', cityName:'Chicago', countryName:'USA' },
   { iataCode:'MIA', entityId:'95565074', name:'Miami International Airport', cityName:'Miami', countryName:'USA' },
 ];
 
-function renderAcList(listEl, airports, field) {
-  // Position fixed dropdown under the input (fixed = viewport coords, no scroll offset)
-  const inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
-  const rect = inputEl.getBoundingClientRect();
-  listEl.style.top  = (rect.bottom + 4) + 'px';
+function showAcList(listEl, inputEl, airports, field) {
+  var rect = inputEl.getBoundingClientRect();
+  listEl.style.position = 'fixed';
+  listEl.style.top = (rect.bottom + 4) + 'px';
   listEl.style.left = rect.left + 'px';
   listEl.style.width = rect.width + 'px';
-
-  if (!airports.length) { listEl.innerHTML = '<li class="ac-noresult">No results found</li>'; return; }
-  listEl.innerHTML = airports.slice(0, 7).map(a => `
-    <li onclick="selectAirport('${field}', '${a.iataCode}', '${escape(a.cityName || a.name)}', '${a.entityId || ''}')">
-      <span class="ac-icon">✈</span>
-      <span class="ac-details">
-        <span class="ac-city">${a.cityName || a.name} <span class="ac-badge">${a.iataCode}</span></span>
-        <span class="ac-airport">${a.name}${a.countryName ? ' · ' + a.countryName : ''}</span>
-      </span>
-    </li>
-  `).join('');
+  listEl.style.zIndex = '9999';
+  if (airports.length === 0) {
+    listEl.innerHTML = '<li style="padding:12px 16px;color:#aaa;font-size:.88rem;">No results found</li>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < Math.min(airports.length, 7); i++) {
+    var a = airports[i];
+    var city = (a.cityName || a.name).replace(/'/g, "&#39;");
+    var aname = a.name.replace(/'/g, "&#39;");
+    var country = (a.countryName || '').replace(/'/g, "&#39;");
+    var code = a.iataCode;
+    var eid = (a.entityId || '').replace(/'/g, "&#39;");
+    html += '<li onclick="selectAirport(\'' + field + '\',\'' + code + '\',\'' + city + '\',\'' + eid + '\')" style="padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f2f8;">';
+    html += '<span style="width:30px;height:30px;background:#e8efff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">&#9992;</span>';
+    html += '<span><strong style="color:#1a2b4a;font-size:.95rem;">' + city + '</strong> <span style="background:#3b6fc9;color:#fff;font-size:.7rem;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:4px;">' + code + '</span><br>';
+    html += '<span style="font-size:.78rem;color:#7a8aaa;">' + aname + (country ? ' &middot; ' + country : '') + '</span></span>';
+    html += '</li>';
+  }
+  listEl.innerHTML = html;
 }
 
 async function autocomplete(field) {
-  const inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
-  const listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
-  const keyword = inputEl.value.trim().toLowerCase();
-
+  var inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
+  var listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
+  var keyword = inputEl.value.trim().toLowerCase();
   if (keyword.length < 1) { listEl.innerHTML = ''; return; }
-
-  // Show instant results from local list first
-  const local = POPULAR_AIRPORTS.filter(a =>
-    a.cityName.toLowerCase().startsWith(keyword) ||
-    a.iataCode.toLowerCase().startsWith(keyword) ||
-    a.countryName.toLowerCase().startsWith(keyword) ||
-    a.name.toLowerCase().includes(keyword)
-  );
-  if (local.length) renderAcList(listEl, local, field);
-
+  var local = POPULAR_AIRPORTS.filter(function(a) {
+    return a.cityName.toLowerCase().indexOf(keyword) === 0 ||
+           a.iataCode.toLowerCase().indexOf(keyword) === 0 ||
+           a.countryName.toLowerCase().indexOf(keyword) === 0 ||
+           a.name.toLowerCase().indexOf(keyword) !== -1;
+  });
+  if (local.length > 0) showAcList(listEl, inputEl, local, field);
   if (keyword.length < 2) return;
-
-  // Then call API for more results
   clearTimeout(autocompleteTimers[field]);
-  autocompleteTimers[field] = setTimeout(async () => {
+  autocompleteTimers[field] = setTimeout(async function() {
     try {
-      const res = await fetch(`/api/airports/search?keyword=${encodeURIComponent(keyword)}`);
-      const airports = await res.json();
-      if (airports.length) renderAcList(listEl, airports, field);
-    } catch (e) { /* keep local results */ }
-  }, 300);
+      var res = await fetch('/api/airports/search?keyword=' + encodeURIComponent(keyword));
+      var airports = await res.json();
+      if (airports.length > 0) showAcList(listEl, inputEl, airports, field);
+    } catch(e) {}
+  }, 350);
 }
 
 function selectAirport(field, code, cityName, entityId) {
