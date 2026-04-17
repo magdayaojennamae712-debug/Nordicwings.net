@@ -1,5 +1,5 @@
 // ============================================================
-// SkyBook — script.js
+// NordicWings — script.js
 // Frontend logic: Firebase auth, flight search, Stripe payment,
 // bookings dashboard. All "pages" are shown/hidden in the DOM.
 // ============================================================
@@ -48,12 +48,15 @@ auth.onAuthStateChanged(user => {
   updateNavForAuth(user);
 });
 
+const OWNER_EMAIL = 'magdayaojennamae712@gmail.com';
+
 function updateNavForAuth(user) {
   const navLogin    = document.getElementById('nav-login');
   const navSignup   = document.getElementById('nav-signup');
   const navUser     = document.getElementById('nav-user');
   const navUsername = document.getElementById('nav-username');
   const navDash     = document.getElementById('nav-dashboard');
+  const navAdmin    = document.getElementById('nav-admin');
 
   if (user) {
     navLogin.style.display    = 'none';
@@ -61,11 +64,14 @@ function updateNavForAuth(user) {
     navUser.style.display     = 'flex';
     navDash.style.display     = 'inline-flex';
     navUsername.textContent   = user.displayName || user.email.split('@')[0];
+    // Show admin button only for owner
+    if (navAdmin) navAdmin.style.display = user.email === OWNER_EMAIL ? 'inline-flex' : 'none';
   } else {
     navLogin.style.display    = 'inline-flex';
     navSignup.style.display   = 'inline-flex';
     navUser.style.display     = 'none';
     navDash.style.display     = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
   }
 }
 
@@ -77,8 +83,9 @@ function showPage(pageId) {
   document.getElementById('page-' + pageId).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Load dashboard data when navigating there
+  // Load data when navigating to special pages
   if (pageId === 'dashboard') loadDashboard();
+  if (pageId === 'admin')     loadAdminDashboard();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -98,29 +105,74 @@ function setTripType(type) {
 // ─────────────────────────────────────────────────────────────
 let autocompleteTimers = {}; // Debounce timers per field
 
+// Built-in popular airports fallback (shown instantly, before API responds)
+const POPULAR_AIRPORTS = [
+  { iataCode:'HEL', entityId:'95673644', name:'Helsinki-Vantaa Airport', cityName:'Helsinki', countryName:'Finland' },
+  { iataCode:'LHR', entityId:'95565050', name:'Heathrow Airport', cityName:'London', countryName:'United Kingdom' },
+  { iataCode:'DXB', entityId:'95673506', name:'Dubai International Airport', cityName:'Dubai', countryName:'UAE' },
+  { iataCode:'BKK', entityId:'95673827', name:'Suvarnabhumi Airport', cityName:'Bangkok', countryName:'Thailand' },
+  { iataCode:'JFK', entityId:'95565058', name:'John F. Kennedy International', cityName:'New York', countryName:'USA' },
+  { iataCode:'MNL', entityId:'95673820', name:'Ninoy Aquino International', cityName:'Manila', countryName:'Philippines' },
+  { iataCode:'NRT', entityId:'95673640', name:'Narita International Airport', cityName:'Tokyo', countryName:'Japan' },
+  { iataCode:'BCN', entityId:'95565059', name:'El Prat Airport', cityName:'Barcelona', countryName:'Spain' },
+  { iataCode:'CDG', entityId:'95565044', name:'Charles de Gaulle Airport', cityName:'Paris', countryName:'France' },
+  { iataCode:'AMS', entityId:'95565045', name:'Amsterdam Schiphol Airport', cityName:'Amsterdam', countryName:'Netherlands' },
+  { iataCode:'SIN', entityId:'95673821', name:'Changi Airport', cityName:'Singapore', countryName:'Singapore' },
+  { iataCode:'SYD', entityId:'95673825', name:'Sydney Kingsford Smith Airport', cityName:'Sydney', countryName:'Australia' },
+  { iataCode:'YYZ', entityId:'95565071', name:'Toronto Pearson International', cityName:'Toronto', countryName:'Canada' },
+  { iataCode:'FRA', entityId:'95565046', name:'Frankfurt Airport', cityName:'Frankfurt', countryName:'Germany' },
+  { iataCode:'MAD', entityId:'95565047', name:'Adolfo Suárez Madrid-Barajas', cityName:'Madrid', countryName:'Spain' },
+  { iataCode:'ICN', entityId:'95673822', name:'Incheon International Airport', cityName:'Seoul', countryName:'South Korea' },
+  { iataCode:'IST', entityId:'95565060', name:'Istanbul Airport', cityName:'Istanbul', countryName:'Turkey' },
+  { iataCode:'DEL', entityId:'95673826', name:'Indira Gandhi International', cityName:'New Delhi', countryName:'India' },
+  { iataCode:'HKG', entityId:'95673823', name:'Hong Kong International Airport', cityName:'Hong Kong', countryName:'China' },
+  { iataCode:'DOH', entityId:'95673505', name:'Hamad International Airport', cityName:'Doha', countryName:'Qatar' },
+  { iataCode:'KUL', entityId:'95673824', name:'Kuala Lumpur International', cityName:'Kuala Lumpur', countryName:'Malaysia' },
+  { iataCode:'CGK', entityId:'95673828', name:'Soekarno-Hatta International', cityName:'Jakarta', countryName:'Indonesia' },
+  { iataCode:'LAX', entityId:'95565072', name:'Los Angeles International', cityName:'Los Angeles', countryName:'USA' },
+  { iataCode:'ORD', entityId:'95565073', name:'O\'Hare International Airport', cityName:'Chicago', countryName:'USA' },
+  { iataCode:'MIA', entityId:'95565074', name:'Miami International Airport', cityName:'Miami', countryName:'USA' },
+];
+
+function renderAcList(listEl, airports, field) {
+  if (!airports.length) { listEl.innerHTML = '<li class="ac-noresult">No results found</li>'; return; }
+  listEl.innerHTML = airports.slice(0, 7).map(a => `
+    <li onclick="selectAirport('${field}', '${a.iataCode}', '${escape(a.cityName || a.name)}', '${a.entityId || ''}')">
+      <span class="ac-icon">✈</span>
+      <span class="ac-details">
+        <span class="ac-city">${a.cityName || a.name} <span class="ac-badge">${a.iataCode}</span></span>
+        <span class="ac-airport">${a.name}${a.countryName ? ' · ' + a.countryName : ''}</span>
+      </span>
+    </li>
+  `).join('');
+}
+
 async function autocomplete(field) {
   const inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
   const listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
-  const keyword = inputEl.value.trim();
+  const keyword = inputEl.value.trim().toLowerCase();
 
-  if (keyword.length < 2) { listEl.innerHTML = ''; return; }
+  if (keyword.length < 1) { listEl.innerHTML = ''; return; }
 
-  // Debounce: wait 300ms before calling the API
+  // Show instant results from local list first
+  const local = POPULAR_AIRPORTS.filter(a =>
+    a.cityName.toLowerCase().startsWith(keyword) ||
+    a.iataCode.toLowerCase().startsWith(keyword) ||
+    a.countryName.toLowerCase().startsWith(keyword) ||
+    a.name.toLowerCase().includes(keyword)
+  );
+  if (local.length) renderAcList(listEl, local, field);
+
+  if (keyword.length < 2) return;
+
+  // Then call API for more results
   clearTimeout(autocompleteTimers[field]);
   autocompleteTimers[field] = setTimeout(async () => {
     try {
-      const res     = await fetch(`/api/airports/search?keyword=${encodeURIComponent(keyword)}`);
+      const res = await fetch(`/api/airports/search?keyword=${encodeURIComponent(keyword)}`);
       const airports = await res.json();
-
-      listEl.innerHTML = airports.map(a => `
-        <li onclick="selectAirport('${field}', '${a.iataCode}', '${escape(a.cityName || a.name)}', '${a.entityId || ''}')">
-          <span class="ac-code">${a.iataCode} — ${a.cityName || a.name}</span>
-          <span class="ac-name">${a.name}${a.countryName ? ', ' + a.countryName : ''}</span>
-        </li>
-      `).join('');
-    } catch (e) {
-      listEl.innerHTML = '';
-    }
+      if (airports.length) renderAcList(listEl, airports, field);
+    } catch (e) { /* keep local results */ }
   }, 300);
 }
 
@@ -404,15 +456,129 @@ function sortFlights(by, btn) {
 
 function selectFlight(index) {
   selectedFlight = (window._flights || [])[index];
+  showAgencyPage();
+}
 
-  // Require login before booking
+// ─────────────────────────────────────────────────────────────
+// AGENCY COMPARISON PAGE (Skyscanner-style)
+// ─────────────────────────────────────────────────────────────
+function showAgencyPage() {
+  const f       = selectedFlight;
+  const seg     = f.itineraries[0].segments[0];
+  const lastSeg = f.itineraries[0].segments[f.itineraries[0].segments.length - 1];
+  const allSegs = f.itineraries[0].segments;
+  const price   = parseFloat(f.price.grandTotal);
+  const sym     = f.price.currency === 'EUR' ? '€' : '$';
+
+  // Route title
+  document.getElementById('agency-route-title').textContent =
+    `${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}`;
+  document.getElementById('agency-route-sub').textContent =
+    `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
+
+  // Agencies list
+  const agencies = [
+    { name: 'NordicWings Direct', rating: 4.9, reviews: 1240, price: price,      perks: '✓ Instant confirmation · No hidden fees', direct: true,  stars: 5 },
+    { name: 'Trip.com',       rating: 4.7, reviews: 3821, price: price+5,    perks: '✓ Pay now or pay later · 24/7 support',   direct: false, stars: 5 },
+    { name: 'Mytrip',         rating: 4.3, reviews: 456,  price: price+8,    perks: '✓ Pay now or pay later',                  direct: false, stars: 4 },
+    { name: 'Ticket.fi',      rating: 2.8, reviews: 108,  price: price+10,   perks: '',                                        direct: false, stars: 3 },
+    { name: 'Flightnetwork',  rating: 4.2, reviews: 518,  price: price+14,   perks: '✓ 24/7 customer support',                 direct: false, stars: 4 },
+    { name: 'Gotogate',       rating: 3.8, reviews: 124,  price: price+18,   perks: '✓ Support in your language',              direct: false, stars: 4 },
+    { name: 'Travelis',       rating: 4.6, reviews: 224,  price: price+20,   perks: '✓ Pay now or later',                      direct: false, stars: 5 },
+    { name: 'Flysmarter.fi',  rating: 3.6, reviews: 42,   price: price+23,   perks: '✓ Pay now or pay later',                  direct: false, stars: 4 },
+    { name: 'lastminute.com', rating: 3.7, reviews: 118,  price: price+31,   perks: '✓ Customer support',                      direct: false, stars: 4 },
+  ];
+
+  document.getElementById('agencies-list').innerHTML = agencies.map((a, i) => `
+    <div class="agency-row ${a.direct ? 'nordicwings-direct' : ''}"
+         onclick="${a.direct ? 'proceedToBooking()' : `openPartnerLink('${a.name}')`}">
+      <div class="agency-name-wrap">
+        <div class="agency-name">
+          ${a.name}
+          ${a.direct ? '<span class="agency-badge badge-direct">Book Direct</span>' : '<span class="agency-badge badge-partner">Partner</span>'}
+        </div>
+        <div class="agency-stars">
+          ${'★'.repeat(a.stars)}<span class="agency-rating">${a.rating}/5 · ${a.reviews} reviews</span>
+        </div>
+        ${a.perks ? `<div class="agency-perks">${a.perks}</div>` : ''}
+      </div>
+      <div>
+        <div class="agency-price">${sym}${a.price.toFixed(0)}</div>
+        <div class="agency-price-sub">per person · total</div>
+      </div>
+      <button class="agency-btn ${a.direct ? 'direct' : ''}">${a.direct ? 'Book Now' : 'Select'}</button>
+    </div>
+  `).join('');
+
+  // Build detailed itinerary
+  let itinHtml = `<div class="itin-leg"><div class="itin-leg-label">Outbound · ${formatDate(seg.departure.at)}</div>`;
+  allSegs.forEach((s, idx) => {
+    itinHtml += `
+      <div class="itin-seg">
+        <div class="itin-dot-col">
+          <div class="itin-dot"></div>
+          ${idx < allSegs.length - 1 ? '<div class="itin-line"></div>' : ''}
+        </div>
+        <div class="itin-seg-info">
+          <div class="itin-seg-time">${formatTime(s.departure.at)}</div>
+          <div class="itin-seg-airport">${s.departure.iataCode}</div>
+          <div class="itin-seg-flight">Flight ${s.carrierCode}${s.number} · ${AIRLINE_NAMES[s.carrierCode] || s.carrierCode}</div>
+          <div class="itin-seg-dur">▼ ${formatDuration(s.duration)}</div>
+        </div>
+        <div class="itin-seg-info" style="text-align:right;">
+          <div class="itin-seg-time">${formatTime(s.arrival.at)}</div>
+          <div class="itin-seg-airport">${s.arrival.iataCode}</div>
+        </div>
+      </div>
+      ${idx < allSegs.length - 1 ? `<div class="itin-layover">🕐 Layover at ${s.arrival.iataCode} — approx 1h 30min</div>` : ''}
+    `;
+  });
+  itinHtml += `<div class="itin-arrival">🛬 Arrives ${formatDate(lastSeg.arrival.at)} · Total: ${formatDuration(f.itineraries[0].duration)}</div></div>`;
+
+  document.getElementById('agency-itinerary').innerHTML = itinHtml;
+  showPage('agencies');
+}
+
+function proceedToBooking() {
   if (!currentUser) {
     openAuthModal('login');
     return;
   }
-
   setupBookingPage();
   showPage('booking');
+}
+
+function openPartnerLink(agencyName) {
+  const f    = selectedFlight;
+  const seg  = f.itineraries[0].segments[0];
+  const last = f.itineraries[0].segments[f.itineraries[0].segments.length - 1];
+  const orig = seg.departure.iataCode;
+  const dest = last.arrival.iataCode;
+  const date = seg.departure.at ? seg.departure.at.split('T')[0] : '';
+  const pass = searchParams.passengers || 1;
+  const marker = '519037'; // Your Travelpayouts marker
+
+  // Your affiliate IDs
+  const TP  = '519037';          // Travelpayouts marker
+  const TC  = 'Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D15634670'; // Trip.com
+
+  // Affiliate deep links — earn commission when users book!
+  const links = {
+    'Trip.com':      `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
+    'Mytrip':        `https://www.mytrip.com/flights/${orig.toLowerCase()}-${dest.toLowerCase()}/?marker=${TP}`,
+    'Ticket.fi':     `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
+    'Flightnetwork': `https://www.flightnetwork.com/flights/${orig}-${dest}?departureDate=${date}&adults=${pass}&marker=${TP}`,
+    'Gotogate':      `https://www.gotogate.com/flight/${orig}${dest}/${date}?adults=${pass}&marker=${TP}`,
+    'Travelis':      `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&marker=${TP}`,
+    'Flysmarter.fi': `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&marker=${TP}`,
+    'lastminute.com':`https://www.lastminute.com/flights/${orig}-${dest}/?departureDate=${date}&adults=${pass}&marker=${TP}`,
+  };
+
+  // Fallback
+  const fallback = `https://www.trip.com/?${TC}`;
+  const url = links[agencyName] || fallback;
+
+  window.open(url, '_blank');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -659,11 +825,12 @@ async function submitBooking() {
     const { error: stripeError } = await stripe.confirmPayment({
       elements: stripeElements,
       confirmParams: {
+        return_url: window.location.origin + '/?booking=confirmed',
         payment_method_data: {
           billing_details: { email, phone }
         }
       },
-      redirect: 'if_required' // Don't redirect, handle result here
+      redirect: 'if_required' // Don't redirect for card payments, handle result here
     });
 
     if (stripeError) {
@@ -940,6 +1107,129 @@ function friendlyAuthError(code) {
     'auth/too-many-requests':   'Too many attempts. Please try again later.'
   };
   return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ─────────────────────────────────────────────────────────────
+// ADMIN BUSINESS DASHBOARD
+// Only visible to owner (magdayaojennamae712@gmail.com)
+// ─────────────────────────────────────────────────────────────
+let _allAdminBookings = [];
+
+async function loadAdminDashboard() {
+  if (!currentUser || currentUser.email !== OWNER_EMAIL) {
+    showPage('home'); return;
+  }
+
+  document.getElementById('admin-loading').style.display = 'flex';
+  document.getElementById('admin-table').style.display   = 'none';
+  document.getElementById('admin-empty').style.display   = 'none';
+
+  try {
+    const snapshot = await db.collection('bookings')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    _allAdminBookings = [];
+    snapshot.forEach(doc => _allAdminBookings.push({ id: doc.id, ...doc.data() }));
+
+    document.getElementById('admin-loading').style.display = 'none';
+
+    if (_allAdminBookings.length === 0) {
+      document.getElementById('admin-empty').style.display = 'flex';
+      return;
+    }
+
+    renderAdminStats(_allAdminBookings);
+    renderAdminTable(_allAdminBookings);
+
+  } catch (err) {
+    console.error('Admin load error:', err);
+    document.getElementById('admin-loading').style.display = 'none';
+    document.getElementById('admin-empty').style.display   = 'flex';
+  }
+}
+
+function renderAdminStats(bookings) {
+  const total     = bookings.length;
+  const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+  const revenue   = bookings
+    .filter(b => b.status === 'confirmed')
+    .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0);
+  const customers = new Set(bookings.map(b => b.userEmail)).size;
+
+  document.getElementById('stat-total-bookings').textContent  = total;
+  document.getElementById('stat-total-revenue').textContent   = '€' + revenue.toFixed(2);
+  document.getElementById('stat-total-customers').textContent = customers;
+  document.getElementById('stat-confirmed').textContent       = confirmed;
+}
+
+function renderAdminTable(bookings) {
+  if (!bookings.length) {
+    document.getElementById('admin-table').style.display = 'none';
+    document.getElementById('admin-empty').style.display = 'flex';
+    return;
+  }
+  document.getElementById('admin-empty').style.display   = 'none';
+  document.getElementById('admin-table').style.display   = 'table';
+
+  document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td>${b.passengers?.length || 1} pax</td>
+      <td><strong>$${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function filterAdminBookings() {
+  const search = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  const filter = document.getElementById('admin-filter')?.value || 'all';
+
+  let filtered = _allAdminBookings.filter(b => {
+    const matchStatus = filter === 'all' || b.status === filter;
+    const matchSearch = !search ||
+      (b.bookingRef || '').toLowerCase().includes(search) ||
+      (b.contact?.email || '').toLowerCase().includes(search) ||
+      (b.userEmail || '').toLowerCase().includes(search) ||
+      (`${b.flight?.from}-${b.flight?.to}`).toLowerCase().includes(search) ||
+      (`${b.passengers?.[0]?.firstName} ${b.passengers?.[0]?.lastName}`).toLowerCase().includes(search);
+    return matchStatus && matchSearch;
+  });
+
+  renderAdminStats(filtered);
+  renderAdminTable(filtered);
+}
+
+function exportBookingsCSV() {
+  const rows = [
+    ['Booking Ref','Customer Name','Email','Route','Depart Date','Passengers','Amount','Status']
+  ];
+  _allAdminBookings.forEach(b => {
+    rows.push([
+      b.bookingRef || '',
+      `${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}`,
+      b.contact?.email || b.userEmail || '',
+      `${b.flight?.from || ''} → ${b.flight?.to || ''}`,
+      b.flight?.departTime ? formatDate(b.flight.departTime) : '',
+      b.passengers?.length || 1,
+      `$${parseFloat(b.totalPrice || 0).toFixed(2)}`,
+      b.status || ''
+    ]);
+  });
+
+  const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `nordicwings-bookings-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 // ─────────────────────────────────────────────────────────────
