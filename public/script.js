@@ -475,7 +475,7 @@ function generateClientFlights(orig, dest, date, numAdults) {
   });
 }
 
-function searchFlights() {
+async function searchFlights() {
   const originInput = document.getElementById('origin-input');
   const destInput   = document.getElementById('dest-input');
   const departDate  = document.getElementById('depart-input').value;
@@ -577,20 +577,48 @@ function searchFlights() {
   searchParams = { origin, dest, departDate, passengers };
 
   showPage('results');
-  document.getElementById('results-loading').style.display = 'none';
+  document.getElementById('results-loading').style.display = 'flex';
   document.getElementById('results-list').style.display    = 'none';
   document.getElementById('results-empty').style.display   = 'none';
   document.getElementById('results-heading').textContent   = `${origin} \u2192 ${dest}`;
   document.getElementById('results-subheading').textContent =
     `${formatDate(departDate)} \u00B7 ${passengers} passenger${passengers > 1 ? 's' : ''}`;
 
-  // Generate flights instantly in the browser — no server call needed
-  const flights = generateClientFlights(origin, dest, departDate, passengers);
-  if (!flights || flights.length === 0) {
-    document.getElementById('results-empty').style.display = 'flex';
-    return;
+  // Pass entity IDs from autocomplete selection (if user picked from dropdown)
+  const originEntityId = originInput.dataset.entityId || '';
+  const destEntityId   = destInput.dataset.entityId   || '';
+
+  // Build query params
+  const qs = new URLSearchParams({
+    origin, destination: dest, departureDate: departDate, adults: passengers
+  });
+  if (originEntityId) qs.set('originEntityId', originEntityId);
+  if (destEntityId)   qs.set('destinationEntityId', destEntityId);
+
+  // Try real API — fall back to client-generated demo on any error
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 20000); // 20s max wait
+    const resp = await fetch(`/api/flights/search?${qs}`, { signal: controller.signal });
+    if (!resp.ok) throw new Error('API error');
+    const flights = await resp.json();
+    document.getElementById('results-loading').style.display = 'none';
+    if (!flights || !flights.length) {
+      document.getElementById('results-empty').style.display = 'flex';
+      return;
+    }
+    renderFlightCards(flights);
+  } catch (err) {
+    // Fallback: generate demo flights instantly in the browser
+    console.warn('Real API unavailable, using demo flights:', err.message);
+    document.getElementById('results-loading').style.display = 'none';
+    const flights = generateClientFlights(origin, dest, departDate, passengers);
+    if (!flights || !flights.length) {
+      document.getElementById('results-empty').style.display = 'flex';
+      return;
+    }
+    renderFlightCards(flights);
   }
-  renderFlightCards(flights);
 }
 
 // Airline code → full name map

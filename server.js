@@ -223,10 +223,17 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   let resolvedOriginEntityId      = originEntityId;
   let resolvedDestinationEntityId = destinationEntityId;
 
-  if (!resolvedOriginEntityId)      resolvedOriginEntityId      = await getEntityId(origin.toUpperCase());
-  if (!resolvedDestinationEntityId) resolvedDestinationEntityId = await getEntityId(destination.toUpperCase());
+  // Run both lookups in parallel (faster than sequential)
+  if (!resolvedOriginEntityId || !resolvedDestinationEntityId) {
+    const [eid1, eid2] = await Promise.all([
+      resolvedOriginEntityId      ? Promise.resolve(resolvedOriginEntityId)      : getEntityId(cleanOrigin),
+      resolvedDestinationEntityId ? Promise.resolve(resolvedDestinationEntityId) : getEntityId(cleanDest)
+    ]);
+    resolvedOriginEntityId      = eid1;
+    resolvedDestinationEntityId = eid2;
+  }
 
-  console.log(`Flight search: ${origin} (${resolvedOriginEntityId}) → ${destination} (${resolvedDestinationEntityId}) on ${departureDate}`);
+  console.log(`Flight search: ${cleanOrigin} (${resolvedOriginEntityId}) → ${cleanDest} (${resolvedDestinationEntityId}) on ${cleanDate}`);
 
   // Helper: generate realistic demo flights with correct stopovers and durations
   function generateDemoFlights(orig, dest, date, numAdults) {
@@ -598,11 +605,14 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     });
   }
 
-  // Always use demo as safe fallback
+  // Demo flights — used as fallback if API fails or returns nothing
   const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
 
-  // Return demo flights immediately — skip slow external API
-  return res.json(demoFlights);
+  // If no API key configured, return demo flights immediately
+  if (!RAPIDAPI_KEY) {
+    console.log('No RAPIDAPI_KEY set — returning demo flights');
+    return res.json(demoFlights);
+  }
 
   try {
     const data = await skyFetch('/api/v2/flights/searchFlights', {
