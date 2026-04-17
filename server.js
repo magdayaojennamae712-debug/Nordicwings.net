@@ -601,6 +601,9 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   // Always use demo as safe fallback
   const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
 
+  // Return demo flights immediately — skip slow external API
+  return res.json(demoFlights);
+
   try {
     const data = await skyFetch('/api/v2/flights/searchFlights', {
       originSkyId:           cleanOrigin,
