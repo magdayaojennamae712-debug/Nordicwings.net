@@ -40,6 +40,33 @@ let stripeElements   = null;    // Stripe Elements instance
 let cancelBookingId  = null;    // Booking being cancelled
 
 // ─────────────────────────────────────────────────────────────
+// DATE / TIME / DURATION HELPERS
+// ─────────────────────────────────────────────────────────────
+function formatDate(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  } catch(e) { return isoStr; }
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false });
+  } catch(e) { return ''; }
+}
+
+function formatDuration(pt) {
+  if (!pt) return '';
+  const m = pt.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!m) return pt;
+  const h = parseInt(m[1]||0), min = parseInt(m[2]||0);
+  return h > 0 ? `${h}h ${min}m` : `${min}m`;
+}
+
+// ─────────────────────────────────────────────────────────────
 // AUTH STATE LISTENER
 // Fires whenever login state changes (on load, login, logout)
 // ─────────────────────────────────────────────────────────────
