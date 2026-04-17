@@ -232,14 +232,14 @@
         <div class="search-form">
           <div class="input-group autocomplete-wrap" id="origin-wrap">
             <label>From</label>
-            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="autocomplete('origin')" />
+            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="airportSearch('origin')" />
           </div>
 
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
 
           <div class="input-group autocomplete-wrap" id="dest-wrap">
             <label>To</label>
-            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="autocomplete('dest')" />
+            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="airportSearch('dest')" />
           </div>
 
           <div class="input-group">

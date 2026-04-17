@@ -160,7 +160,7 @@ function showAcList(listEl, inputEl, airports, field) {
   listEl.innerHTML = html;
 }
 
-async function autocomplete(field) {
+async function airportSearch(field) {
   var inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
   var listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
   var keyword = inputEl.value.trim().toLowerCase();
