@@ -1394,10 +1394,9 @@ async function signInUser() {
     await auth.signInWithEmailAndPassword(email, password);
     document.getElementById('auth-overlay').style.display = 'none';
 
-    // If they were trying to book a flight, go back to booking
+    // If they were on the agencies page, go back there
     if (selectedFlight) {
-      setupBookingPage();
-      showPage('booking');
+      showAgencyPage();
     }
   } catch (err) {
     setError(errorEl, friendlyAuthError(err.code));
@@ -1425,8 +1424,7 @@ async function signUpUser() {
     document.getElementById('auth-overlay').style.display = 'none';
 
     if (selectedFlight) {
-      setupBookingPage();
-      showPage('booking');
+      showAgencyPage();
     }
   } catch (err) {
     setError(errorEl, friendlyAuthError(err.code));
