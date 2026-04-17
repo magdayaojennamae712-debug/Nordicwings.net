@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBook — Find & Book Flights</title>
+  <title>NordicWings — Find & Book Flights</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- PWA -->
@@ -11,9 +11,39 @@
   <meta name="theme-color" content="#1a2b4a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="SkyBook" />
+  <meta name="apple-mobile-web-app-title" content="NordicWings" />
   <link rel="apple-touch-icon" href="/icon-192.svg" />
-  <meta name="description" content="Search and book flights from hundreds of airlines worldwide. Fast, secure, and easy with SkyBook." />
+  <!-- ===== SEO: Core Meta Tags ===== -->
+  <meta name="description" content="NordicWings - Book cheap flights from Helsinki to anywhere worldwide. Compare 500+ airlines, instant booking, secure Stripe payment. Best prices to London, Dubai, Bangkok, New York, Manila and more." />
+  <meta name="keywords" content="cheap flights, book flights online, NordicWings, Helsinki flights, flights from Finland, Helsinki to London, Helsinki to Dubai, Helsinki to Bangkok, Helsinki to New York, Manila to Helsinki, compare airlines, airline tickets, cheap airfare, flight booking, last minute flights, budget flights Europe, flights to Asia, international flights Finland" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="google-site-verification" content="uSenGe-ZEE8fio43miDCTObGcB2uoOmY3w5SMNFMPHw" />
+  <meta name="author" content="NordicWings" />
+  <link rel="canonical" href="https://nordicwings.net/" />
+
+  <!-- ===== SEO: Open Graph (Facebook / LinkedIn sharing) ===== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nordicwings.net/" />
+  <meta property="og:title" content="NordicWings - Find and Book Cheap Flights" />
+  <meta property="og:description" content="Search and compare cheap flights from 500+ airlines worldwide. Book flights to Europe, Asia, Americas and beyond. Fast, secure booking." />
+  <meta property="og:image" content="https://nordicwings.net/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="NordicWings" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ===== SEO: Twitter Card ===== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@JennamaeSa87519" />
+  <meta name="twitter:creator" content="@JennamaeSa87519" />
+  <meta name="twitter:url" content="https://nordicwings.net/" />
+  <meta name="twitter:title" content="NordicWings - Book Cheap Flights from Helsinki" />
+  <meta name="twitter:description" content="Compare 500+ airlines and book cheap flights from Finland worldwide. Instant booking, secure payment. Helsinki to London, Dubai, Bangkok & more." />
+  <meta name="twitter:image" content="https://nordicwings.net/og-image.png" />
+
+  <!-- ===== SEO: Geo targeting ===== -->
+  <meta name="geo.region" content="FI" />
+  <meta name="language" content="English" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -28,6 +58,19 @@
     })();
   </script>
 
+  <!-- Google Analytics (tracks visitors, revenue, conversions) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WERWZ07J05"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-WERWZ07J05');
+    // Track booking events
+    window.trackBooking = function(amount, currency) {
+      gtag('event', 'purchase', { value: amount, currency: currency, transaction_id: 'SKY-' + Date.now() });
+    };
+  </script>
+
   <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
 
@@ -35,6 +78,92 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <!-- ===== SEO: Structured Data (Google Rich Results) ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NordicWings",
+    "url": "https://nordicwings.net",
+    "description": "Search and compare cheap flights from 500+ airlines worldwide.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://nordicwings.net/?from={origin}&to={destination}"
+      },
+      "query-input": "required name=origin required name=destination"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NordicWings",
+    "url": "https://nordicwings.net",
+    "logo": "https://nordicwings.net/icon-512.svg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "support@nordicwings.net",
+      "contactType": "customer support",
+      "availableLanguage": ["English"]
+    },
+    "sameAs": [
+      "https://x.com/JennamaeSa87519",
+      "https://business.tiktok.com/manage/overview/?org_id=7629628055513858056"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I book a cheap flight on NordicWings?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simply enter your departure city, destination, travel dates and number of passengers on NordicWings.net. We compare 500+ airlines and show you the best prices instantly. Pay securely with card, Klarna or other payment methods."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What payment methods does NordicWings accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "NordicWings accepts all major credit and debit cards (Visa, Mastercard, Amex), Klarna buy-now-pay-later, and other local payment methods. All payments are secured by Stripe."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I book flights from Helsinki to anywhere in the world?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! NordicWings offers flights from Helsinki (HEL) to hundreds of destinations worldwide including London, Dubai, Bangkok, New York, Manila, Tokyo, Barcelona and many more."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is NordicWings safe to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. NordicWings uses SSL encryption, Stripe-verified payments, and is fully GDPR-compliant. Your personal and payment data is always protected."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I contact NordicWings customer support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can reach NordicWings customer support by emailing support@nordicwings.net. We are happy to help with booking questions, cancellations, and any other inquiries."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -43,14 +172,15 @@
   ════════════════════════════════════════════════════════ -->
   <header id="site-header">
     <div class="header-inner">
-      <a href="#" class="logo" onclick="showPage('home')">
-        <span class="logo-icon">✈</span> SkyBook
+      <a href="javascript:void(0)" class="logo" onclick="showPage('home')">
+        <span class="logo-icon">✈</span> NordicWings
       </a>
       <nav class="header-nav">
-        <a href="#" class="nav-link" onclick="showPage('home')">Home</a>
+        <a href="javascript:void(0)" class="nav-link" onclick="showPage('home')">Home</a>
         <a href="#how-it-works" class="nav-link">How it Works</a>
         <a href="#destinations" class="nav-link">Destinations</a>
         <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">My Bookings</button>
+        <button class="btn-ghost" id="nav-admin" onclick="showPage('admin')" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">📊 Business</button>
         <button class="btn-ghost" id="nav-login" onclick="openAuthModal('login')">Sign In</button>
         <button class="btn-primary" id="nav-signup" onclick="openAuthModal('signup')">Sign Up Free</button>
         <div id="nav-user" style="display:none;" class="user-chip">
@@ -61,7 +191,7 @@
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
     </div>
     <div class="mobile-menu" id="mobile-menu">
-      <a href="#" onclick="showPage('home');toggleMobileMenu()">Home</a>
+      <a href="javascript:void(0)" onclick="showPage('home');toggleMobileMenu()">Home</a>
       <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
       <a href="#destinations" onclick="toggleMobileMenu()">Destinations</a>
       <button onclick="openAuthModal('login');toggleMobileMenu()">Sign In</button>
@@ -84,6 +214,12 @@
         <div class="hero-badge">✈ Trusted by 10,000+ travelers</div>
         <h1>Your Journey Starts <span class="hero-highlight">Here</span></h1>
         <p>Search hundreds of airlines. Find the best prices. Book in minutes.</p>
+        <div class="hero-trust-strip">
+          <div class="hts-item">🔒 SSL Secured</div>
+          <div class="hts-item">💳 Stripe Protected</div>
+          <div class="hts-item">✈ 500+ Airlines</div>
+          <div class="hts-item">🛡️ GDPR Compliant</div>
+        </div>
       </div>
 
       <!-- SEARCH CARD -->
@@ -173,6 +309,17 @@
       </div>
     </section>
 
+    <!-- TRUST BAR -->
+    <section class="trust-bar">
+      <div class="trust-inner">
+        <div class="trust-item"><span class="trust-icon">🔒</span><span>SSL Secured Booking</span></div>
+        <div class="trust-item"><span class="trust-icon">💳</span><span>Stripe Payment Protection</span></div>
+        <div class="trust-item"><span class="trust-icon">✈</span><span>500+ Real Airlines</span></div>
+        <div class="trust-item"><span class="trust-icon">🛡️</span><span>GDPR Compliant</span></div>
+        <div class="trust-item"><span class="trust-icon">📧</span><span>24/7 Email Support</span></div>
+      </div>
+    </section>
+
     <!-- POPULAR DESTINATIONS -->
     <section class="destinations-section" id="destinations">
       <div class="section-inner">
@@ -239,7 +386,7 @@
       <div class="section-inner">
         <div class="section-header">
           <span class="section-badge">🚀 Simple Process</span>
-          <h2>How SkyBook Works</h2>
+          <h2>How NordicWings Works</h2>
           <p>Book your perfect flight in just 3 easy steps</p>
         </div>
         <div class="steps-grid">
@@ -271,7 +418,7 @@
     <section class="features-section">
       <div class="section-inner features-layout">
         <div class="features-text">
-          <span class="section-badge">⭐ Why SkyBook</span>
+          <span class="section-badge">⭐ Why NordicWings</span>
           <h2>The Smarter Way to Book Flights</h2>
           <p>We combine real-time flight data with a beautifully simple booking experience — so you can focus on the adventure ahead.</p>
           <div class="features-list">
@@ -320,12 +467,12 @@
         <div class="section-header">
           <span class="section-badge">💬 Reviews</span>
           <h2>What Our Travelers Say</h2>
-          <p>Join thousands of happy customers who book with SkyBook</p>
+          <p>Join thousands of happy customers who book with NordicWings</p>
         </div>
         <div class="testimonials-grid">
           <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p>"Found an amazing deal to London in under 2 minutes! The booking process was so smooth and easy. Will definitely use SkyBook again!"</p>
+            <p>"Found an amazing deal to London in under 2 minutes! The booking process was so smooth and easy. Will definitely use NordicWings again!"</p>
             <div class="testimonial-author">
               <div class="author-avatar">M</div>
               <div>
@@ -347,7 +494,7 @@
           </div>
           <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p>"Booked my Dubai trip in minutes. The interface is beautiful and intuitive. SkyBook is now my go-to for all flight bookings!"</p>
+            <p>"Booked my Dubai trip in minutes. The interface is beautiful and intuitive. NordicWings is now my go-to for all flight bookings!"</p>
             <div class="testimonial-author">
               <div class="author-avatar">S</div>
               <div>
@@ -366,7 +513,7 @@
         <div class="section-header">
           <span class="section-badge">❓ FAQ</span>
           <h2>Frequently Asked Questions</h2>
-          <p>Everything you need to know about booking with SkyBook</p>
+          <p>Everything you need to know about booking with NordicWings</p>
         </div>
         <div class="faq-list">
           <div class="faq-item">
@@ -398,15 +545,15 @@
               Do I need an account to book? <span class="faq-icon">+</span>
             </button>
             <div class="faq-answer">
-              You need a free SkyBook account to complete a booking. This allows you to manage your trips, view booking history, and receive booking confirmations. Creating an account takes less than 30 seconds!
+              You need a free NordicWings account to complete a booking. This allows you to manage your trips, view booking history, and receive booking confirmations. Creating an account takes less than 30 seconds!
             </div>
           </div>
           <div class="faq-item">
             <button class="faq-question" onclick="toggleFaq(this)">
-              What airlines does SkyBook cover? <span class="faq-icon">+</span>
+              What airlines does NordicWings cover? <span class="faq-icon">+</span>
             </button>
             <div class="faq-answer">
-              SkyBook searches over 500 airlines worldwide including major carriers like Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, and many more budget and regional airlines.
+              NordicWings searches over 500 airlines worldwide including major carriers like Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, and many more budget and regional airlines.
             </div>
           </div>
         </div>
@@ -414,10 +561,45 @@
     </section>
 
     <!-- CTA SECTION -->
+    <!-- ── HOTEL AD SECTION (earns affiliate commission) ── -->
+    <section class="hotel-ad-section">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="section-badge">Also Book</span>
+          <h2>Need a Hotel Too?</h2>
+          <p>Find the best hotel deals at your destination</p>
+        </div>
+        <div class="hotel-ad-widget">
+          <div class="hotel-cards-grid">
+            <a href="https://www.trip.com/hotels/?Allianceid=8098413&SID=306552835&trip_sub1=hotels&trip_sub3=D15634670" target="_blank" class="hotel-ad-link">
+              <div class="hotel-ad-card">
+                <div class="hotel-ad-icon">🏨</div>
+                <div>
+                  <div class="hotel-ad-title">Trip.com Hotels</div>
+                  <div class="hotel-ad-sub">Best price guarantee · 1.4M+ hotels worldwide</div>
+                </div>
+                <div class="hotel-ad-btn">Search Hotels →</div>
+              </div>
+            </a>
+            <a href="https://www.booking.com/?aid=2311236" target="_blank" class="hotel-ad-link">
+              <div class="hotel-ad-card">
+                <div class="hotel-ad-icon">🛎️</div>
+                <div>
+                  <div class="hotel-ad-title">Booking.com</div>
+                  <div class="hotel-ad-sub">Free cancellation on most rooms</div>
+                </div>
+                <div class="hotel-ad-btn">Search Hotels →</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="cta-section">
       <div class="cta-inner">
         <h2>Ready to Take Off? ✈</h2>
-        <p>Join thousands of travelers booking smarter with SkyBook</p>
+        <p>Join thousands of travelers booking smarter with NordicWings</p>
         <div class="cta-buttons">
           <button class="btn-cta-primary" onclick="openAuthModal('signup')">Create Free Account</button>
           <button class="btn-cta-ghost" onclick="document.getElementById('origin-input').focus(); window.scrollTo({top:0,behavior:'smooth'})">Search Flights</button>
@@ -428,43 +610,73 @@
     <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-inner">
+
+        <!-- Trust + Payment row -->
+        <div class="footer-trust-row">
+          <div class="footer-trust-badges">
+            <div class="ftb">🔒 SSL Secured</div>
+            <div class="ftb">💳 Stripe Verified</div>
+            <div class="ftb">✈ Real Flight Data</div>
+            <div class="ftb">🛡️ GDPR Compliant</div>
+            <div class="ftb">🏆 Trusted Business</div>
+          </div>
+          <div class="payment-logos">
+            <span class="pay-logo visa">VISA</span>
+            <span class="pay-logo mc">MC</span>
+            <span class="pay-logo amex">AMEX</span>
+            <span class="pay-logo stripe">Stripe</span>
+          </div>
+        </div>
+
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="footer-logo">
-              <span class="logo-icon">✈</span> SkyBook
+              <span class="logo-icon">✈</span> NordicWings
             </div>
-            <p>Making flight booking simple, fast and trustworthy for travelers worldwide.</p>
-            <div class="footer-social">
-              <a href="#" class="social-btn">f</a>
-              <a href="#" class="social-btn">in</a>
-              <a href="#" class="social-btn">tw</a>
+            <p>Making flight booking simple, fast and trustworthy for travelers worldwide. Your trusted partner for global flight search and booking.</p>
+            <a href="mailto:support@nordicwings.net" class="footer-email">📧 support@nordicwings.net</a>
+            <div class="footer-social" style="margin-top:14px;">
+              <a href="https://x.com/JennamaeSa87519" target="_blank" class="social-btn social-x" aria-label="X (Twitter)">𝕏</a>
+              <a href="https://www.tiktok.com/@nordicwings" target="_blank" class="social-btn social-tiktok" aria-label="TikTok">&#9654;TikTok</a>
+            </div>
+            <!-- QR Code: scan to visit NordicWings -->
+            <div style="margin-top:18px;">
+              <p style="font-size:11px;color:#aaa;margin-bottom:6px;">📱 Scan to visit NordicWings</p>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://nordicwings.net&color=ffffff&bgcolor=1a2236&margin=4"
+                   alt="NordicWings QR Code" width="100" height="100"
+                   style="border-radius:8px;border:2px solid #ffffff22;" />
             </div>
           </div>
           <div class="footer-links">
             <h4>Company</h4>
-            <a href="#">About Us</a>
-            <a href="#">How It Works</a>
-            <a href="#">Destinations</a>
-            <a href="#">Blog</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('about')">About Us</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('howitworks')">How It Works</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('destinations')">Destinations</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('contact')">Contact Us</a>
           </div>
           <div class="footer-links">
-            <h4>Support</h4>
-            <a href="#">Help Center</a>
-            <a href="#">Contact Us</a>
-            <a href="#">Cancellation Policy</a>
-            <a href="#">Privacy Policy</a>
+            <h4>Legal &amp; Support</h4>
+            <a href="javascript:void(0)" onclick="openPolicyModal('help')">Help Center</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('contact')">Contact Us</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('cancellation')">Cancellation Policy</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('privacy')">Privacy Policy</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('terms')">Terms &amp; Conditions</a>
           </div>
           <div class="footer-links">
             <h4>Book With Us</h4>
-            <a href="#" onclick="showPage('home')">Search Flights</a>
-            <a href="#" onclick="openAuthModal('signup')">Create Account</a>
-            <a href="#" onclick="openAuthModal('login')">Sign In</a>
-            <a href="#" onclick="showPage('dashboard')">My Bookings</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('bookwithus')">Search Flights</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('createaccount')">Create Account</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('signin')">Sign In</a>
+            <a href="javascript:void(0)" onclick="openPolicyModal('mybookings')">My Bookings</a>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>© 2026 SkyBook. All rights reserved.</p>
-          <p>Powered by real flight data · Secured by Stripe</p>
+          <p>© 2026 NordicWings. All rights reserved. &nbsp;·&nbsp;
+            <a href="javascript:void(0)" onclick="openPolicyModal('privacy')" style="color:inherit;">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="javascript:void(0)" onclick="openPolicyModal('terms')" style="color:inherit;">Terms</a> &nbsp;·&nbsp;
+            <a href="javascript:void(0)" onclick="openPolicyModal('cancellation')" style="color:inherit;">Cancellation Policy</a>
+          </p>
+          <p>Powered by real flight data · Secured by Stripe · <a href="mailto:support@nordicwings.net" style="color:inherit;">support@nordicwings.net</a> · <a href="javascript:void(0)" onclick="openPolicyModal('privacy')" style="color:inherit;">Privacy</a></p>
         </div>
       </div>
     </footer>
@@ -493,6 +705,50 @@
         <button class="btn-primary" onclick="showPage('home')">Search Again</button>
       </div>
       <div id="results-list" class="results-list" style="display:none;"></div>
+
+      <!-- ── Travelpayouts Ad Banner (earns commission) ── -->
+      <div class="ad-banner-wrap">
+        <div class="ad-label">Sponsored</div>
+        <script async src="//widgets.travelpayouts.com/widget.js"
+          data-locale="en"
+          data-width="auto"
+          data-height="60"
+          data-type="banner"
+          data-marker="519037"
+          data-target-host="aviasales.com"
+          charset="utf-8"></script>
+        <noscript>
+          <a href="https://www.jetradar.com/?marker=519037" target="_blank">
+            <img src="https://images.aviasales.com/banners/600x90.gif" alt="Find cheap flights" style="width:100%;max-width:728px;border-radius:8px;" />
+          </a>
+        </noscript>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE: AGENCIES (Skyscanner-style agent comparison)
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-agencies" class="page">
+    <div class="page-inner">
+      <button class="back-btn" onclick="showPage('results')" style="margin-bottom:16px;">← Back to Results</button>
+      <div class="agencies-layout">
+        <!-- LEFT: Agent list -->
+        <div class="agencies-left">
+          <div class="agencies-header">
+            <h2 id="agency-route-title">HEL → DUB</h2>
+            <p id="agency-route-sub"></p>
+          </div>
+          <div id="agencies-list"></div>
+        </div>
+        <!-- RIGHT: Flight itinerary -->
+        <div class="agencies-right">
+          <div class="itinerary-card">
+            <div class="itin-header">✈ Flight Details</div>
+            <div id="agency-itinerary"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -590,6 +846,79 @@
     </div>
   </main>
 
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE: ADMIN BUSINESS DASHBOARD (owner only)
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-admin" class="page">
+    <div class="page-inner">
+      <div class="results-header">
+        <button class="back-btn" onclick="showPage('home')">← Home</button>
+        <h2>📊 Business Dashboard</h2>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="admin-stats-row">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon">✈️</div>
+          <div class="admin-stat-value" id="stat-total-bookings">—</div>
+          <div class="admin-stat-label">Total Bookings</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon">💰</div>
+          <div class="admin-stat-value" id="stat-total-revenue">—</div>
+          <div class="admin-stat-label">Total Revenue</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon">👥</div>
+          <div class="admin-stat-value" id="stat-total-customers">—</div>
+          <div class="admin-stat-label">Customers</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon">✅</div>
+          <div class="admin-stat-value" id="stat-confirmed">—</div>
+          <div class="admin-stat-label">Confirmed</div>
+        </div>
+      </div>
+
+      <!-- Filter + Search -->
+      <div class="admin-toolbar">
+        <input type="text" id="admin-search" placeholder="🔍 Search by name, route, or booking ref..." class="admin-search-input" oninput="filterAdminBookings()" />
+        <select id="admin-filter" class="admin-filter-select" onchange="filterAdminBookings()">
+          <option value="all">All Bookings</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="btn-primary" onclick="exportBookingsCSV()" style="white-space:nowrap;">⬇ Export CSV</button>
+      </div>
+
+      <!-- Bookings Table -->
+      <div class="admin-table-wrap">
+        <div id="admin-loading" class="loading-state">
+          <div class="spinner large"></div><p>Loading all bookings...</p>
+        </div>
+        <div id="admin-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">📋</div>
+          <h3>No bookings yet</h3>
+          <p>Customer bookings will appear here</p>
+        </div>
+        <table class="admin-table" id="admin-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Booking Ref</th>
+              <th>Customer</th>
+              <th>Route</th>
+              <th>Date</th>
+              <th>Passengers</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
   <!-- AUTH MODAL -->
   <div id="auth-overlay" class="modal-overlay" onclick="closeAuthModal(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
@@ -600,7 +929,7 @@
       </div>
       <div id="form-login" class="auth-form">
         <h2>Welcome back</h2>
-        <p class="auth-subtitle">Sign in to your SkyBook account</p>
+        <p class="auth-subtitle">Sign in to your NordicWings account</p>
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="login-email" placeholder="you@email.com" />
@@ -614,11 +943,11 @@
           <span id="login-btn-text">Sign In</span>
           <span id="login-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a></p>
+        <p class="auth-switch">Don't have an account? <a href="javascript:void(0)" onclick="switchAuthTab('signup')">Sign up free</a></p>
       </div>
       <div id="form-signup" class="auth-form" style="display:none;">
         <h2>Create your account</h2>
-        <p class="auth-subtitle">Join SkyBook and start booking flights</p>
+        <p class="auth-subtitle">Join NordicWings and start booking flights</p>
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="signup-name" placeholder="Your full name" />
@@ -636,8 +965,30 @@
           <span id="signup-btn-text">Create Account</span>
           <span id="signup-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Sign in</a></p>
+        <p class="auth-switch">Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign in</a></p>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       POLICY MODALS (About, Privacy, Terms, Cancellation, Help, Contact)
+  ════════════════════════════════════════════════════════ -->
+  <div id="policy-modal-overlay" class="policy-modal-overlay" onclick="closePolicyModal(event)">
+    <div class="policy-modal-card" onclick="event.stopPropagation()">
+      <div class="policy-modal-header">
+        <h2 id="policy-modal-title"></h2>
+        <button class="modal-close" onclick="closePolicyModal()">✕</button>
+      </div>
+      <div class="policy-modal-body" id="policy-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookie-banner" class="cookie-banner">
+    <p>🍪 We use cookies to improve your experience and analyse traffic. By using NordicWings you agree to our <a href="javascript:void(0)" onclick="openPolicyModal('privacy')">Privacy Policy</a>.</p>
+    <div class="cookie-actions">
+      <button onclick="acceptCookies()" class="btn-primary">Accept All</button>
+      <button onclick="declineCookies()" class="btn-ghost">Essential Only</button>
     </div>
   </div>
 
@@ -655,20 +1006,14 @@
 
   <script src="script.js"></script>
   <script>
-    // FAQ toggle
     function toggleFaq(btn) {
-      const answer = btn.nextElementSibling;
-      const icon   = btn.querySelector('.faq-icon');
-      const isOpen = answer.style.maxHeight;
-      document.querySelectorAll('.faq-answer').forEach(a => a.style.maxHeight = '');
-      document.querySelectorAll('.faq-icon').forEach(i => i.textContent = '+');
-      if (!isOpen) {
-        answer.style.maxHeight = answer.scrollHeight + 'px';
-        icon.textContent = '−';
-      }
+      var answer = btn.nextElementSibling;
+      var icon = btn.querySelector('.faq-icon');
+      var isOpen = answer.style.maxHeight;
+      document.querySelectorAll('.faq-answer').forEach(function(a){ a.style.maxHeight=''; });
+      document.querySelectorAll('.faq-icon').forEach(function(i){ i.textContent='+'; });
+      if (!isOpen) { answer.style.maxHeight = answer.scrollHeight + 'px'; icon.textContent = '-'; }
     }
-
-    // Quick search from destination cards
     function quickSearch(from, to) {
       document.getElementById('origin-input').value = from;
       document.getElementById('origin-input').dataset.code = from;
@@ -676,36 +1021,114 @@
       document.getElementById('dest-input').dataset.code = to;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    // Quick fill from popular route buttons
     function quickFill(fromCode, fromName, toCode, toName) {
-      const originInput = document.getElementById('origin-input');
-      const destInput   = document.getElementById('dest-input');
-      originInput.value            = `${fromCode} — ${fromName}`;
-      originInput.dataset.code     = fromCode;
-      originInput.dataset.entityId = '';
-      destInput.value              = `${toCode} — ${toName}`;
-      destInput.dataset.code       = toCode;
-      destInput.dataset.entityId   = '';
-      // Set default date to 2 weeks from today
-      const d = new Date();
-      d.setDate(d.getDate() + 14);
-      document.getElementById('depart-input').value = d.toISOString().split('T')[0];
-      // Scroll to search
+      var o = document.getElementById('origin-input');
+      var d = document.getElementById('dest-input');
+      o.value = fromCode + ' \u2014 ' + fromName;
+      o.dataset.code = fromCode; o.dataset.entityId = '';
+      d.value = toCode + ' \u2014 ' + toName;
+      d.dataset.code = toCode; d.dataset.entityId = '';
+      var dt = new Date(); dt.setDate(dt.getDate() + 14);
+      document.getElementById('depart-input').value = dt.toISOString().split('T')[0];
       document.querySelector('.search-card').scrollIntoView({ behavior: 'smooth' });
     }
-
-    // Mobile menu
     function toggleMobileMenu() {
       document.getElementById('mobile-menu').classList.toggle('open');
     }
 
-    // Register Service Worker
+    /* POLICY MODALS */
+    var POLICY_CONTENT = {
+      about: {
+        title: '\u2708 About NordicWings',
+        html: '<p><strong>NordicWings</strong> is an online flight search and booking platform dedicated to making air travel simple, transparent, and accessible for everyone worldwide.</p><h3>Our Mission</h3><p>We connect travelers to real-time flight data from 500+ airlines globally, giving you the best selection and prices in one place.</p><h3>Security &amp; Trust</h3><ul><li>All payments processed by <strong>Stripe</strong> &mdash; the world&#39;s leading payment platform</li><li>Your card details are <strong>never stored</strong> on our servers</li><li><strong>SSL encryption</strong> protects all data in transit</li><li>Fully <strong>GDPR compliant</strong></li></ul><h3>Contact</h3><ul><li><strong>Website:</strong> nordicwings.net</li><li><strong>Email:</strong> support@nordicwings.net</li></ul><div class=\'policy-contact-box\'><p>&#128231; <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response within 24 hours, Monday&ndash;Friday.</p></div>'
+      },
+      howitworks: {
+        title: '&#128640; How NordicWings Works',
+        html: '<p>Booking your flight with NordicWings is fast and simple. Here is exactly how it works:</p><h3>Step 1 &mdash; Search Flights</h3><p>Enter your <strong>departure city</strong>, <strong>destination</strong>, and <strong>travel date</strong>. We instantly search hundreds of airlines to find the best options.</p><h3>Step 2 &mdash; Compare &amp; Choose</h3><p>Browse results with real-time prices, durations, airlines, and stop info. Sort by <strong>cheapest</strong> or <strong>fastest</strong>. Filter for <strong>nonstop only</strong>.</p><h3>Step 3 &mdash; Pick Your Booking Option</h3><p>You will see a <strong>price comparison page</strong> showing NordicWings Direct and trusted partner agencies so you can pick the best deal.</p><h3>Step 4 &mdash; Enter Passenger Details</h3><p>Fill in passenger names, contact email, and phone number. All information is protected.</p><h3>Step 5 &mdash; Pay Securely</h3><p>Pay safely with your card through <strong>Stripe</strong> &mdash; bank-level security. Instant booking confirmation sent by email.</p><h3>Step 6 &mdash; Manage Your Booking</h3><p>Log in anytime and go to <strong>My Bookings</strong> to view, manage, or cancel your trip.</p><div class=\'policy-contact-box\'><p>&#128231; Need help? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      destinations: {
+        title: '&#9992; Popular Destinations',
+        html: '<p>NordicWings searches flights to <strong>thousands of destinations worldwide</strong>. Here are our most popular routes:</p><h3>&#127466;&#127482; Europe</h3><ul><li><strong>Helsinki &rarr; London</strong> &mdash; from &euro;150, ~3h direct, Finnair / British Airways</li><li><strong>Helsinki &rarr; Barcelona</strong> &mdash; from &euro;120, ~4h, Vueling / Finnair</li><li><strong>Helsinki &rarr; Paris</strong> &mdash; from &euro;130, ~3.5h, Finnair / Air France</li><li><strong>Helsinki &rarr; Amsterdam</strong> &mdash; from &euro;110, ~3h, KLM / Finnair</li></ul><h3>&#127759; Middle East &amp; Asia</h3><ul><li><strong>Helsinki &rarr; Dubai</strong> &mdash; from &euro;280, ~6h, Emirates / Finnair</li><li><strong>Helsinki &rarr; Bangkok</strong> &mdash; from &euro;350, ~11h, Finnair / Thai Airways</li><li><strong>Helsinki &rarr; Tokyo</strong> &mdash; from &euro;480, ~9.5h direct, Finnair</li></ul><h3>&#127482;&#127480; Americas</h3><ul><li><strong>Helsinki &rarr; New York</strong> &mdash; from &euro;400, ~9h, Finnair / American Airlines</li><li><strong>Helsinki &rarr; Miami</strong> &mdash; from &euro;450, ~11h</li></ul><h3>&#127477;&#127469; Philippines &amp; Southeast Asia</h3><ul><li><strong>Manila &rarr; Helsinki</strong> &mdash; from &euro;380 via connections</li><li><strong>Davao &rarr; Manila</strong> &mdash; from &euro;35, ~1.5h domestic</li><li><strong>Cebu &rarr; Manila</strong> &mdash; from &euro;30, ~1h domestic</li></ul><div class=\'policy-contact-box\'><p>&#128269; Can&#39;t find your route? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      bookwithus: {
+        title: '&#128269; Search &amp; Book Flights',
+        html: '<p>Searching and booking with NordicWings is completely free. Here is everything you need to know:</p><h3>How to Search</h3><ul><li>Enter your <strong>From</strong> city or airport (e.g. HEL &mdash; Helsinki)</li><li>Enter your <strong>To</strong> destination</li><li>Choose your <strong>travel date</strong> and <strong>number of passengers</strong></li><li>Click <strong>Search Flights</strong></li></ul><h3>One-Way &amp; Round Trip</h3><p>Use the tabs to switch between <strong>One Way</strong> and <strong>Round Trip</strong>. For round trips, select both your outbound and return dates.</p><h3>What You See in Results</h3><ul><li>Airline logo and name</li><li>Departure and arrival times</li><li>Flight duration and number of stops</li><li>Price per person in euros</li><li><strong>Best Value</strong> and <strong>Nonstop</strong> badges</li></ul><h3>Sort &amp; Filter</h3><p>Sort by <strong>Cheapest</strong> or <strong>Fastest</strong>. Filter for <strong>Nonstop Only</strong> flights.</p><div class=\'policy-contact-box\'><p>&#128231; Questions? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      createaccount: {
+        title: '&#128100; Create a Free Account',
+        html: '<p>Creating a NordicWings account is <strong>100% free</strong> and takes less than 30 seconds.</p><h3>Why Create an Account?</h3><ul><li>Required to <strong>complete a booking</strong> and receive confirmation</li><li>Access <strong>My Bookings</strong> to view and manage all your trips</li><li>Receive instant <strong>booking confirmation emails</strong></li><li>Securely save your booking history</li></ul><h3>How to Sign Up</h3><ol><li>Click the <strong>Sign Up Free</strong> button in the top right corner</li><li>Enter your <strong>full name</strong> and <strong>email address</strong></li><li>Choose a <strong>password</strong> (minimum 6 characters)</li><li>Click <strong>Create Account</strong> &mdash; done!</li></ol><h3>Is My Data Safe?</h3><p>Yes. Your account is secured with <strong>Firebase Authentication</strong> (Google enterprise-grade security). We never share your data with third parties.</p><div class=\'policy-contact-box\'><p>&#128231; Need help signing up? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      signin: {
+        title: '&#128272; Sign In to NordicWings',
+        html: '<p>Already have a NordicWings account? Signing in gives you access to all your bookings and personal settings.</p><h3>How to Sign In</h3><ol><li>Click <strong>Sign In</strong> in the top navigation bar</li><li>Enter your <strong>email address</strong> and <strong>password</strong></li><li>Click <strong>Sign In</strong> &mdash; you will be logged in instantly</li></ol><h3>What You Can Do When Signed In</h3><ul><li>View all your <strong>past and upcoming bookings</strong></li><li>See your <strong>booking reference numbers</strong></li><li>Cancel a booking if needed</li><li>Search and book new flights</li></ul><h3>Stay Secure</h3><ul><li>Never share your password with anyone</li><li>Always sign out on shared or public computers</li><li>NordicWings will <strong>never</strong> ask for your password by email</li></ul><h3>Problems Signing In?</h3><p>If you have forgotten your password, please contact us and we will assist you.</p><div class=\'policy-contact-box\'><p>&#128231; Sign-in issues? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      mybookings: {
+        title: '&#128203; My Bookings',
+        html: '<p>The <strong>My Bookings</strong> section is your personal travel dashboard to view and manage all your flights.</p><h3>What You Can See</h3><ul><li>All <strong>confirmed bookings</strong> with reference numbers</li><li>Flight details: route, date, airline, departure and arrival times</li><li>Number of passengers and total amount paid</li><li>Booking status: <strong>Confirmed</strong> or <strong>Cancelled</strong></li></ul><h3>How to Access</h3><ol><li><strong>Sign in</strong> to your NordicWings account</li><li>Click <strong>My Bookings</strong> in the navigation menu</li><li>All your bookings will be listed with full details</li></ol><h3>Cancelling a Booking</h3><p>Find your booking and click the <strong>Cancel Booking</strong> button. You will be asked to confirm before any changes are made.</p><h3>Missing a Booking?</h3><p>Make sure you are signed in with the <strong>same email</strong> used when booking. If it still does not appear, contact support with your reference number.</p><div class=\'policy-contact-box\'><p>&#128231; Booking issue? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      privacy: {
+        title: '&#128274; Privacy Policy',
+        html: '<p><em>Last updated: April 2026</em></p><p>NordicWings is committed to protecting your personal data in accordance with the <strong>EU GDPR</strong>.</p><h3>What Data We Collect</h3><ul><li><strong>Account data:</strong> Your name and email address</li><li><strong>Booking data:</strong> Passenger names, travel dates, flight details</li><li><strong>Payment data:</strong> Processed by Stripe &mdash; we never store card numbers</li><li><strong>Analytics:</strong> Anonymised browser cookies via Google Analytics</li></ul><h3>How We Use Your Data</h3><ul><li>To process and manage your flight bookings</li><li>To send booking confirmations by email</li><li>To improve our platform via anonymised analytics</li><li>To comply with legal obligations</li></ul><h3>Your GDPR Rights</h3><p>You have the right to access, correct, or delete your data. Contact us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a>.</p><h3>Data Security</h3><p>Payments processed exclusively by <strong>Stripe</strong>. All data transmitted over HTTPS. We never sell your data. Data retained up to 3 years then securely deleted.</p><div class=\'policy-contact-box\'><p>&#128231; Privacy questions: <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      terms: {
+        title: '&#128203; Terms &amp; Conditions',
+        html: '<p><em>Last updated: April 2026</em></p><p>By using NordicWings (nordicwings.net) you agree to these Terms and Conditions.</p><h3>1. Our Service</h3><p>NordicWings is a flight search, comparison, and booking platform acting as an intermediary between you and the airlines.</p><h3>2. Booking &amp; Payment</h3><ul><li>Bookings subject to seat availability at time of payment</li><li>Prices shown are per person including all displayed taxes</li><li>Payment processed securely by <strong>Stripe</strong></li><li>Booking confirmed only when payment is successfully processed</li></ul><h3>3. Confirmation</h3><p>Booking confirmation with your reference number sent to your registered email. Please keep this for all future communications.</p><h3>4. Affiliate Partners</h3><p>NordicWings may display links to partners (Trip.com, Booking.com, etc.). We may earn a small commission at no extra cost to you.</p><h3>5. Airline Responsibility</h3><p>The airline is solely responsible for flight operations, delays, and cancellations. NordicWings is not liable for airline-caused disruptions.</p><h3>6. Governing Law</h3><p>These terms are governed by the laws of Finland.</p><div class=\'policy-contact-box\'><p>&#128231; Questions: <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      cancellation: {
+        title: '&#8617; Cancellation &amp; Refund Policy',
+        html: '<p><em>Last updated: April 2026</em></p><p>We understand plans change. Here is our clear policy on cancellations and refunds.</p><h3>How to Cancel</h3><p>Log in &rarr; <strong>My Bookings</strong> &rarr; select your booking &rarr; <strong>Cancel Booking</strong>. You will receive a cancellation confirmation email.</p><h3>Refund Windows</h3><ul><li><strong>Within 24 hours of booking</strong> (flight 7+ days away): Full refund</li><li><strong>After 24 hours:</strong> Subject to airline fare conditions</li><li><strong>Non-refundable fares:</strong> Airport taxes and fees only refunded</li><li><strong>Flexible fares:</strong> Full refund per airline policy</li></ul><h3>Refund Timeline</h3><p>Refunds processed within <strong>5&ndash;10 business days</strong>, returned to your original payment method.</p><h3>EU Passenger Rights</h3><p>If your flight is cancelled or significantly delayed by the airline, you may be entitled to a full refund under <strong>EU Regulation 261/2004</strong>.</p><div class=\'policy-contact-box\'><p>&#128231; Need help? Include your booking reference: <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
+      },
+      help: {
+        title: '&#10067; Help Center',
+        html: '<h3>How do I search for flights?</h3><p>Enter your departure city, destination, and travel date in the search box on the homepage. Click <strong>Search Flights</strong> and browse available options.</p><h3>How do I book a flight?</h3><p>Select your preferred flight, click <strong>Select</strong>, choose a booking option, enter passenger details, and pay securely via Stripe.</p><h3>Do I need an account to book?</h3><p>Yes &mdash; a free NordicWings account is required. Creating one takes under 30 seconds.</p><h3>Is my payment secure?</h3><p>Absolutely. All payments are processed by <strong>Stripe</strong>. Your card details are never stored on our servers.</p><h3>How do I cancel a booking?</h3><p>Log in &rarr; My Bookings &rarr; select your booking &rarr; Cancel Booking. See our full Cancellation Policy for refund details.</p><h3>I did not receive a confirmation email</h3><p>Check your spam/junk folder first. If it is not there, email us with your booking reference number.</p><h3>What airlines does NordicWings cover?</h3><p>500+ airlines including Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, Philippine Airlines, Ryanair, EasyJet, and many more worldwide.</p><div class=\'policy-contact-box\'><p>&#128231; Still need help? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response time: within 24 hours, Mon&ndash;Fri.</p></div>'
+      },
+      contact: {
+        title: '&#128231; Contact Us',
+        html: '<p>We are here to help! Whether you have a question about a booking, need support, or want to give feedback &mdash; get in touch and we will respond promptly.</p><h3>Customer Support</h3><p>&#128231; <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p>For booking enquiries, cancellations, or general questions. Please include your <strong>booking reference number</strong> if your query relates to a specific booking.</p><h3>Response Times</h3><ul><li><strong>Weekdays (Mon&ndash;Fri):</strong> Within 24 hours</li><li><strong>Weekends:</strong> Within 48 hours</li><li><strong>Urgent issues:</strong> Mark subject as <strong>URGENT</strong></li></ul><h3>Business &amp; Partnership Enquiries</h3><p>For advertising, partnerships, or affiliate opportunities, email us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a>.</p><div class=\'policy-contact-box\'><p>&#128231; <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">nordicwings.net &middot; Secure &amp; Trusted Flight Booking</p></div>'
+      }
+    };
+
+    function openPolicyModal(type) {
+      var c = POLICY_CONTENT[type];
+      if (!c) return;
+      document.getElementById('policy-modal-title').textContent = c.title;
+      document.getElementById('policy-modal-body').innerHTML = c.html;
+      document.getElementById('policy-modal-overlay').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closePolicyModal(e) {
+      var o = document.getElementById('policy-modal-overlay');
+      if (e && e.target !== o) return;
+      o.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    /* COOKIE CONSENT */
+    function acceptCookies() {
+      try { localStorage.setItem('nordicwings_cookies','all'); } catch(ex){}
+      document.getElementById('cookie-banner').style.display = 'none';
+    }
+    function declineCookies() {
+      try { localStorage.setItem('nordicwings_cookies','essential'); } catch(ex){}
+      document.getElementById('cookie-banner').style.display = 'none';
+    }
+    (function(){
+      try {
+        if (!localStorage.getItem('nordicwings_cookies')) {
+          setTimeout(function(){
+            var b = document.getElementById('cookie-banner');
+            if (b) b.style.display = 'flex';
+          }, 2500);
+        }
+      } catch(ex){}
+    })();
+
+    /* SERVICE WORKER */
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      window.addEventListener('load', function() {
         navigator.serviceWorker.register('/sw.js')
-          .then(() => console.log('SkyBook PWA ready!'))
-          .catch(err => console.log('SW error:', err));
+          .then(function(){ console.log('NordicWings PWA ready'); })
+          .catch(function(e){ console.log('SW error', e); });
       });
     }
   </script>

@@ -671,6 +671,89 @@ img { max-width: 100%; display: block; }
   padding: 14px; margin-top: 4px; min-height: 50px;
 }
 
+/* ── Skyscanner-style Flight Cards ───────────────────────── */
+.results-sort-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 12px 16px; background: white; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.sort-label { font-size: .8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; }
+.sort-btn, .filter-btn {
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-size: .82rem; font-weight: 600; color: var(--text-muted);
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.sort-btn:hover, .filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+.sort-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+.filter-btn.active { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.results-count { margin-left: auto; font-size: .82rem; color: var(--text-muted); font-weight: 500; }
+
+/* New Flight Card */
+.fc {
+  background: white; border-radius: var(--radius); border: 1.5px solid var(--border);
+  padding: 18px 22px; display: grid;
+  grid-template-columns: 140px 1fr 80px 160px;
+  align-items: center; gap: 16px;
+  cursor: pointer; transition: all .18s; box-shadow: var(--shadow-sm);
+  margin-bottom: 10px;
+}
+.fc:hover { border-color: var(--blue); box-shadow: 0 4px 20px rgba(37,99,235,.15); transform: translateY(-2px); }
+
+/* Airline column */
+.fc-airline { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.fc-logo { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: #f8fafc; padding: 4px; border: 1px solid var(--border); }
+.fc-logo-fallback {
+  width: 40px; height: 40px; border-radius: 8px; background: var(--blue);
+  color: white; font-weight: 800; font-size: .8rem;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.fc-airline-name { font-size: .78rem; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.fc-flight-num { font-size: .72rem; color: var(--text-muted); }
+
+/* Route column */
+.fc-route { display: flex; align-items: center; gap: 12px; }
+.fc-point { text-align: center; min-width: 52px; }
+.fc-time { font-size: 1.25rem; font-weight: 800; color: var(--navy); line-height: 1; }
+.fc-iata { font-size: .78rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+.fc-mid { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.fc-dur { font-size: .78rem; font-weight: 600; color: var(--text-muted); }
+.fc-line-wrap { display: flex; align-items: center; width: 100%; gap: 2px; }
+.fc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue-dark); flex-shrink: 0; }
+.fc-bar { flex: 1; height: 2px; background: #d1d5db; }
+.fc-plane { font-size: .85rem; color: var(--blue); flex-shrink: 0; }
+
+/* Stop badges */
+.badge-nonstop {
+  display: inline-block; background: #dcfce7; color: #15803d;
+  font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+.badge-stop {
+  display: inline-block; background: #fef3c7; color: #92400e;
+  font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+}
+
+/* Cabin column */
+.fc-cabin-col { text-align: center; }
+.fc-cabin { font-size: .75rem; color: var(--text-muted); font-weight: 600; }
+
+/* Price column */
+.fc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.badge-best {
+  background: #fef9c3; color: #854d0e; font-size: .7rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px; margin-bottom: 2px;
+}
+.seats-urgent { font-size: .72rem; color: #dc2626; font-weight: 700; }
+.seats-warning { font-size: .72rem; color: #d97706; font-weight: 600; }
+.fc-price { font-size: 1.55rem; font-weight: 800; color: var(--navy); line-height: 1; }
+.fc-per { font-size: .72rem; color: var(--text-muted); }
+.fc-select-btn {
+  background: var(--blue); color: white; border: none; border-radius: var(--radius-sm);
+  padding: 9px 18px; font-size: .88rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all .15s; margin-top: 4px; white-space: nowrap;
+}
+.fc-select-btn:hover { background: var(--blue-dark); transform: scale(1.03); }
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .destinations-grid { grid-template-columns: repeat(2, 1fr); }
@@ -683,6 +766,12 @@ img { max-width: 100%; display: block; }
   .booking-layout { grid-template-columns: 1fr; }
   .booking-summary-card { order: -1; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 750px) {
+  .fc { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .fc-cabin-col { display: none; }
+  .fc-right { align-items: flex-start; }
 }
 
 @media (max-width: 600px) {

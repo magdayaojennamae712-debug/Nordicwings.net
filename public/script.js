@@ -249,65 +249,161 @@ async function searchFlights() {
   }
 }
 
-// Render flight result cards
+// Airline code → full name map
+const AIRLINE_NAMES = {
+  'AY':'Finnair','EK':'Emirates','QR':'Qatar Airways','BA':'British Airways',
+  'LH':'Lufthansa','TK':'Turkish Airlines','AF':'Air France','KL':'KLM',
+  'SK':'SAS','DY':'Norwegian','FR':'Ryanair','U2':'easyJet','VY':'Vueling',
+  'IB':'Iberia','TP':'TAP Air Portugal','LX':'Swiss','OS':'Austrian',
+  'SN':'Brussels Airlines','EI':'Aer Lingus','BE':'flybe',
+  'W6':'Wizz Air','PC':'Pegasus','XW':'NokScoot','TG':'Thai Airways',
+  'SQ':'Singapore Airlines','MH':'Malaysia Airlines','CX':'Cathay Pacific',
+  'JL':'Japan Airlines','NH':'ANA','OZ':'Asiana Airlines','KE':'Korean Air',
+  'PR':'Philippine Airlines','5J':'Cebu Pacific','Z2':'Philippines AirAsia',
+  'GA':'Garuda Indonesia','QZ':'Indonesia AirAsia','JT':'Lion Air',
+  'FZ':'flydubai','G9':'Air Arabia','WY':'Oman Air','SV':'Saudia',
+  'MS':'EgyptAir','ET':'Ethiopian Airlines','KQ':'Kenya Airways',
+  'SA':'South African','QF':'Qantas','NZ':'Air New Zealand','VA':'Virgin Australia',
+  'AC':'Air Canada','WS':'WestJet','AA':'American','UA':'United','DL':'Delta',
+  'WN':'Southwest','B6':'JetBlue','AS':'Alaska Airlines','F9':'Frontier',
+  'LA':'LATAM','G3':'Gol','AD':'Azul','CM':'Copa Airlines',
+};
+
+// Render flight result cards (Skyscanner-style)
 function renderFlightCards(flights) {
+  window._flights = flights;
+  window._flightsAll = flights; // Keep original for sorting/filtering
+
   const list = document.getElementById('results-list');
   list.style.display = 'flex';
 
-  list.innerHTML = flights.map((flight, i) => {
-    const seg       = flight.itineraries[0].segments[0];
-    const lastSeg   = flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1];
-    const stops     = flight.itineraries[0].segments.length - 1;
-    const duration  = formatDuration(flight.itineraries[0].duration);
-    const price     = parseFloat(flight.price.grandTotal).toFixed(2);
-    const currency  = flight.price.currency;
-    const cabin     = flight.travelerPricings[0]?.fareDetailsBySegment[0]?.cabin || 'ECONOMY';
-    const seats     = flight.numberOfBookableSeats || '';
+  // Build sort/filter bar
+  const hasNonstop = flights.some(f => f.itineraries[0].segments.length === 1);
+  const sortBarHtml = `
+    <div class="results-sort-bar">
+      <div class="sort-label">Sort by:</div>
+      <button class="sort-btn active" onclick="sortFlights('cheapest', this)">💰 Cheapest</button>
+      <button class="sort-btn" onclick="sortFlights('fastest', this)">⚡ Fastest</button>
+      ${hasNonstop ? '<button class="filter-btn" onclick="filterNonstop(this)">✅ Nonstop only</button>' : ''}
+      <div class="results-count">${flights.length} flights found</div>
+    </div>
+  `;
+
+  list.innerHTML = sortBarHtml + '<div id="flights-container"></div>';
+  renderFlightList(flights);
+}
+
+function renderFlightList(flights) {
+  const container = document.getElementById('flights-container');
+  if (!container) return;
+
+  container.innerHTML = flights.map((flight, i) => {
+    const seg      = flight.itineraries[0].segments[0];
+    const lastSeg  = flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1];
+    const allSegs  = flight.itineraries[0].segments;
+    const stops    = allSegs.length - 1;
+    const duration = formatDuration(flight.itineraries[0].duration);
+    const price    = parseFloat(flight.price.grandTotal).toFixed(0);
+    const currency = flight.price.currency;
+    const seats    = flight.numberOfBookableSeats;
+    const cabin    = flight.travelerPricings?.[0]?.fareDetailsBySegment?.[0]?.cabin || 'ECONOMY';
+    const code     = seg.carrierCode;
+    const name     = AIRLINE_NAMES[code] || code;
+    const sym      = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+
+    // Stop badge
+    const stopVia = allSegs.slice(0,-1).map(s => s.arrival.iataCode).join(', ');
+    const stopBadge = stops === 0
+      ? '<span class="badge-nonstop">Nonstop</span>'
+      : `<span class="badge-stop">${stops} stop${stops>1?'s':''} · ${stopVia}</span>`;
+
+    // Seats urgency
+    const seatsBadge = (seats && seats <= 5)
+      ? `<div class="seats-urgent">🔥 Only ${seats} left!</div>`
+      : (seats && seats <= 9 ? `<div class="seats-warning">${seats} seats left</div>` : '');
+
+    // Best deal badge (cheapest 20%)
+    const allPrices = (window._flightsAll||flights).map(f=>parseFloat(f.price.grandTotal));
+    const minPrice = Math.min(...allPrices);
+    const dealBadge = parseFloat(flight.price.grandTotal) <= minPrice * 1.05
+      ? '<div class="badge-best">Best price</div>' : '';
 
     return `
-      <div class="flight-card" onclick="selectFlight(${i})">
-        <div class="flight-airline">
-          <div class="airline-code">${seg.carrierCode}</div>
-          <div class="airline-number">${seg.carrierCode}${seg.number}</div>
+      <div class="fc" onclick="selectFlight(${i})" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
+        <div class="fc-airline">
+          <img src="https://www.gstatic.com/flights/airline_logos/70px/${code}.png"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+               class="fc-logo" alt="${name}" />
+          <div class="fc-logo-fallback" style="display:none">${code}</div>
+          <div class="fc-airline-name">${name}</div>
+          <div class="fc-flight-num">${code}${seg.number}</div>
         </div>
 
-        <div class="flight-route">
-          <div class="route-point">
-            <div class="route-time">${formatTime(seg.departure.at)}</div>
-            <div class="route-airport">${seg.departure.iataCode}</div>
+        <div class="fc-route">
+          <div class="fc-point">
+            <div class="fc-time">${formatTime(seg.departure.at)}</div>
+            <div class="fc-iata">${seg.departure.iataCode}</div>
           </div>
-          <div class="route-line">
-            <span class="route-duration">${duration}</span>
-            <div class="route-bar"></div>
-            <span class="route-stops">${stops === 0 ? '✅ Nonstop' : stops + ' stop' + (stops > 1 ? 's' : '') + ' via ' + flight.itineraries[0].segments.slice(0,-1).map(s => s.arrival.iataCode).join(', ')}</span>
+          <div class="fc-mid">
+            <div class="fc-dur">${duration}</div>
+            <div class="fc-line-wrap">
+              <span class="fc-dot"></span>
+              <div class="fc-bar"></div>
+              <span class="fc-plane">✈</span>
+              <div class="fc-bar"></div>
+              <span class="fc-dot"></span>
+            </div>
+            ${stopBadge}
           </div>
-          <div class="route-point">
-            <div class="route-time">${formatTime(lastSeg.arrival.at)}</div>
-            <div class="route-airport">${lastSeg.arrival.iataCode}</div>
+          <div class="fc-point">
+            <div class="fc-time">${formatTime(lastSeg.arrival.at)}</div>
+            <div class="fc-iata">${lastSeg.arrival.iataCode}</div>
           </div>
         </div>
 
-        <div class="flight-meta">
-          <div class="flight-cabin">${cabin.charAt(0) + cabin.slice(1).toLowerCase()}</div>
-          ${seats ? `<div class="flight-seats">${seats} seats left</div>` : ''}
+        <div class="fc-cabin-col">
+          <div class="fc-cabin">${cabin === 'BUSINESS' ? '💼 Business' : '✈ Economy'}</div>
         </div>
 
-        <div class="flight-price">
-          <div class="price-amount">${currency === 'USD' ? '$' : currency}${price}</div>
-          <div class="price-label">per person</div>
+        <div class="fc-right">
+          ${dealBadge}
+          ${seatsBadge}
+          <div class="fc-price">${sym}${price}</div>
+          <div class="fc-per">per person</div>
+          <button class="fc-select-btn">Select <span>→</span></button>
         </div>
-
-        <button class="btn-select">Select</button>
       </div>
     `;
   }).join('');
+}
 
-  // Store flights array on window for access in selectFlight()
-  window._flights = flights;
+let _nonstopOnly = false;
+function filterNonstop(btn) {
+  _nonstopOnly = !_nonstopOnly;
+  btn.classList.toggle('active', _nonstopOnly);
+  const base = window._flightsAll || window._flights || [];
+  const filtered = _nonstopOnly ? base.filter(f => f.itineraries[0].segments.length === 1) : base;
+  renderFlightList(filtered);
+  window._flights = filtered;
+}
+
+function sortFlights(by, btn) {
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const arr = [...(window._flightsAll || window._flights || [])];
+  if (_nonstopOnly) arr.filter(f => f.itineraries[0].segments.length === 1);
+  if (by === 'cheapest') {
+    arr.sort((a,b) => parseFloat(a.price.grandTotal) - parseFloat(b.price.grandTotal));
+  } else if (by === 'fastest') {
+    const durMs = d => { const m = (d||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?/); return ((+m?.[1]||0)*60+(+m?.[2]||0)); };
+    arr.sort((a,b) => durMs(a.itineraries[0].duration) - durMs(b.itineraries[0].duration));
+  }
+  window._flights = arr;
+  renderFlightList(arr);
 }
 
 function selectFlight(index) {
-  selectedFlight = window._flights[index];
+  selectedFlight = (window._flights || [])[index];
 
   // Require login before booking
   if (!currentUser) {
@@ -531,7 +627,8 @@ async function submitBooking() {
   const email      = document.getElementById('contact-email').value.trim();
   const phone      = document.getElementById('contact-phone').value.trim();
 
-  if (firstNames.some(n => !n) || lastNames.some(n => !n)) {
+  // Only validate if fields exist and have values
+  if (firstNames.length > 0 && (firstNames.some(n => !n) || lastNames.some(n => !n))) {
     return setError(errorEl, 'Please fill in all passenger names.');
   }
   if (!email || !email.includes('@')) {
