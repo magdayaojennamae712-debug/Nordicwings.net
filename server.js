@@ -14,6 +14,7 @@ const stripe    = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app  = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
+app.set('trust proxy', 1); // Trust Railway's proxy for rate limiting
 
 // ── Security: Helmet (sets safe HTTP headers) ─────────────────
 app.use(helmet({

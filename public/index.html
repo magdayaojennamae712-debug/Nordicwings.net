@@ -233,7 +233,6 @@
           <div class="input-group autocomplete-wrap" id="origin-wrap">
             <label>From</label>
             <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('origin')" />
-            <ul class="autocomplete-list" id="origin-list"></ul>
           </div>
 
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
@@ -241,7 +240,6 @@
           <div class="input-group autocomplete-wrap" id="dest-wrap">
             <label>To</label>
             <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" oninput="autocomplete('dest')" />
-            <ul class="autocomplete-list" id="dest-list"></ul>
           </div>
 
           <div class="input-group">
@@ -1132,5 +1130,8 @@
       });
     }
   </script>
+  <!-- Autocomplete dropdowns live at body level to avoid overflow:hidden clipping -->
+  <ul class="autocomplete-list" id="origin-list" style="display:none;"></ul>
+  <ul class="autocomplete-list" id="dest-list" style="display:none;"></ul>
 </body>
 </html>

@@ -133,11 +133,12 @@ const POPULAR_AIRPORTS = [
 
 function showAcList(listEl, inputEl, airports, field) {
   var rect = inputEl.getBoundingClientRect();
+  listEl.style.display = 'block';
   listEl.style.position = 'fixed';
   listEl.style.top = (rect.bottom + 4) + 'px';
   listEl.style.left = rect.left + 'px';
   listEl.style.width = rect.width + 'px';
-  listEl.style.zIndex = '9999';
+  listEl.style.zIndex = '99999';
   if (airports.length === 0) {
     listEl.innerHTML = '<li style="padding:12px 16px;color:#aaa;font-size:.88rem;">No results found</li>';
     return;
@@ -163,7 +164,7 @@ async function autocomplete(field) {
   var inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
   var listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
   var keyword = inputEl.value.trim().toLowerCase();
-  if (keyword.length < 1) { listEl.innerHTML = ''; return; }
+  if (keyword.length < 1) { listEl.innerHTML = ''; listEl.style.display = 'none'; return; }
   var local = POPULAR_AIRPORTS.filter(function(a) {
     return a.cityName.toLowerCase().indexOf(keyword) === 0 ||
            a.iataCode.toLowerCase().indexOf(keyword) === 0 ||
@@ -194,7 +195,7 @@ function selectAirport(field, code, cityName, entityId) {
 // Close autocomplete when clicking elsewhere
 document.addEventListener('click', e => {
   if (!e.target.closest('.autocomplete-wrap')) {
-    document.querySelectorAll('.autocomplete-list').forEach(l => l.innerHTML = '');
+    document.querySelectorAll('.autocomplete-list').forEach(l => { l.innerHTML = ''; l.style.display = 'none'; });
   }
 });
 
