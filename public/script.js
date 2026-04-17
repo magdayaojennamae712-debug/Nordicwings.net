@@ -326,28 +326,79 @@ function searchFlights() {
   const passengers  = parseInt(document.getElementById('passengers-input').value) || 1;
   const errorEl     = document.getElementById('search-error');
 
-  // City name to IATA code map
+  // City / country → IATA code (very comprehensive)
   const cityToCode = {
-    'HELSINKI':'HEL','LONDON':'LHR','DUBAI':'DXB','NEW YORK':'JFK',
-    'PARIS':'CDG','AMSTERDAM':'AMS','BANGKOK':'BKK','SINGAPORE':'SIN',
-    'SYDNEY':'SYD','TOKYO':'NRT','ROME':'FCO','MADRID':'MAD',
-    'BERLIN':'BER','MUNICH':'MUC','VIENNA':'VIE','ZURICH':'ZRH',
-    'BARCELONA':'BCN','LISBON':'LIS','OSLO':'OSL','STOCKHOLM':'ARN',
-    'COPENHAGEN':'CPH','DUBLIN':'DUB','BRUSSELS':'BRU','WARSAW':'WAW',
-    'PRAGUE':'PRG','BUDAPEST':'BUD','ATHENS':'ATH','ISTANBUL':'IST',
-    'CAIRO':'CAI','JOHANNESBURG':'JNB','NAIROBI':'NBO','LAGOS':'LOS',
-    'MUMBAI':'BOM','DELHI':'DEL','HONG KONG':'HKG','BEIJING':'PEK',
-    'SHANGHAI':'PVG','SEOUL':'ICN','KUALA LUMPUR':'KUL','JAKARTA':'CGK',
-    'MANILA':'MNL','DAVAO':'DVO','CEBU':'CEB','LOS ANGELES':'LAX',
-    'CHICAGO':'ORD','TORONTO':'YYZ','MEXICO CITY':'MEX','SAO PAULO':'GRU',
-    'BUENOS AIRES':'EZE','DOHA':'DOH','ABU DHABI':'AUH','RIYADH':'RUH',
-    'FRANKFURT':'FRA','MILAN':'MXP','NICE':'NCE','PHUKET':'HKT',
-    'BALI':'DPS','HO CHI MINH':'SGN','HANOI':'HAN','MALDIVES':'MLE',
-    'COLOMBO':'CMB','KATHMANDU':'KTM','KARACHI':'KHI','GHANA':'ACC',
-    'KENYA':'NBO','ETHIOPIA':'ADD','MELBOURNE':'MEL','BRISBANE':'BNE',
-    'PERTH':'PER','AUCKLAND':'AKL','MIAMI':'MIA','DALLAS':'DFW',
-    'HOUSTON':'IAH','SEATTLE':'SEA','BOSTON':'BOS','ATLANTA':'ATL',
-    'DENVER':'DEN','VANCOUVER':'YVR','MONTREAL':'YUL','RIO':'GIG',
+    // Finland
+    'HELSINKI':'HEL','TAMPERE':'TMP','TURKU':'TKU','OULU':'OUL','ROVANIEMI':'RVN',
+    // Scandinavia
+    'OSLO':'OSL','BERGEN':'BGO','STOCKHOLM':'ARN','GOTHENBURG':'GOT','COPENHAGEN':'CPH','MALMO':'MMX',
+    // UK & Ireland
+    'LONDON':'LHR','MANCHESTER':'MAN','BIRMINGHAM':'BHX','EDINBURGH':'EDI','GLASGOW':'GLA','DUBLIN':'DUB',
+    // Western Europe
+    'PARIS':'CDG','AMSTERDAM':'AMS','BRUSSELS':'BRU','FRANKFURT':'FRA','BERLIN':'BER',
+    'MUNICH':'MUC','HAMBURG':'HAM','DUSSELDORF':'DUS','ZURICH':'ZRH','GENEVA':'GVA',
+    'VIENNA':'VIE','ROME':'FCO','MILAN':'MXP','VENICE':'VCE','NAPLES':'NAP',
+    'MADRID':'MAD','BARCELONA':'BCN','LISBON':'LIS','PORTO':'OPO',
+    'NICE':'NCE','LYON':'LYS','MARSEILLE':'MRS',
+    // Eastern Europe
+    'WARSAW':'WAW','POLAND':'WAW','KRAKOW':'KRK','GDANSK':'GDN','WROCLAW':'WRO','POZNAN':'POZ','KATOWICE':'KTW',
+    'PRAGUE':'PRG','CZECH REPUBLIC':'PRG','BUDAPEST':'BUD','HUNGARY':'BUD',
+    'BUCHAREST':'OTP','ROMANIA':'OTP','SOFIA':'SOF','BULGARIA':'SOF',
+    'ZAGREB':'ZAG','CROATIA':'ZAG','BELGRADE':'BEG','SERBIA':'BEG',
+    'BRATISLAVA':'BTS','SLOVAKIA':'BTS','VILNIUS':'VNO','LITHUANIA':'VNO',
+    'RIGA':'RIX','LATVIA':'RIX','TALLINN':'TLL','ESTONIA':'TLL',
+    'KIEV':'KBP','KYIV':'KBP','UKRAINE':'KBP',
+    'MINSK':'MSQ','BELARUS':'MSQ',
+    // Southern Europe
+    'ATHENS':'ATH','GREECE':'ATH','THESSALONIKI':'SKG',
+    'ISTANBUL':'IST','TURKEY':'IST','ANKARA':'ESB',
+    'MALTA':'MLA','VALLETTA':'MLA','NICOSIA':'LCA','CYPRUS':'LCA',
+    // Middle East
+    'DUBAI':'DXB','UAE':'DXB','ABU DHABI':'AUH','SHARJAH':'SHJ',
+    'DOHA':'DOH','QATAR':'DOH','RIYADH':'RUH','SAUDI ARABIA':'RUH',
+    'JEDDAH':'JED','MUSCAT':'MCT','OMAN':'MCT','KUWAIT':'KWI',
+    'BAHRAIN':'BAH','AMMAN':'AMM','JORDAN':'AMM',
+    'TEL AVIV':'TLV','ISRAEL':'TLV','BEIRUT':'BEY','LEBANON':'BEY',
+    // Asia
+    'BANGKOK':'BKK','THAILAND':'BKK','PHUKET':'HKT','CHIANG MAI':'CNX',
+    'SINGAPORE':'SIN','KUALA LUMPUR':'KUL','MALAYSIA':'KUL','PENANG':'PEN',
+    'JAKARTA':'CGK','INDONESIA':'CGK','BALI':'DPS','SURABAYA':'SUB',
+    'MANILA':'MNL','PHILIPPINES':'MNL','CEBU':'CEB','DAVAO':'DVO',
+    'TOKYO':'NRT','JAPAN':'NRT','OSAKA':'KIX','NAGOYA':'NGO','SAPPORO':'CTS','FUKUOKA':'FUK',
+    'SEOUL':'ICN','SOUTH KOREA':'ICN','BUSAN':'PUS',
+    'BEIJING':'PEK','CHINA':'PEK','SHANGHAI':'PVG','GUANGZHOU':'CAN','SHENZHEN':'SZX','CHENGDU':'CTU',
+    'HONG KONG':'HKG','TAIPEI':'TPE','TAIWAN':'TPE',
+    'HO CHI MINH':'SGN','VIETNAM':'SGN','HANOI':'HAN','DA NANG':'DAD',
+    'CAMBODIA':'PNH','PHNOM PENH':'PNH','SIEM REAP':'REP',
+    'MYANMAR':'RGN','YANGON':'RGN',
+    'MALDIVES':'MLE','SRI LANKA':'CMB','COLOMBO':'CMB',
+    'NEPAL':'KTM','KATHMANDU':'KTM',
+    'DELHI':'DEL','INDIA':'DEL','MUMBAI':'BOM','BANGALORE':'BLR','CHENNAI':'MAA','KOLKATA':'CCU','HYDERABAD':'HYD',
+    'DHAKA':'DAC','BANGLADESH':'DAC','KARACHI':'KHI','PAKISTAN':'KHI','LAHORE':'LHE','ISLAMABAD':'ISB',
+    // Africa
+    'CAIRO':'CAI','EGYPT':'CAI','NAIROBI':'NBO','KENYA':'NBO',
+    'ADDIS ABABA':'ADD','ETHIOPIA':'ADD','LAGOS':'LOS','NIGERIA':'LOS',
+    'ACCRA':'ACC','GHANA':'ACC','JOHANNESBURG':'JNB','SOUTH AFRICA':'JNB','CAPE TOWN':'CPT',
+    'CASABLANCA':'CMN','MOROCCO':'CMN','TUNIS':'TUN','TUNISIA':'TUN',
+    'DAR ES SALAAM':'DAR','TANZANIA':'DAR','KAMPALA':'EBB','UGANDA':'EBB',
+    'KIGALI':'KGL','RWANDA':'KGL','LUSAKA':'LUN','ZAMBIA':'LUN',
+    // Australia & Pacific
+    'SYDNEY':'SYD','AUSTRALIA':'SYD','MELBOURNE':'MEL','BRISBANE':'BNE','PERTH':'PER','ADELAIDE':'ADL',
+    'AUCKLAND':'AKL','NEW ZEALAND':'AKL','CHRISTCHURCH':'CHC',
+    // North America
+    'NEW YORK':'JFK','LOS ANGELES':'LAX','CHICAGO':'ORD','MIAMI':'MIA',
+    'DALLAS':'DFW','HOUSTON':'IAH','SEATTLE':'SEA','BOSTON':'BOS',
+    'ATLANTA':'ATL','DENVER':'DEN','SAN FRANCISCO':'SFO','LAS VEGAS':'LAS',
+    'WASHINGTON':'IAD','PHILADELPHIA':'PHL','DETROIT':'DTW','MINNEAPOLIS':'MSP',
+    'ORLANDO':'MCO','PHOENIX':'PHX','PORTLAND':'PDX','SALT LAKE CITY':'SLC',
+    'USA':'JFK','UNITED STATES':'JFK',
+    'TORONTO':'YYZ','CANADA':'YYZ','VANCOUVER':'YVR','MONTREAL':'YUL','CALGARY':'YYC',
+    'MEXICO CITY':'MEX','MEXICO':'MEX','CANCUN':'CUN','GUADALAJARA':'GDL',
+    // Central & South America
+    'SAO PAULO':'GRU','BRAZIL':'GRU','RIO':'GIG','RIO DE JANEIRO':'GIG',
+    'BUENOS AIRES':'EZE','ARGENTINA':'EZE','SANTIAGO':'SCL','CHILE':'SCL',
+    'LIMA':'LIM','PERU':'LIM','BOGOTA':'BOG','COLOMBIA':'BOG',
+    'PANAMA CITY':'PTY','PANAMA':'PTY','SAN JOSE':'SJO','COSTA RICA':'SJO',
   };
 
   function resolveCode(input) {
@@ -355,15 +406,15 @@ function searchFlights() {
     if (ds) return ds;
     const raw = input.value.split('—')[0].trim().toUpperCase();
     if (/^[A-Z]{3}$/.test(raw)) return raw;
-    return cityToCode[raw] || raw.substring(0,3).toUpperCase();
+    return cityToCode[raw] || null; // null = not found, will show error
   }
 
   const origin = resolveCode(originInput);
   const dest   = resolveCode(destInput);
 
   errorEl.textContent = '';
-  if (!origin || origin.length < 2) return setError(errorEl, 'Please enter a departure city or airport.');
-  if (!dest   || dest.length   < 2) return setError(errorEl, 'Please enter a destination city or airport.');
+  if (!origin) return setError(errorEl, 'Could not find departure airport. Try typing the airport code (e.g. HEL, WAW, LHR).');
+  if (!dest)   return setError(errorEl, 'Could not find destination airport. Try typing the airport code (e.g. WAW, LHR, DXB).');
   if (!departDate)                   return setError(errorEl, 'Please select a departure date.');
   if (new Date(departDate) < new Date().setHours(0,0,0,0)) return setError(errorEl, 'Departure date cannot be in the past.');
 
