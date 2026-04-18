@@ -1,75 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Homepage -->
+  <\!-- Homepage -->
   <url>
     <loc>https://nordicwings.net/</loc>
-    <lastmod>2026-04-17</lastmod>
+    <lastmod>2026-04-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Popular flight routes -->
+  <\!-- Popular routes: Finland to Philippines -->
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-london</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=MNL</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-dubai</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=DVO</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-bangkok</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://nordicwings.net/#flights-helsinki-new-york</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://nordicwings.net/#flights-manila-helsinki</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://nordicwings.net/#flights-helsinki-tokyo</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=CEB</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-barcelona</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=OUL&amp;to=MNL</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-paris</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=TMP&amp;to=MNL</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <\!-- Popular routes: Finland to Europe -->
+  <url>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=LHR</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-amsterdam</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=CDG</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nordicwings.net/#flights-helsinki-singapore</loc>
-    <lastmod>2026-04-17</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=BCN</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=AMS</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <\!-- Popular routes: Finland to Asia -->
+  <url>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=BKK</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=SIN</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/?from=HEL&amp;to=DXB</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
   </url>
 
 </urlset>

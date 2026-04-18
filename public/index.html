@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-title" content="NordicWings" />
   <link rel="apple-touch-icon" href="/icon-192.svg" />
   <!-- ===== SEO: Core Meta Tags ===== -->
-  <meta name="description" content="NordicWings - Book cheap flights from Helsinki to anywhere worldwide. Compare 500+ airlines, instant booking, secure Stripe payment. Best prices to London, Dubai, Bangkok, New York, Manila and more." />
-  <meta name="keywords" content="cheap flights, book flights online, NordicWings, Helsinki flights, flights from Finland, Helsinki to London, Helsinki to Dubai, Helsinki to Bangkok, Helsinki to New York, Manila to Helsinki, compare airlines, airline tickets, cheap airfare, flight booking, last minute flights, budget flights Europe, flights to Asia, international flights Finland" />
+  <meta name="description" content="NordicWings – Search cheap flights from Finland to Philippines, Asia, Europe & worldwide. Compare Finnair, Emirates, Qatar Airways. Book via Skyscanner, Google Flights & Jetradar. Best prices Helsinki to Manila, Davao, Cebu." />
+  <meta name="keywords" content="cheap flights Finland to Philippines, Helsinki to Manila flights, Helsinki to Davao flights, flights from Finland to Philippines, halpa lento Helsinki Manila, lento Helsinki Davao, cheap flights HEL MNL, Finland Philippines lento, NordicWings, flights from Oulu to Manila, flights from Tampere to Philippines, Finnair Philippines, Helsinki to Cebu, compare flights Finland, book flights online Finland, halpalennot Suomi, lentoja Suomesta Filippiineille, cheap international flights Helsinki" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="google-site-verification" content="uSenGe-ZEE8fio43miDCTObGcB2uoOmY3w5SMNFMPHw" />
   <meta name="author" content="NordicWings" />
@@ -28,26 +28,76 @@
   <!-- ===== SEO: Open Graph (Facebook / LinkedIn sharing) ===== -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nordicwings.net/" />
-  <meta property="og:title" content="NordicWings - Find and Book Cheap Flights" />
-  <meta property="og:description" content="Search and compare cheap flights from 500+ airlines worldwide. Book flights to Europe, Asia, Americas and beyond. Fast, secure booking." />
+  <meta property="og:title" content="NordicWings – Cheap Flights Finland to Philippines & Worldwide" />
+  <meta property="og:description" content="Find cheap flights from Finland to Philippines, Asia, Europe and worldwide. Compare Finnair, Emirates, Qatar Airways prices. Book via Skyscanner & Jetradar." />
   <meta property="og:image" content="https://nordicwings.net/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="NordicWings" />
   <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="fi_FI" />
 
   <!-- ===== SEO: Twitter Card ===== -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@JennamaeSa87519" />
   <meta name="twitter:creator" content="@JennamaeSa87519" />
   <meta name="twitter:url" content="https://nordicwings.net/" />
-  <meta name="twitter:title" content="NordicWings - Book Cheap Flights from Helsinki" />
-  <meta name="twitter:description" content="Compare 500+ airlines and book cheap flights from Finland worldwide. Instant booking, secure payment. Helsinki to London, Dubai, Bangkok & more." />
+  <meta name="twitter:title" content="NordicWings – Cheap Flights Finland to Philippines" />
+  <meta name="twitter:description" content="Search cheap flights from Finland to Philippines, Manila, Davao, Cebu. Compare airlines & book via Skyscanner, Jetradar, Google Flights." />
   <meta name="twitter:image" content="https://nordicwings.net/og-image.png" />
 
   <!-- ===== SEO: Geo targeting ===== -->
   <meta name="geo.region" content="FI" />
+  <meta name="geo.placename" content="Helsinki, Finland" />
   <meta name="language" content="English" />
+
+  <!-- ===== SEO: Structured Data (helps Google show rich results) ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NordicWings",
+    "url": "https://nordicwings.net",
+    "description": "Search and compare cheap flights from Finland to Philippines, Asia, Europe and worldwide.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://nordicwings.net/?from={origin}&to={destination}&date={date}"
+      },
+      "query-input": "required name=origin required name=destination required name=date"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "NordicWings",
+      "url": "https://nordicwings.net",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://nordicwings.net/icon-192.svg"
+      }
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TravelAgency",
+    "name": "NordicWings",
+    "url": "https://nordicwings.net",
+    "description": "Compare and book cheap flights from Finland to Philippines, Asia, Europe and worldwide. Best prices guaranteed.",
+    "areaServed": ["Finland", "Philippines", "Europe", "Asia"],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Flight Search",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Flight", "name": "Helsinki to Manila flights" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Flight", "name": "Helsinki to Davao flights" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Flight", "name": "Helsinki to Cebu flights" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Flight", "name": "Finland to Philippines flights" } }
+      ]
+    }
+  }
+  </script>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
