@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-  <\!-- Homepage -->
   <url>
     <loc>https://nordicwings.net/</loc>
     <lastmod>2026-04-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-
-  <\!-- Popular routes: Finland to Philippines -->
   <url>
     <loc>https://nordicwings.net/?from=HEL&amp;to=MNL</loc>
     <lastmod>2026-04-18</lastmod>
@@ -40,8 +36,6 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-
-  <\!-- Popular routes: Finland to Europe -->
   <url>
     <loc>https://nordicwings.net/?from=HEL&amp;to=LHR</loc>
     <lastmod>2026-04-18</lastmod>
@@ -52,7 +46,7 @@
     <loc>https://nordicwings.net/?from=HEL&amp;to=CDG</loc>
     <lastmod>2026-04-18</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://nordicwings.net/?from=HEL&amp;to=BCN</loc>
@@ -66,8 +60,6 @@
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-
-  <\!-- Popular routes: Finland to Asia -->
   <url>
     <loc>https://nordicwings.net/?from=HEL&amp;to=BKK</loc>
     <lastmod>2026-04-18</lastmod>
@@ -86,5 +78,4 @@
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-
 </urlset>
