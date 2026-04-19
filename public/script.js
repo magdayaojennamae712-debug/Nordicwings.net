@@ -18,7 +18,7 @@ const FIREBASE_CONFIG = {
 
 // ── YOUR STRIPE PUBLISHABLE KEY ───────────────────────────────
 // Get this from: Stripe Dashboard → Developers → API Keys
-const STRIPE_PUBLISHABLE_KEY = "pk_test_51TLzxKAcVzPDklFmI7KvmRH5mfEBgFSD8VKpz9b0USzbh4QeSmiAhfyXCBF0PkcTNh791ZpzKDCxFekuKkRTspkN00duTwNGZm";
+const STRIPE_PUBLISHABLE_KEY = "pk_live_51TLzx6A2y3gkkjexteIatqrlYXOzr0czlPkEN4F2faog5HqFSQM574swwi0HVrsMt4kr6gYdiyeZvvC0jS9tPuDH00KmkEAZry";
 
 // ─────────────────────────────────────────────────────────────
 // FIREBASE INIT
