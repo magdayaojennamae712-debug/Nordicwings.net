@@ -120,6 +120,107 @@ function isValidDate(dateStr) {
 const RAPIDAPI_KEY  = process.env.RAPIDAPI_KEY;
 const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 
+// ── Duffel API config ─────────────────────────────────────────
+const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
+const DUFFEL_BASE_URL = 'https://api.duffel.com';
+
+async function searchDuffelFlights(orig, dest, date, adults) {
+  if (!DUFFEL_API_KEY) return null;
+
+  // Build passengers array
+  const passengers = [];
+  for (let i = 0; i < adults; i++) passengers.push({ type: 'adult' });
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await fetch(`${DUFFEL_BASE_URL}/air/offer_requests?return_offers=true`, {
+      method: 'POST',
+      headers: {
+        'Authorization':  `Bearer ${DUFFEL_API_KEY}`,
+        'Duffel-Version': 'v2',
+        'Content-Type':   'application/json',
+        'Accept':         'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          slices: [{ origin: orig, destination: dest, departure_date: date }],
+          passengers,
+          cabin_class: 'economy'
+        }
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Duffel error response:', err.substring(0, 300));
+      return null;
+    }
+
+    const json = await res.json();
+    const offers = json?.data?.offers || [];
+    if (!offers.length) {
+      console.log('Duffel returned 0 offers');
+      return null;
+    }
+
+    console.log(`Duffel returned ${offers.length} offers`);
+
+    // Map Duffel offers to NordicWings flight format
+    const flights = [];
+    for (let i = 0; i < Math.min(offers.length, 10); i++) {
+      try {
+        const offer = offers[i];
+        const slice = offer.slices?.[0];
+        if (!slice) continue;
+
+        const segments = (slice.segments || []).map(seg => ({
+          departure: { iataCode: seg.origin?.iata_code || orig, at: seg.departing_at || date },
+          arrival:   { iataCode: seg.destination?.iata_code || dest, at: seg.arriving_at || date },
+          carrierCode: seg.marketing_carrier?.iata_code || seg.operating_carrier?.iata_code || 'XX',
+          number: seg.marketing_carrier_flight_designator?.flight_number || String(i * 10 + 100),
+          duration: seg.duration || 'PT2H0M'
+        }));
+
+        if (!segments.length) continue;
+
+        const price = parseFloat(offer.total_amount || 0);
+        const cabin = offer.slices?.[0]?.segments?.[0]?.passengers?.[0]?.cabin_class_marketing_name || 'ECONOMY';
+        const durationMins = slice.duration
+          ? (parseInt(slice.duration.match(/(\d+)H/)?.[1] || 0) * 60 + parseInt(slice.duration.match(/(\d+)M/)?.[1] || 0))
+          : 120;
+
+        flights.push({
+          id: `duffel-${offer.id}`,
+          price: {
+            grandTotal: price.toFixed(2),
+            currency:   offer.total_currency || 'EUR',
+            fees:       [{ amount: (price * 0.10).toFixed(2) }]
+          },
+          numberOfBookableSeats: offer.available_services?.length || 9,
+          itineraries: [{
+            duration: slice.duration || `PT${Math.floor(durationMins/60)}H${durationMins%60}M`,
+            segments
+          }],
+          travelerPricings: [{
+            fareDetailsBySegment: [{ cabin: cabin.toUpperCase() }]
+          }]
+        });
+      } catch (mapErr) {
+        console.error('Duffel map error:', mapErr.message);
+      }
+    }
+    return flights.length ? flights : null;
+  } catch (err) {
+    clearTimeout(timeout);
+    console.error('Duffel search error:', err.message);
+    return null;
+  }
+}
+
 // Helper: make a fetch request to Sky Scrapper
 async function skyFetch(path, params) {
   const url = new URL(`https://${RAPIDAPI_HOST}${path}`);
@@ -607,6 +708,17 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
 
   // Demo flights — used as fallback if all APIs fail
   const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+
+  // ── Try Duffel first (real flights, free API) ────────────────
+  if (DUFFEL_API_KEY) {
+    console.log('Trying Duffel API...');
+    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+    if (duffelFlights && duffelFlights.length) {
+      console.log(`Duffel returned ${duffelFlights.length} real flights!`);
+      return res.json(duffelFlights);
+    }
+    console.log('Duffel returned no results — trying Sky Scrapper...');
+  }
 
   // If no API key configured, return demo flights immediately
   if (!RAPIDAPI_KEY) {
