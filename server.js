@@ -123,6 +123,7 @@ const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 // ── Duffel API config ─────────────────────────────────────────
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
+const MARKUP_PERCENT  = 0.10; // 10% margin added to all Duffel prices
 
 async function searchDuffelFlights(orig, dest, date, adults) {
   if (!DUFFEL_API_KEY) return null;
@@ -187,7 +188,8 @@ async function searchDuffelFlights(orig, dest, date, adults) {
 
         if (!segments.length) continue;
 
-        const price = parseFloat(offer.total_amount || 0);
+        const basePrice   = parseFloat(offer.total_amount || 0);
+        const markedPrice = Math.round(basePrice * (1 + MARKUP_PERCENT) * 100) / 100; // 10% markup
         const cabin = offer.slices?.[0]?.segments?.[0]?.passengers?.[0]?.cabin_class_marketing_name || 'ECONOMY';
         const durationMins = slice.duration
           ? (parseInt(slice.duration.match(/(\d+)H/)?.[1] || 0) * 60 + parseInt(slice.duration.match(/(\d+)M/)?.[1] || 0))
@@ -195,10 +197,12 @@ async function searchDuffelFlights(orig, dest, date, adults) {
 
         flights.push({
           id: `duffel-${offer.id}`,
+          duffelOfferId: offer.id,         // store for booking
+          duffelBasePrice: basePrice,      // what Duffel charges us
           price: {
-            grandTotal: price.toFixed(2),
+            grandTotal: markedPrice.toFixed(2),  // what customer pays (with markup)
             currency:   offer.total_currency || 'EUR',
-            fees:       [{ amount: (price * 0.10).toFixed(2) }]
+            fees:       [{ amount: (basePrice * 0.10).toFixed(2) }]
           },
           numberOfBookableSeats: offer.available_services?.length || 9,
           itineraries: [{
@@ -793,6 +797,82 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     console.error('Flight search error:', err.message);
     console.log('Returning demo flights as fallback');
     return res.json(demoFlights);
+  }
+});
+
+// ============================================================
+// ROUTE: POST /api/bookings/create
+// Books a real flight via Duffel using a live offer ID.
+// Customer has already paid via Stripe before this is called.
+// Body: { offerId, passengers: [{title,given_name,family_name,born_on,gender,email,phone}] }
+// ============================================================
+app.post('/api/bookings/create', async (req, res) => {
+  const { offerId, passengers } = req.body;
+
+  if (!offerId || !passengers || !passengers.length) {
+    return res.status(400).json({ error: 'Missing offer ID or passenger details.' });
+  }
+  if (!DUFFEL_API_KEY) {
+    return res.status(500).json({ error: 'Booking service not configured.' });
+  }
+
+  // Validate passengers
+  for (const p of passengers) {
+    if (!p.given_name || !p.family_name || !p.born_on || !p.gender || !p.email) {
+      return res.status(400).json({ error: 'All passenger details are required.' });
+    }
+  }
+
+  try {
+    const orderRes = await fetch(`${DUFFEL_BASE_URL}/air/orders`, {
+      method: 'POST',
+      headers: {
+        'Authorization':  `Bearer ${DUFFEL_API_KEY}`,
+        'Duffel-Version': 'v2',
+        'Content-Type':   'application/json',
+        'Accept':         'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          selected_offers: [offerId],
+          passengers: passengers.map((p, i) => ({
+            id:          `passenger-${i}`,
+            title:       p.title || 'mr',
+            given_name:  sanitize(p.given_name),
+            family_name: sanitize(p.family_name),
+            born_on:     p.born_on,
+            gender:      p.gender,
+            email:       sanitize(p.email),
+            phone_number: p.phone || '+358000000000'
+          })),
+          payments: [{
+            type:     'balance',
+            currency: 'EUR',
+            amount:   String(req.body.basePrice || '0')
+          }]
+        }
+      })
+    });
+
+    const orderData = await orderRes.json();
+    if (!orderRes.ok) {
+      console.error('Duffel booking error:', JSON.stringify(orderData).substring(0, 500));
+      return res.status(400).json({ error: orderData?.errors?.[0]?.message || 'Booking failed. Please try again.' });
+    }
+
+    const order = orderData.data;
+    console.log(`Booking created! Order ID: ${order.id}, Booking ref: ${order.booking_reference}`);
+
+    res.json({
+      success:          true,
+      orderId:          order.id,
+      bookingReference: order.booking_reference,
+      passengerName:    `${passengers[0].given_name} ${passengers[0].family_name}`,
+      email:            passengers[0].email
+    });
+  } catch (err) {
+    console.error('Booking error:', err.message);
+    res.status(500).json({ error: 'Booking failed. Please try again.' });
   }
 });
 
