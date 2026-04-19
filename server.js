@@ -123,7 +123,8 @@ const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 // ── Duffel API config ─────────────────────────────────────────
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
-const MARKUP_PERCENT  = 0.10; // 10% margin added to all Duffel prices
+const MARKUP_DOMESTIC      = 0.05; // 5% margin for cheap/domestic flights (under €150)
+const MARKUP_INTERNATIONAL = 0.10; // 10% margin for international flights (€150+)
 
 async function searchDuffelFlights(orig, dest, date, adults) {
   if (!DUFFEL_API_KEY) return null;
@@ -189,7 +190,8 @@ async function searchDuffelFlights(orig, dest, date, adults) {
         if (!segments.length) continue;
 
         const basePrice   = parseFloat(offer.total_amount || 0);
-        const markedPrice = Math.round(basePrice * (1 + MARKUP_PERCENT) * 100) / 100; // 10% markup
+        const markup      = basePrice < 150 ? MARKUP_DOMESTIC : MARKUP_INTERNATIONAL;
+        const markedPrice = Math.round(basePrice * (1 + markup) * 100) / 100; // smart markup
         const cabin = offer.slices?.[0]?.segments?.[0]?.passengers?.[0]?.cabin_class_marketing_name || 'ECONOMY';
         const durationMins = slice.duration
           ? (parseInt(slice.duration.match(/(\d+)H/)?.[1] || 0) * 60 + parseInt(slice.duration.match(/(\d+)M/)?.[1] || 0))
