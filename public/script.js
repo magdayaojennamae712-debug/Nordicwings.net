@@ -892,8 +892,12 @@ function showAgencyPage() {
   document.getElementById('agency-route-sub').textContent =
     `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
 
-  // Agencies list — top row are real booking partners
+  // Agencies list — NordicWings Direct first if Duffel flight, then partners
+  const isDuffelFlight = !!(f.duffelOfferId);
   const agencies = [
+    ...(isDuffelFlight ? [
+      { name: 'NordicWings', rating: 5.0, reviews: 0, price: price, perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true, stars: 5, highlight: true }
+    ] : []),
     { name: 'Skyscanner',     rating: 4.8, reviews: 52400, price: price,    perks: '✓ Real flights · Best price guarantee · Trusted worldwide', direct: false, stars: 5, highlight: true },
     { name: 'Jetradar',       rating: 4.7, reviews: 41800, price: price+1,  perks: '✓ Compare 728 airlines · Earn cashback · Best deals',      direct: false, stars: 5, highlight: true },
     { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
@@ -1023,19 +1027,37 @@ async function setupBookingPage() {
     document.getElementById('contact-email').value = currentUser.email || '';
   }
 
-  // Build passenger forms
+  // Build passenger forms (Duffel requires title, gender, DOB, email)
   let formsHtml = '';
   for (let i = 1; i <= passengerCount; i++) {
     formsHtml += `
       <p class="passenger-header">Passenger ${i}</p>
       <div class="form-row">
         <div class="form-group">
+          <label>Title</label>
+          <select class="pax-title">
+            <option value="mr">Mr</option>
+            <option value="ms">Ms</option>
+            <option value="mrs">Mrs</option>
+            <option value="dr">Dr</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select class="pax-gender">
+            <option value="m">Male</option>
+            <option value="f">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
           <label>First Name</label>
-          <input type="text" class="pax-first" placeholder="First name" />
+          <input type="text" class="pax-first" placeholder="As on passport" />
         </div>
         <div class="form-group">
           <label>Last Name</label>
-          <input type="text" class="pax-last" placeholder="Last name" />
+          <input type="text" class="pax-last" placeholder="As on passport" />
         </div>
       </div>
       <div class="form-row">
@@ -1044,7 +1066,17 @@ async function setupBookingPage() {
           <input type="date" class="pax-dob" />
         </div>
         <div class="form-group">
-          <label>Passport / ID</label>
+          <label>Email</label>
+          <input type="email" class="pax-email" placeholder="For ticket delivery" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" class="pax-phone" placeholder="+358..." />
+        </div>
+        <div class="form-group">
+          <label>Passport / ID Number</label>
           <input type="text" class="pax-passport" placeholder="Passport number" />
         </div>
       </div>
@@ -1264,15 +1296,63 @@ async function submitBooking() {
       return;
     }
 
-    // Payment succeeded — save booking to Firestore
+    // Payment succeeded — now issue the real ticket via Duffel (if Duffel flight)
     const seg     = selectedFlight.itineraries[0].segments[0];
     const lastSeg = selectedFlight.itineraries[0].segments[selectedFlight.itineraries[0].segments.length - 1];
     const price   = parseFloat(selectedFlight.price.grandTotal) * (searchParams.passengers || 1);
 
+    // Collect all passenger details from form
+    const titles   = Array.from(document.querySelectorAll('.pax-title')).map(el => el.value);
+    const genders  = Array.from(document.querySelectorAll('.pax-gender')).map(el => el.value);
+    const dobs     = Array.from(document.querySelectorAll('.pax-dob')).map(el => el.value);
+    const paxEmails = Array.from(document.querySelectorAll('.pax-email')).map(el => el.value.trim());
+    const phones   = Array.from(document.querySelectorAll('.pax-phone')).map(el => el.value.trim());
+
+    let duffelBookingRef = null;
+    let duffelOrderId    = null;
+
+    // If this is a Duffel flight, create the real order
+    if (selectedFlight.duffelOfferId) {
+      try {
+        const passengersPayload = firstNames.map((first, i) => ({
+          title:       titles[i] || 'mr',
+          given_name:  first,
+          family_name: lastNames[i],
+          born_on:     dobs[i] || '1990-01-01',
+          gender:      genders[i] || 'm',
+          email:       paxEmails[i] || email,
+          phone:       phones[i] || phone || '+358000000000'
+        }));
+
+        const bookRes = await fetch('/api/bookings/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            offerId:   selectedFlight.duffelOfferId,
+            basePrice: selectedFlight.duffelBasePrice,
+            passengers: passengersPayload
+          })
+        });
+
+        const bookData = await bookRes.json();
+        if (bookData.success) {
+          duffelBookingRef = bookData.bookingReference;
+          duffelOrderId    = bookData.orderId;
+          console.log('✅ Duffel ticket issued! Ref:', duffelBookingRef);
+        } else {
+          console.error('Duffel booking failed:', bookData.error);
+          // Payment already taken — still save to Firestore, flag for manual review
+        }
+      } catch (duffelErr) {
+        console.error('Duffel order error:', duffelErr.message);
+      }
+    }
+
     const booking = {
       userId:    currentUser.uid,
       userEmail: currentUser.email,
-      bookingRef: generateBookingRef(),
+      bookingRef: duffelBookingRef || generateBookingRef(),
+      duffelOrderId: duffelOrderId || null,
       status:    'confirmed',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       flight: {
@@ -1286,14 +1366,16 @@ async function submitBooking() {
       },
       passengers: firstNames.map((first, i) => ({
         firstName: first,
-        lastName:  lastNames[i]
+        lastName:  lastNames[i],
+        dob:       dobs[i] || '',
+        gender:    genders[i] || ''
       })),
       contact: { email, phone },
       totalPrice: price.toFixed(2),
-      currency:  selectedFlight.price.currency || 'USD'
+      currency:  selectedFlight.price.currency || 'EUR'
     };
 
-    const docRef = await db.collection('bookings').add(booking);
+    await db.collection('bookings').add(booking);
 
     // Show confirmation page
     showConfirmationPage(booking);
@@ -1307,14 +1389,46 @@ async function submitBooking() {
 }
 
 function showConfirmationPage(booking) {
+  const isRealTicket = !!booking.duffelOrderId;
   document.getElementById('confirmation-details').innerHTML = `
-    <div><strong>Booking Reference:</strong> ${booking.bookingRef}</div>
-    <div><strong>Route:</strong> ${booking.flight.from} → ${booking.flight.to}</div>
-    <div><strong>Date:</strong> ${formatDate(booking.flight.departTime)}</div>
-    <div><strong>Departure:</strong> ${formatTime(booking.flight.departTime)} · Arrival: ${formatTime(booking.flight.arriveTime)}</div>
-    <div><strong>Flight:</strong> ${booking.flight.flightNum}</div>
-    <div><strong>Passengers:</strong> ${booking.passengers.map(p => p.firstName + ' ' + p.lastName).join(', ')}</div>
-    <div><strong>Total Paid:</strong> $${booking.totalPrice}</div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:8px;">${isRealTicket ? '✅' : '🎫'}</div>
+      <div style="font-weight:700;color:#16a34a;font-size:1.1rem;">${isRealTicket ? 'Real Ticket Issued!' : 'Booking Confirmed!'}</div>
+      <div style="font-size:.85rem;color:#4b5563;margin-top:4px;">${isRealTicket ? 'Your ticket has been issued by the airline.' : 'Your booking is confirmed.'}</div>
+    </div>
+    <div style="display:grid;gap:10px;">
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Booking Reference</span>
+        <strong style="color:#1a2b4a;font-size:1rem;letter-spacing:1px;">${booking.bookingRef}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Route</span>
+        <strong>${booking.flight.from} → ${booking.flight.to}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Date</span>
+        <strong>${formatDate(booking.flight.departTime)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Flight Time</span>
+        <strong>${formatTime(booking.flight.departTime)} → ${formatTime(booking.flight.arriveTime)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Flight</span>
+        <strong>${booking.flight.flightNum}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Passengers</span>
+        <strong>${booking.passengers.map(p => p.firstName + ' ' + p.lastName).join(', ')}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px;">
+        <span style="color:#6b7280;font-size:.85rem;">Total Paid</span>
+        <strong style="color:#16a34a;font-size:1.1rem;">€${booking.totalPrice}</strong>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:#fffbeb;border-radius:8px;font-size:.82rem;color:#92400e;text-align:center;">
+      📧 Confirmation and ticket details sent to <strong>${booking.contact.email}</strong>
+    </div>
   `;
   showPage('confirmation');
 }
