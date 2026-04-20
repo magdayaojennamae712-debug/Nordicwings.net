@@ -1248,3 +1248,30 @@ img { max-width: 100%; display: block; }
   .contact-card { padding: 16px 18px; }
   .contact-info-box { padding: 20px 18px; }
 }
+
+/* ══════════════════════════════════════════════
+   FOOTER SOCIAL MEDIA BANNER
+══════════════════════════════════════════════ */
+.footer-social-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px; padding: 20px 28px; margin-bottom: 32px;
+}
+.fsb-text { display: flex; flex-direction: column; gap: 4px; }
+.fsb-text strong { color: #fff; font-size: 1rem; font-weight: 700; }
+.fsb-text span { color: #94a3b8; font-size: .85rem; }
+.fsb-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.fsb-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px;
+  font-size: .88rem; font-weight: 700; text-decoration: none;
+  transition: all .15s; border: none; cursor: pointer;
+}
+.fsb-fb { background: #1877f2; color: #fff; }
+.fsb-fb:hover { background: #1558b0; text-decoration: none; transform: translateY(-1px); }
+.fsb-ig { background: linear-gradient(45deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888); color: #fff; }
+.fsb-ig:hover { opacity: .9; text-decoration: none; transform: translateY(-1px); }
+@media(max-width:600px){
+  .footer-social-banner { flex-direction: column; align-items: flex-start; }
+}
