@@ -1725,16 +1725,14 @@ function renderAdminTable(bookings) {
     </tr>
   `).join('');
 }
-/* ══════════════════════════════════════════════
-   SUPPORT / FAQ PAGE — accordion toggle
-══════════════════════════════════════════════ */
+// FAQ accordion toggle
 function toggleFaq(btn) {
   const answer = btn.nextElementSibling;
   const isOpen = btn.classList.contains('open');
 
   // Close all open items in the same section
   const section = btn.closest('.faq-section');
-  section.querySelectorAll('.faq-q.open').forEach(b => {
+  section.querySelectorAll('.faq-q.open').forEach(function(b) {
     b.classList.remove('open');
     b.nextElementSibling.classList.remove('open');
   });
