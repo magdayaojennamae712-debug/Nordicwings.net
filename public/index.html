@@ -761,7 +761,7 @@
               <span class="logo-icon">✈</span> NordicWings
             </div>
             <p>Making flight booking simple, fast and trustworthy for travelers worldwide. Your trusted partner for global flight search and booking.</p>
-            <a href="mailto:hello@nordicwings.net" class="footer-email">📧 hello@nordicwings.net</a>
+            <a href="javascript:void(0)" onclick="showPage('contact')" class="footer-email">📧 hello@nordicwings.net</a>
             <div class="footer-social" style="margin-top:14px;">
               <a href="https://www.facebook.com/profile.php?id=61570661157217" target="_blank" class="social-btn social-fb" aria-label="Facebook">f Facebook</a>
               <a href="https://www.instagram.com/nord.icwings/" target="_blank" class="social-btn social-ig" aria-label="Instagram">&#128247; Instagram</a>
@@ -1270,10 +1270,79 @@
           <div class="support-contact-icon">💬</div>
           <h3>Still have a question?</h3>
           <p>Our support team is here to help. Send us an email and we will reply within 24 hours.</p>
-          <a href="mailto:hello@nordicwings.net" class="btn-primary">✉️ Email Support</a>
+          <button class="btn-primary" onclick="showPage('contact')" style="border:none;cursor:pointer;">✉️ Contact Us</button>
         </div>
 
       </div><!-- /faq-container -->
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE: CONTACT US
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-contact" class="page">
+    <div class="page-inner contact-page">
+      <button class="back-btn" onclick="showPage('support')" style="margin-bottom:24px;">← Back to Support</button>
+
+      <h1 class="contact-title">Contact NordicWings</h1>
+      <p class="contact-subtitle">We are happy to help. Choose the best way to reach us.</p>
+
+      <!-- Quick answer cards -->
+      <p class="contact-section-label">Okay, these articles might answer your questions</p>
+      <div class="contact-cards">
+        <button class="contact-card" onclick="showPage('support')">
+          <div class="contact-card-text">
+            <strong>How do I book a flight?</strong>
+            <span>Search your route, pick a flight, fill in passenger details and pay securely.</span>
+          </div>
+          <span class="contact-card-arrow">↗</span>
+        </button>
+        <button class="contact-card" onclick="showPage('support')">
+          <div class="contact-card-text">
+            <strong>Where is my booking confirmation?</strong>
+            <span>Your booking reference is shown on screen right after payment. Contact us if you need it resent.</span>
+          </div>
+          <span class="contact-card-arrow">↗</span>
+        </button>
+        <button class="contact-card" onclick="showPage('support')">
+          <div class="contact-card-text">
+            <strong>Can I cancel or change my flight?</strong>
+            <span>Cancellation options depend on your fare type. Contact us with your booking reference and we will help.</span>
+          </div>
+          <span class="contact-card-arrow">↗</span>
+        </button>
+      </div>
+
+      <!-- Contact us section -->
+      <p class="contact-section-label" style="margin-top:40px;">If you still need help, you can contact us here</p>
+      <div class="contact-info-box">
+        <p class="contact-info-note">For faster service, please include your <strong>booking reference number</strong> in your message. Customers with active bookings are prioritised.</p>
+
+        <div class="contact-method">
+          <span class="contact-method-icon">✉️</span>
+          <div>
+            <a href="mailto:hello@nordicwings.net" class="contact-email-link">hello@nordicwings.net</a>
+            <p class="contact-method-detail">Mon–Fri 09:00–18:00 · Response within 24 hours</p>
+          </div>
+        </div>
+
+        <div class="contact-method" style="margin-top:20px;">
+          <span class="contact-method-icon">📘</span>
+          <div>
+            <a href="https://www.facebook.com/profile.php?id=61570661157217" target="_blank" class="contact-email-link">NordicWings on Facebook</a>
+            <p class="contact-method-detail">Send us a message on Facebook for quick replies</p>
+          </div>
+        </div>
+
+        <div class="contact-method" style="margin-top:20px;">
+          <span class="contact-method-icon">📸</span>
+          <div>
+            <a href="https://www.instagram.com/nord.icwings/" target="_blank" class="contact-email-link">@nord.icwings on Instagram</a>
+            <p class="contact-method-detail">DM us on Instagram anytime</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
