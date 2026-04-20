@@ -1184,19 +1184,17 @@ async function setupBookingPage() {
     </div>
   `;
 
-  const taxAmount  = parseFloat(selectedFlight.price.fees?.[0]?.amount || (price * 0.1)).toFixed(2);
-  const baseAmount = (price - taxAmount).toFixed(2);
-  const total      = price.toFixed(2);
-
-  const airportTax  = (taxAmount * 0.5 * passengerCount).toFixed(2);
-  const fuelSurcharge = (taxAmount * 0.3 * passengerCount).toFixed(2);
-  const serviceFee  = (taxAmount * 0.2 * passengerCount).toFixed(2);
+  // Use real Duffel base price if available, otherwise estimate
+  const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (price / 1.02));
+  const nwFee       = Math.max(0, price - duffelBase);
+  const airlineFare = (duffelBase * 0.88 * passengerCount).toFixed(2);
+  const taxesTotal  = (duffelBase * 0.12 * passengerCount).toFixed(2);
+  const nwFeeTotal  = (nwFee * passengerCount).toFixed(2);
 
   document.getElementById('price-breakdown').innerHTML = `
-    <div class="price-row"><span>Base fare × ${passengerCount}</span><span>$${(baseAmount * passengerCount).toFixed(2)}</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Airport taxes</span><span>$${airportTax}</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Fuel surcharge</span><span>$${fuelSurcharge}</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Service fee</span><span>$${serviceFee}</span></div>
+    <div class="price-row"><span>Airline fare × ${passengerCount}</span><span>$${airlineFare}</span></div>
+    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Taxes &amp; fees</span><span>$${taxesTotal}</span></div>
+    ${nwFee > 0.01 ? `<div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee</span><span>$${nwFeeTotal}</span></div>` : ''}
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Baggage included ✓</span><span>$0.00</span></div>
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Meals included ✓</span><span>$0.00</span></div>
     <div class="price-row total"><span>Total (USD)</span><span>$${(price * passengerCount).toFixed(2)}</span></div>
