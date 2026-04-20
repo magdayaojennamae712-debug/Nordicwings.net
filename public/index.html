@@ -233,6 +233,7 @@
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('home')">Home</a>
         <a href="#how-it-works" class="nav-link">How it Works</a>
         <a href="#destinations" class="nav-link">Destinations</a>
+        <a href="javascript:void(0)" class="nav-link" onclick="showPage('support')">Support</a>
         <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">My Bookings</button>
         <button class="btn-ghost" id="nav-admin" onclick="showPage('admin')" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">📊 Business</button>
         <button class="btn-ghost" id="nav-login" onclick="openAuthModal('login')">Sign In</button>
@@ -1042,6 +1043,237 @@
           <tbody id="admin-table-body"></tbody>
         </table>
       </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE: SUPPORT / FAQ
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-support" class="page">
+    <div class="page-inner support-page">
+
+      <!-- Hero -->
+      <div class="support-hero">
+        <h1>How can we help you?</h1>
+        <p>Find answers to common questions about booking flights with NordicWings</p>
+        <div class="support-contact-bar">
+          <span>✉️ <a href="mailto:support@nordicwings.net">support@nordicwings.net</a></span>
+          <span>⏰ Response within 24 hours</span>
+        </div>
+      </div>
+
+      <!-- FAQ Sections -->
+      <div class="faq-container">
+
+        <!-- Section 1: Top Questions -->
+        <div class="faq-section">
+          <h2 class="faq-section-title">⭐ Top questions</h2>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I book a flight on NordicWings?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Enter your departure city, destination, travel dates and number of passengers on the home page, then click <strong>Search Flights</strong>. Browse the results and click <strong>Book Now</strong> on the flight you want. You will be guided through a secure passenger details form and payment.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Is my booking confirmed immediately?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Yes! When you book directly through NordicWings (look for the blue <strong>"Book directly"</strong> badge), your ticket is issued in real-time via our airline system. You will receive a booking reference instantly on screen.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              What payment methods do you accept?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>We accept all major credit and debit cards (Visa, Mastercard, American Express) through our secure Stripe payment system. Your card details are never stored on our servers.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Can I book a flight for someone else?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Yes. During checkout you can enter the passenger's details (name, date of birth, passport number) separately from your own contact email. The ticket will be issued in the passenger's name.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Do prices include taxes and fees?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Yes. All prices shown on NordicWings include airport taxes and carrier fees. There are no hidden charges — the price you see is the price you pay.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: About the service -->
+        <div class="faq-section">
+          <h2 class="faq-section-title">ℹ️ About the service</h2>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              What is NordicWings?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>NordicWings is a Finnish online travel agency specialising in flights from Finland to the Philippines and other popular destinations. We offer competitive prices by comparing multiple airlines and booking systems.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How does NordicWings make money?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>We add a small service margin (5–10%) on top of the airline's base fare. This covers our operating costs and allows us to offer 24/7 support in Finnish and English. We are transparent — you are always shown the final price before paying.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Is NordicWings a registered company?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Yes. NordicWings is a registered business in Finland. We operate under Finnish consumer protection law and EU passenger rights regulations.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Which airlines does NordicWings work with?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>We search flights across major airlines including Finnair, Philippine Airlines, Etihad Airways, Qatar Airways, Emirates, and many more. The airlines available depend on your route and dates.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Ticket and check-in -->
+        <div class="faq-section">
+          <h2 class="faq-section-title">🎫 Ticket and check-in</h2>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Where is my e-ticket?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Your booking reference is shown on the confirmation screen immediately after payment. Please save or screenshot this reference. Contact us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a> with your booking reference and we will send your e-ticket to your email.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I check in for my flight?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Check-in is done directly with the airline, not through NordicWings. Visit the airline's official website and enter your booking reference (PNR) and last name. Most airlines open online check-in 24–48 hours before departure.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Can I add baggage to my booking?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Baggage allowance depends on the fare type. If you need to add extra baggage, you can do so directly on the airline's website using your booking reference after purchase. We are working on adding in-app baggage options soon.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              What documents do I need to travel to the Philippines?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Finnish citizens and EU residents do not need a visa for the Philippines for stays up to 30 days. You need a valid passport (at least 6 months validity beyond your travel dates) and a return or onward ticket. Always check the latest entry requirements with the Philippine embassy before travelling.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Can I cancel or change my flight?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Cancellation and change policies depend on the airline and fare type. Most economy fares are non-refundable or have a change fee. Contact us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a> as soon as possible and we will help you with the options available for your booking.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Technical info -->
+        <div class="faq-section">
+          <h2 class="faq-section-title">🔧 Technical info</h2>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Is my payment secure?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Yes. All payments are processed by <strong>Stripe</strong>, a globally trusted payment provider used by millions of businesses. We use SSL encryption on all pages. Your card details are never stored on our servers.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Why do I need to create an account?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Creating a free account lets you view your booking history and manage your trips in one place. You can also book as a guest — simply proceed through the checkout without signing in.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              The search is not showing results. What should I do?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>Please check that your travel dates are in the future and that you have selected a valid departure and destination airport. If the problem continues, try refreshing the page or contact us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a>.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              Which browser works best with NordicWings?
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-a">
+              <p>NordicWings works on all modern browsers including Chrome, Firefox, Safari, and Edge. We recommend keeping your browser up to date for the best experience. The site also works on mobile phones and tablets.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Still need help -->
+        <div class="support-contact-card">
+          <div class="support-contact-icon">💬</div>
+          <h3>Still have a question?</h3>
+          <p>Our support team is here to help. Send us an email and we will reply within 24 hours.</p>
+          <a href="mailto:support@nordicwings.net" class="btn-primary">✉️ Email Support</a>
+        </div>
+
+      </div><!-- /faq-container -->
     </div>
   </main>
 
