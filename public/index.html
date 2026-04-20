@@ -1435,11 +1435,28 @@
   <script>
     function toggleFaq(btn) {
       var answer = btn.nextElementSibling;
-      var icon = btn.querySelector('.faq-icon');
-      var isOpen = answer.style.maxHeight;
-      document.querySelectorAll('.faq-answer').forEach(function(a){ a.style.maxHeight=''; });
-      document.querySelectorAll('.faq-icon').forEach(function(i){ i.textContent='+'; });
-      if (!isOpen) { answer.style.maxHeight = answer.scrollHeight + 'px'; icon.textContent = '-'; }
+      if (!answer) return;
+      var isOpen = answer.style.display === 'block';
+
+      // Close all open FAQ answers on the page
+      document.querySelectorAll('.faq-answer, .faq-a').forEach(function(a) {
+        a.style.display = 'none';
+        a.classList.remove('open');
+      });
+      document.querySelectorAll('.faq-question, .faq-q').forEach(function(b) {
+        b.classList.remove('open');
+        var ic = b.querySelector('.faq-icon');
+        if (ic) ic.textContent = '+';
+      });
+
+      // If it was closed, open it
+      if (!isOpen) {
+        answer.style.display = 'block';
+        answer.classList.add('open');
+        btn.classList.add('open');
+        var icon = btn.querySelector('.faq-icon');
+        if (icon) icon.textContent = '-';
+      }
     }
     function quickSearch(from, to) {
       document.getElementById('origin-input').value = from;
