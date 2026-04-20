@@ -1740,7 +1740,7 @@ function toggleFaq(btn) {
   });
 
   // If it wasn't open, open it
-  if (\!isOpen) {
+  if (!isOpen) {
     btn.classList.add('open');
     answer.classList.add('open');
   }

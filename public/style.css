@@ -531,8 +531,8 @@ img { max-width: 100%; display: block; }
   text-decoration: none; white-space: nowrap;
 }
 .social-btn:hover { background: var(--blue); text-decoration: none; }
-.social-x:hover { background: #000; }
-.social-tiktok:hover { background: #ff0050; }
+.social-fb:hover { background: #1877f2; }
+.social-ig:hover { background: #c13584; }
 .footer-links h4 { color: white; font-size: .9rem; font-weight: 700; margin-bottom: 16px; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a {
