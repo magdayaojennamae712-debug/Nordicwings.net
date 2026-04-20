@@ -123,8 +123,8 @@ const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 // ── Duffel API config ─────────────────────────────────────────
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
-const MARKUP_DOMESTIC      = 0.05; // 5% margin for cheap/domestic flights (under €150)
-const MARKUP_INTERNATIONAL = 0.10; // 10% margin for international flights (€150+)
+const MARKUP_DOMESTIC      = 0.02; // 2% margin for domestic flights (under €150)
+const MARKUP_INTERNATIONAL = 0.05; // 5% margin for international flights (€150+)
 
 async function searchDuffelFlights(orig, dest, date, adults) {
   if (!DUFFEL_API_KEY) return null;
