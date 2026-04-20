@@ -497,10 +497,10 @@ img { max-width: 100%; display: block; }
 .faq-question:hover { background: var(--bg); }
 .faq-icon { font-size: 1.2rem; color: var(--blue); font-weight: 400; }
 .faq-answer {
-  max-height: 0; overflow: hidden; transition: max-height .3s ease;
-  padding: 0 20px; font-size: .9rem; color: var(--text-muted); line-height: 1.7;
+  display: none;
+  padding: 0 20px 18px; font-size: .9rem; color: var(--text-muted); line-height: 1.7;
 }
-.faq-answer[style*="max-height"] { padding: 0 20px 18px; }
+.faq-answer.open { display: block; }
 
 /* ── CTA Section ──────────────────────────────────────────── */
 .cta-section {

@@ -1725,21 +1725,32 @@ function renderAdminTable(bookings) {
     </tr>
   `).join('');
 }
-// FAQ accordion toggle
+// FAQ accordion toggle — works for both home page FAQ and support page FAQ
 function toggleFaq(btn) {
-  const answer = btn.nextElementSibling;
-  const isOpen = btn.classList.contains('open');
+  var answer = btn.nextElementSibling;
+  var isOpen = btn.classList.contains('open');
 
-  // Close all open items in the same section
-  const section = btn.closest('.faq-section');
-  section.querySelectorAll('.faq-q.open').forEach(function(b) {
-    b.classList.remove('open');
-    b.nextElementSibling.classList.remove('open');
-  });
+  // Determine the parent container (support page uses .faq-section, home uses .faq-list)
+  var container = btn.closest('.faq-section') || btn.closest('.faq-list');
 
-  // If it wasn't open, open it
+  // Close any currently open items inside this container
+  if (container) {
+    container.querySelectorAll('.faq-q.open, .faq-question.open').forEach(function(b) {
+      b.classList.remove('open');
+      var sib = b.nextElementSibling;
+      if (sib) {
+        sib.classList.remove('open');
+        sib.style.display = 'none';
+      }
+    });
+  }
+
+  // If it was closed, open it now
   if (!isOpen) {
     btn.classList.add('open');
-    answer.classList.add('open');
+    if (answer) {
+      answer.classList.add('open');
+      answer.style.display = 'block';
+    }
   }
 }
