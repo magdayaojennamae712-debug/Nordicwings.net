@@ -33,11 +33,15 @@ const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 // ─────────────────────────────────────────────────────────────
 // STATE — app-level variables
 // ─────────────────────────────────────────────────────────────
-let currentUser      = null;    // Firebase user object
-let selectedFlight   = null;    // The flight the user clicked on
-let searchParams     = {};      // Last search params (for display)
-let stripeElements   = null;    // Stripe Elements instance
-let cancelBookingId  = null;    // Booking being cancelled
+let currentUser          = null;    // Firebase user object
+let selectedFlight       = null;    // The outbound flight selected
+let selectedReturnFlight = null;    // The return flight selected (round trip)
+let outboundFlight       = null;    // Temp: holds outbound while searching return
+let isRoundTrip          = false;   // True if user chose round trip
+let searchReturnDate     = '';      // Return date string (YYYY-MM-DD)
+let searchParams         = {};      // Last search params (for display)
+let stripeElements       = null;    // Stripe Elements instance
+let cancelBookingId      = null;    // Booking being cancelled
 
 // ─────────────────────────────────────────────────────────────
 // DATE / TIME / DURATION HELPERS
@@ -653,12 +657,28 @@ async function searchFlights() {
   if (!departDate)                   return setError(errorEl, 'Please select a departure date.');
   if (new Date(departDate) < new Date().setHours(0,0,0,0)) return setError(errorEl, 'Departure date cannot be in the past.');
 
-  searchParams = { origin, dest, departDate, passengers };
+  // Capture trip type and return date
+  const activeTab = document.querySelector('.tab-btn.active');
+  isRoundTrip = activeTab?.dataset.type === 'round-trip';
+  searchReturnDate = document.getElementById('return-input')?.value || '';
+  if (isRoundTrip && !searchReturnDate) {
+    return setError(errorEl, 'Please select a return date.');
+  }
+  if (isRoundTrip && new Date(searchReturnDate) <= new Date(departDate)) {
+    return setError(errorEl, 'Return date must be after departure date.');
+  }
+
+  // Reset round trip state for new search
+  outboundFlight = null;
+  selectedReturnFlight = null;
+
+  searchParams = { origin, dest, departDate, returnDate: searchReturnDate, passengers, isRoundTrip };
 
   showPage('results');
   document.getElementById('results-loading').style.display = 'flex';
   document.getElementById('results-list').style.display    = 'none';
   document.getElementById('results-empty').style.display   = 'none';
+  document.getElementById('outbound-selected-banner').style.display = 'none';
   document.getElementById('results-heading').textContent   = `${origin} \u2192 ${dest}`;
   document.getElementById('results-subheading').textContent =
     `${formatDate(departDate)} \u00B7 ${passengers} passenger${passengers > 1 ? 's' : ''}`;
@@ -871,8 +891,73 @@ function sortFlights(by, btn) {
 }
 
 function selectFlight(index) {
-  selectedFlight = (window._flights || [])[index];
-  showAgencyPage();
+  const flight = (window._flights || [])[index];
+
+  if (isRoundTrip && !outboundFlight) {
+    // First selection = outbound flight — now search for return
+    outboundFlight = flight;
+    searchReturnFlightsAndShow();
+  } else if (isRoundTrip && outboundFlight) {
+    // Second selection = return flight — proceed to agency/booking
+    selectedFlight       = outboundFlight;
+    selectedReturnFlight = flight;
+    outboundFlight = null;
+    showAgencyPage();
+  } else {
+    // One-way trip
+    selectedFlight       = flight;
+    selectedReturnFlight = null;
+    showAgencyPage();
+  }
+}
+
+async function searchReturnFlightsAndShow() {
+  const { dest, origin, passengers } = searchParams;
+
+  // Show outbound-selected banner
+  const banner    = document.getElementById('outbound-selected-banner');
+  const bannerInfo = document.getElementById('outbound-selected-info');
+  if (banner && outboundFlight) {
+    const ob     = outboundFlight;
+    const obSeg  = ob.itineraries[0].segments[0];
+    const obLast = ob.itineraries[0].segments[ob.itineraries[0].segments.length - 1];
+    const airName = AIRLINE_NAMES[obSeg.carrierCode] || obSeg.carrierCode;
+    if (bannerInfo) bannerInfo.textContent =
+      `${airName} · ${obSeg.departure.iataCode} → ${obLast.arrival.iataCode} · ` +
+      `${formatDate(obSeg.departure.at)} · ${formatTime(obSeg.departure.at)} – ${formatTime(obLast.arrival.at)}`;
+    banner.style.display = 'flex';
+  }
+
+  // Update heading
+  document.getElementById('results-heading').textContent = `${dest} \u2192 ${origin}`;
+  document.getElementById('results-subheading').textContent =
+    `Return · ${formatDate(searchReturnDate)} · ${passengers} passenger${passengers > 1 ? 's' : ''}`;
+  document.getElementById('results-loading').style.display = 'flex';
+  document.getElementById('results-list').style.display    = 'none';
+  document.getElementById('results-empty').style.display   = 'none';
+
+  const qs = new URLSearchParams({
+    origin: dest, destination: origin,
+    departureDate: searchReturnDate, adults: passengers
+  });
+
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 20000);
+    const resp = await fetch(`/api/flights/search?${qs}`, { signal: controller.signal });
+    if (!resp.ok) throw new Error('API error');
+    const flights = await resp.json();
+    document.getElementById('results-loading').style.display = 'none';
+    if (!flights || !flights.length) {
+      document.getElementById('results-empty').style.display = 'flex';
+      return;
+    }
+    renderFlightCards(flights);
+  } catch (err) {
+    console.warn('Return flight search failed:', err.message);
+    document.getElementById('results-loading').style.display = 'none';
+    document.getElementById('results-empty').style.display   = 'flex';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1215,7 +1300,67 @@ async function setupBookingPage() {
     </div>
   `;
 
+  // Show return flight section if round trip
+  if (selectedReturnFlight) {
+    const rSeg    = selectedReturnFlight.itineraries[0].segments[0];
+    const rLast   = selectedReturnFlight.itineraries[0].segments[selectedReturnFlight.itineraries[0].segments.length - 1];
+    const rSegs   = selectedReturnFlight.itineraries[0].segments;
+    const rPrice  = parseFloat(selectedReturnFlight.price.grandTotal);
+    const rStops  = rSegs.length - 1;
+    const rStopLabel = rStops === 0
+      ? '<span style="color:#16a34a;font-size:.8rem;font-weight:600;">✅ Nonstop</span>'
+      : `<span style="color:#d97706;font-size:.8rem;font-weight:600;">🔄 ${rStops} stop via ${rSegs.slice(0,-1).map(s=>s.arrival.iataCode).join(', ')}</span>`;
+    const rAircraft = aircraftMap[rSeg.carrierCode] || 'Boeing 737-800';
+
+    const returnHtml = `
+    <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #e5e7eb;">
+      <div style="font-size:.78rem;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:8px;">↩ Return Flight</div>
+      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <img src="https://www.gstatic.com/flights/airline_logos/70px/${rSeg.carrierCode}.png"
+               onerror="this.style.display='none'"
+               style="width:28px;height:28px;object-fit:contain;border-radius:4px;background:#f1f5f9;padding:2px;" />
+          <div style="font-weight:700;color:#1a2b4a;font-size:1rem;">${rSeg.departure.iataCode} → ${rLast.arrival.iataCode}</div>
+        </div>
+        <span style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600;">↩ Return Selected</span>
+      </div>
+      ${rStopLabel}
+      <div style="margin-top:6px;">
+        <strong style="font-size:1rem;">${formatTime(rSeg.departure.at)}</strong>
+        <span style="color:#9ca3af;margin:0 6px;">→</span>
+        <strong style="font-size:1rem;">${formatTime(rLast.arrival.at)}</strong>
+      </div>
+      <div style="font-size:.82rem;color:#6b7280;margin-top:2px;">${formatDate(rSeg.departure.at)} · ${formatDuration(selectedReturnFlight.itineraries[0].duration)} · ${rSeg.carrierCode}${rSeg.number} · ${rAircraft}</div>
+      <!-- Return itinerary -->
+      <div style="margin-top:10px;padding:10px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">
+        <div style="font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:6px;">↩ RETURN ITINERARY</div>
+        ${rSegs.map((s, idx) => {
+          const nxt = rSegs[idx+1];
+          let lay = '';
+          if (nxt) {
+            const diff = Math.round((new Date(nxt.departure.at) - new Date(s.arrival.at)) / 60000);
+            lay = `${Math.floor(diff/60)}h ${diff%60}m`;
+          }
+          return `
+          <div style="font-size:.8rem;color:#374151;padding:4px 0;border-bottom:${idx<rSegs.length-1?'1px dashed #e5e7eb':'none'};">
+            <div style="display:flex;justify-content:space-between;">
+              <div><img src="https://www.gstatic.com/flights/airline_logos/70px/${s.carrierCode}.png" onerror="this.style.display='none'" style="width:16px;height:16px;vertical-align:middle;border-radius:2px;"> <strong>${s.departure.iataCode}</strong> ${formatTime(s.departure.at)} <span style="font-size:.7rem;color:#9ca3af;">${formatDate(s.departure.at)}</span></div>
+              <div style="text-align:right;"><strong>${s.arrival.iataCode}</strong> ${formatTime(s.arrival.at)} <span style="font-size:.7rem;color:#9ca3af;">${formatDate(s.arrival.at)}</span></div>
+            </div>
+            <div style="font-size:.72rem;color:#6b7280;padding-left:20px;">Flight ${s.carrierCode}${s.number}${s.duration?' · '+formatDuration(s.duration):''}</div>
+          </div>
+          ${nxt ? `<div style="font-size:.75rem;color:#d97706;padding:4px 0 4px 8px;">🕐 <strong>Layover at ${s.arrival.iataCode}</strong> — ${lay}</div>` : ''}
+          `;
+        }).join('')}
+      </div>
+    </div>`;
+
+    document.getElementById('booking-flight-summary').innerHTML += returnHtml;
+  }
+
   // Use real Duffel base price if available, otherwise estimate
+  const returnPrice = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
+  const totalPrice  = price + returnPrice;
   const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (price / 1.02));
   const nwFee       = Math.max(0, price - duffelBase);
   const airlineFare = (duffelBase * 0.88 * passengerCount).toFixed(2);
@@ -1223,17 +1368,18 @@ async function setupBookingPage() {
   const nwFeeTotal  = (nwFee * passengerCount).toFixed(2);
 
   document.getElementById('price-breakdown').innerHTML = `
-    <div class="price-row"><span>Airline fare × ${passengerCount}</span><span>$${airlineFare}</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Taxes &amp; fees</span><span>$${taxesTotal}</span></div>
-    ${nwFee > 0.01 ? `<div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee</span><span>$${nwFeeTotal}</span></div>` : ''}
-    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Baggage included ✓</span><span>$0.00</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Meals included ✓</span><span>$0.00</span></div>
-    <div class="price-row total"><span>Total (USD)</span><span>$${(price * passengerCount).toFixed(2)}</span></div>
+    <div class="price-row"><span>Outbound fare × ${passengerCount}</span><span>€${(price * passengerCount).toFixed(2)}</span></div>
+    ${selectedReturnFlight ? `<div class="price-row"><span>Return fare × ${passengerCount}</span><span>€${(returnPrice * passengerCount).toFixed(2)}</span></div>` : ''}
+    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Taxes &amp; fees</span><span>€${taxesTotal}</span></div>
+    ${nwFee > 0.01 ? `<div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee</span><span>€${nwFeeTotal}</span></div>` : ''}
+    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Baggage included ✓</span><span>€0.00</span></div>
+    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Meals included ✓</span><span>€0.00</span></div>
+    <div class="price-row total"><span>Total</span><span>€${(totalPrice * passengerCount).toFixed(2)}</span></div>
     <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Price guaranteed · No hidden fees</div>
   `;
 
-  // Setup Stripe payment element
-  await setupStripePayment(price * passengerCount, currency);
+  // Setup Stripe payment element with combined price
+  await setupStripePayment(totalPrice * passengerCount, currency);
 }
 
 async function setupStripePayment(amount, currency) {
@@ -1293,8 +1439,9 @@ async function submitBooking() {
   // If Stripe elements not loaded yet, try to load it now
   if (!stripeElements) {
     setError(errorEl, 'Loading payment form... please wait.');
+    const _retP = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
     await setupStripePayment(
-      parseFloat(selectedFlight.price.grandTotal) * (searchParams.passengers || 1),
+      (parseFloat(selectedFlight.price.grandTotal) + _retP) * (searchParams.passengers || 1),
       selectedFlight.price.currency || 'USD'
     );
     // Give it 2 seconds to mount
@@ -1328,7 +1475,8 @@ async function submitBooking() {
     // Payment succeeded — now issue the real ticket via Duffel (if Duffel flight)
     const seg     = selectedFlight.itineraries[0].segments[0];
     const lastSeg = selectedFlight.itineraries[0].segments[selectedFlight.itineraries[0].segments.length - 1];
-    const price   = parseFloat(selectedFlight.price.grandTotal) * (searchParams.passengers || 1);
+    const _retPx  = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
+    const price   = (parseFloat(selectedFlight.price.grandTotal) + _retPx) * (searchParams.passengers || 1);
 
     // Collect all passenger details from form
     const titles   = Array.from(document.querySelectorAll('.pax-title')).map(el => el.value);
@@ -1393,6 +1541,16 @@ async function submitBooking() {
         flightNum:  seg.carrierCode + seg.number,
         duration:   formatDuration(selectedFlight.itineraries[0].duration)
       },
+      ...(selectedReturnFlight ? {
+        returnFlight: {
+          from:       selectedReturnFlight.itineraries[0].segments[0].departure.iataCode,
+          to:         selectedReturnFlight.itineraries[0].segments[selectedReturnFlight.itineraries[0].segments.length-1].arrival.iataCode,
+          departTime: selectedReturnFlight.itineraries[0].segments[0].departure.at,
+          arriveTime: selectedReturnFlight.itineraries[0].segments[selectedReturnFlight.itineraries[0].segments.length-1].arrival.at,
+          airline:    selectedReturnFlight.itineraries[0].segments[0].carrierCode,
+          duration:   formatDuration(selectedReturnFlight.itineraries[0].duration)
+        }
+      } : {}),
       passengers: firstNames.map((first, i) => ({
         firstName: first,
         lastName:  lastNames[i],
