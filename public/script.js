@@ -678,7 +678,8 @@ async function searchFlights() {
   document.getElementById('results-loading').style.display = 'flex';
   document.getElementById('results-list').style.display    = 'none';
   document.getElementById('results-empty').style.display   = 'none';
-  document.getElementById('outbound-selected-banner').style.display = 'none';
+  const _banner = document.getElementById('outbound-selected-banner');
+  if (_banner) _banner.style.display = 'none';
   document.getElementById('results-heading').textContent   = `${origin} \u2192 ${dest}`;
   document.getElementById('results-subheading').textContent =
     `${formatDate(departDate)} \u00B7 ${passengers} passenger${passengers > 1 ? 's' : ''}`;
@@ -708,15 +709,9 @@ async function searchFlights() {
     }
     renderFlightCards(flights);
   } catch (err) {
-    // Fallback: generate demo flights instantly in the browser
-    console.warn('Real API unavailable, using demo flights:', err.message);
+    console.warn('Flight search error:', err.message);
     document.getElementById('results-loading').style.display = 'none';
-    const flights = generateClientFlights(origin, dest, departDate, passengers);
-    if (!flights || !flights.length) {
-      document.getElementById('results-empty').style.display = 'flex';
-      return;
-    }
-    renderFlightCards(flights);
+    document.getElementById('results-empty').style.display   = 'flex';
   }
 }
 
