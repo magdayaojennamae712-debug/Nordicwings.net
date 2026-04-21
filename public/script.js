@@ -1108,8 +1108,13 @@ async function setupBookingPage() {
 
   document.getElementById('booking-flight-summary').innerHTML = `
     <div class="summary-flight-row">
-      <div class="summary-route">${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}</div>
-      <span class="booking-status" style="margin:0;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600;">✈ Selected</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="https://www.gstatic.com/flights/airline_logos/70px/${seg.carrierCode}.png"
+             onerror="this.style.display='none'"
+             style="width:32px;height:32px;object-fit:contain;border-radius:4px;background:#f1f5f9;padding:2px;" />
+        <div class="summary-route">${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}</div>
+      </div>
+      <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600;">✈ Selected</span>
     </div>
     ${stopLabel}
     <div class="summary-times" style="margin-top:8px;">
@@ -1165,12 +1170,25 @@ async function setupBookingPage() {
         const segDur = s.duration ? formatDuration(s.duration) : '';
         return `
         <div style="font-size:.82rem;color:#374151;padding:6px 0;border-bottom:${idx < allSegs.length-1 ? '1px dashed #e5e7eb' : 'none'};">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span><strong>${s.departure.iataCode}</strong> ${formatTime(s.departure.at)}</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <img src="https://www.gstatic.com/flights/airline_logos/70px/${s.carrierCode}.png"
+                   onerror="this.style.display='none'"
+                   style="width:20px;height:20px;object-fit:contain;border-radius:3px;background:#f1f5f9;" />
+              <div>
+                <strong>${s.departure.iataCode}</strong>
+                <span style="font-size:.75rem;color:#374151;"> ${formatTime(s.departure.at)}</span>
+                <span style="font-size:.7rem;color:#9ca3af;"> ${formatDate(s.departure.at)}</span>
+              </div>
+            </div>
             <span style="color:#9ca3af;font-size:.75rem;">──✈──</span>
-            <span><strong>${s.arrival.iataCode}</strong> ${formatTime(s.arrival.at)}</span>
+            <div style="text-align:right;">
+              <strong>${s.arrival.iataCode}</strong>
+              <span style="font-size:.75rem;color:#374151;"> ${formatTime(s.arrival.at)}</span>
+              <span style="font-size:.7rem;color:#9ca3af;"> ${formatDate(s.arrival.at)}</span>
+            </div>
           </div>
-          <div style="font-size:.75rem;color:#6b7280;margin-top:2px;">
+          <div style="font-size:.75rem;color:#6b7280;margin-top:3px;padding-left:26px;">
             Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${s.aircraft?.code || aircraftMap[s.carrierCode] || aircraft}
           </div>
         </div>
