@@ -712,10 +712,7 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     });
   }
 
-  // Demo flights — used as fallback if all APIs fail
-  const demoFlights = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
-
-  // ── Try Duffel first (real flights, free API) ────────────────
+  // ── Try Duffel first (real flights, live API) ───────────────
   if (DUFFEL_API_KEY) {
     console.log('Trying Duffel API...');
     const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
@@ -726,10 +723,10 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     console.log('Duffel returned no results — trying Sky Scrapper...');
   }
 
-  // If no API key configured, return demo flights immediately
+  // If no RapidAPI key configured, return empty (no fake flights)
   if (!RAPIDAPI_KEY) {
-    console.log('No RAPIDAPI_KEY set — returning demo flights');
-    return res.json(demoFlights);
+    console.log('No RAPIDAPI_KEY set — no flights found');
+    return res.json([]);
   }
 
   try {
@@ -751,8 +748,8 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
 
     const itineraries = data?.data?.itineraries || [];
     if (!itineraries.length) {
-      console.log('API returned 0 flights — using demo data');
-      return res.json(demoFlights);
+      console.log('API returned 0 flights — no results for this route');
+      return res.json([]);
     }
 
     const flights = [];
@@ -790,15 +787,14 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     }
 
     if (!flights.length) {
-      console.log('All flights failed to map — using demo data');
-      return res.json(demoFlights);
+      console.log('All flights failed to map — no results');
+      return res.json([]);
     }
 
     return res.json(flights);
   } catch (err) {
     console.error('Flight search error:', err.message);
-    console.log('Returning demo flights as fallback');
-    return res.json(demoFlights);
+    return res.json([]);
   }
 });
 
