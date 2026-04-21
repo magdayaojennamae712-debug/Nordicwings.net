@@ -1109,7 +1109,7 @@ async function setupBookingPage() {
   document.getElementById('booking-flight-summary').innerHTML = `
     <div class="summary-flight-row">
       <div class="summary-route">${seg.departure.iataCode} → ${lastSeg.arrival.iataCode}</div>
-      <span class="booking-status status-confirmed" style="margin:0;">✈ Confirmed</span>
+      <span class="booking-status" style="margin:0;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600;">✈ Selected</span>
     </div>
     ${stopLabel}
     <div class="summary-times" style="margin-top:8px;">
@@ -1151,7 +1151,19 @@ async function setupBookingPage() {
     <!-- Flight itinerary -->
     <div style="margin-top:12px;padding:12px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">
       <div style="font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:8px;">✈ FLIGHT ITINERARY</div>
-      ${allSegs.map((s, idx) => `
+      ${allSegs.map((s, idx) => {
+        const nextSeg = allSegs[idx + 1];
+        let layoverStr = '';
+        if (nextSeg) {
+          const arrTime = new Date(s.arrival.at);
+          const depTime = new Date(nextSeg.departure.at);
+          const diffMins = Math.round((depTime - arrTime) / 60000);
+          const lh = Math.floor(diffMins / 60);
+          const lm = diffMins % 60;
+          layoverStr = lh > 0 ? `${lh}h ${lm}m` : `${lm}m`;
+        }
+        const segDur = s.duration ? formatDuration(s.duration) : '';
+        return `
         <div style="font-size:.82rem;color:#374151;padding:6px 0;border-bottom:${idx < allSegs.length-1 ? '1px dashed #e5e7eb' : 'none'};">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <span><strong>${s.departure.iataCode}</strong> ${formatTime(s.departure.at)}</span>
@@ -1159,14 +1171,15 @@ async function setupBookingPage() {
             <span><strong>${s.arrival.iataCode}</strong> ${formatTime(s.arrival.at)}</span>
           </div>
           <div style="font-size:.75rem;color:#6b7280;margin-top:2px;">
-            Flight ${s.carrierCode}${s.number} · ${s.duration ? formatDuration(s.duration) : ''} · ${aircraftMap[s.carrierCode] || aircraft}
+            Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${s.aircraft?.code || aircraftMap[s.carrierCode] || aircraft}
           </div>
         </div>
-        ${idx < allSegs.length-1 ? `
+        ${nextSeg ? `
         <div style="font-size:.78rem;color:#d97706;padding:6px 0 6px 8px;display:flex;align-items:center;gap:6px;">
-          🕐 <span><strong>Layover at ${s.arrival.iataCode}</strong> — approx. 1h 30min connection time</span>
+          🕐 <span><strong>Layover at ${s.arrival.iataCode}</strong> — ${layoverStr} connection time</span>
         </div>` : ''}
-      `).join('')}
+        `;
+      }).join('')}
     </div>
 
     <!-- Included amenities -->
