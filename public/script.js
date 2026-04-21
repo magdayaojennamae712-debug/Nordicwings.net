@@ -1451,7 +1451,7 @@ async function submitBooking() {
 
   try {
     // Confirm the Stripe payment
-    const { error: stripeError } = await stripe.confirmPayment({
+    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements: stripeElements,
       confirmParams: {
         return_url: window.location.origin + '/?booking=confirmed',
@@ -1466,6 +1466,9 @@ async function submitBooking() {
       setError(errorEl, stripeError.message);
       return;
     }
+
+    // Capture Stripe PaymentIntent ID for future refunds
+    const paymentIntentId = paymentIntent?.id || null;
 
     // Payment succeeded — now issue the real ticket via Duffel (if Duffel flight)
     const seg     = selectedFlight.itineraries[0].segments[0];
@@ -1554,7 +1557,8 @@ async function submitBooking() {
       })),
       contact: { email, phone },
       totalPrice: price.toFixed(2),
-      currency:  selectedFlight.price.currency || 'EUR'
+      currency:   selectedFlight.price.currency || 'EUR',
+      paymentIntentId: paymentIntentId || null
     };
 
     await db.collection('bookings').add(booking);
@@ -1703,33 +1707,80 @@ function closeCancelModal(e) {
 async function confirmCancelBooking() {
   if (!cancelBookingId) return;
 
-  const btn = document.getElementById('confirm-cancel-btn');
-  btn.disabled = true;
-  btn.textContent = 'Cancelling...';
+  const btn      = document.getElementById('confirm-cancel-btn');
+  const keepBtn  = document.getElementById('keep-booking-btn');
+  const resultEl = document.getElementById('cancel-result');
+  btn.disabled   = true;
+  btn.textContent = 'Processing...';
+  if (keepBtn)  keepBtn.disabled  = true;
+  if (resultEl) resultEl.style.display = 'none';
 
   try {
-    await db.collection('bookings').doc(cancelBookingId).update({ status: 'cancelled' });
+    // Get booking details from Firestore (need paymentIntentId for refund)
+    const docSnap = await db.collection('bookings').doc(cancelBookingId).get();
+    if (!docSnap.exists) throw new Error('Booking not found.');
+    const booking = docSnap.data();
 
-    // Update the card in the UI without reloading
+    // Call backend: issue real Stripe refund + Duffel cancellation
+    let refundMessage = '';
+    if (booking.paymentIntentId) {
+      try {
+        const res  = await fetch('/api/bookings/cancel', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            paymentIntentId: booking.paymentIntentId,
+            duffelOrderId:   booking.duffelOrderId || null,
+            totalPrice:      booking.totalPrice,
+            bookingRef:      booking.bookingRef
+          })
+        });
+        const data = await res.json();
+        refundMessage = data.success
+          ? (data.message || 'Refund processed successfully.')
+          : (data.error   || 'Contact hello@nordicwings.net for your refund.');
+      } catch {
+        refundMessage = 'Automatic refund unavailable. Email hello@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId);
+      }
+    } else {
+      refundMessage = 'Booking cancelled. Email hello@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId) + ' to request your refund.';
+    }
+
+    // Mark as cancelled in Firestore
+    await db.collection('bookings').doc(cancelBookingId).update({
+      status:      'cancelled',
+      cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update card in dashboard UI
     const card = document.getElementById('booking-' + cancelBookingId);
     if (card) {
       const statusEl = card.querySelector('.booking-status');
-      if (statusEl) {
-        statusEl.className = 'booking-status status-cancelled';
-        statusEl.textContent = 'Cancelled';
-      }
+      if (statusEl) { statusEl.className = 'booking-status status-cancelled'; statusEl.textContent = 'Cancelled'; }
       const cancelBtn = card.querySelector('.btn-cancel');
-      if (cancelBtn) {
-        cancelBtn.outerHTML = '<span style="color:#9ca3af;font-size:.85rem;">Cancelled</span>';
-      }
+      if (cancelBtn) cancelBtn.outerHTML = '<span style="color:#9ca3af;font-size:.85rem;">Cancelled</span>';
     }
+
+    // Show success message in modal
+    if (resultEl) {
+      resultEl.style.cssText = 'display:block;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px;color:#15803d;';
+      resultEl.innerHTML = '✅ <strong>Booking cancelled.</strong> ' + refundMessage;
+    }
+    // Auto-close after 4 seconds
+    setTimeout(() => {
+      document.getElementById('cancel-overlay').style.display = 'none';
+      cancelBookingId = null;
+    }, 4000);
+
   } catch (err) {
-    alert('Could not cancel booking. Please try again.');
+    if (resultEl) {
+      resultEl.style.cssText = 'display:block;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;color:#dc2626;';
+      resultEl.innerHTML = '❌ ' + (err.message || 'Could not cancel. Please contact hello@nordicwings.net');
+    }
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Yes, Cancel';
-    document.getElementById('cancel-overlay').style.display = 'none';
-    cancelBookingId = null;
+    btn.disabled    = false;
+    btn.textContent = 'Yes, Cancel & Refund';
+    if (keepBtn) keepBtn.disabled = false;
   }
 }
 
@@ -1889,8 +1940,8 @@ function renderAdminTable(bookings) {
     document.getElementById('admin-empty').style.display = 'flex';
     return;
   }
-  document.getElementById('admin-empty').style.display   = 'none';
-  document.getElementById('admin-table').style.display   = 'table';
+  document.getElementById('admin-empty').style.display = 'none';
+  document.getElementById('admin-table').style.display = 'table';
 
   document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
     <tr>
@@ -1900,23 +1951,50 @@ function renderAdminTable(bookings) {
         <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
       </td>
       <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '\u2014'}</td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
       <td>${b.passengers?.length || 1} pax</td>
-      <td><strong>$$${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
-      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}"${b.status || 'unknown'}</span></td>
+      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
     </tr>
   `).join('');
 }
-// FAQ accordion toggle
+
+function filterAdminBookings() {
+  const q = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  const filtered = q
+    ? _allAdminBookings.filter(b =>
+        (b.bookingRef || '').toLowerCase().includes(q) ||
+        (b.contact?.email || b.userEmail || '').toLowerCase().includes(q) ||
+        (b.passengers?.[0]?.firstName || '').toLowerCase().includes(q) ||
+        (b.passengers?.[0]?.lastName  || '').toLowerCase().includes(q) ||
+        (b.flight?.from || '').toLowerCase().includes(q) ||
+        (b.flight?.to   || '').toLowerCase().includes(q)
+      )
+    : _allAdminBookings;
+  renderAdminTable(filtered);
+}
+
+// ─────────────────────────────────────────────────────────────
+// FAQ ACCORDION
+// ─────────────────────────────────────────────────────────────
 function toggleFaq(btn) {
   var answer = btn.nextElementSibling;
   if (!answer) return;
   var isOpen = answer.style.display === 'block';
-  if (isOpen) {
-    answer.style.display = 'none';
-    btn.classList.remove('open');
-  } else {
+  document.querySelectorAll('.faq-answer, .faq-a').forEach(function(a) {
+    a.style.display = 'none';
+    a.classList.remove('open');
+  });
+  document.querySelectorAll('.faq-question, .faq-q').forEach(function(b) {
+    b.classList.remove('open');
+    var ic = b.querySelector('.faq-icon');
+    if (ic) ic.textContent = '+';
+  });
+  if (!isOpen) {
     answer.style.display = 'block';
+    answer.classList.add('open');
     btn.classList.add('open');
+    var icon = btn.querySelector('.faq-icon');
+    if (icon) icon.textContent = '-';
   }
 }

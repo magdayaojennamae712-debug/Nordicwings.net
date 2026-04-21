@@ -915,7 +915,89 @@ app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
   }
 });
 
-// ── Global error handler (hides details from users) ───────────
+// ============================================================
+// ROUTE: POST /api/bookings/cancel
+// Cancels a booking: issues Stripe refund + cancels Duffel order.
+// Body: { paymentIntentId, duffelOrderId, totalPrice, bookingRef }
+// ============================================================
+app.post('/api/bookings/cancel', paymentLimiter, async (req, res) => {
+  const { paymentIntentId, duffelOrderId, totalPrice, bookingRef } = req.body;
+
+  if (!paymentIntentId) {
+    return res.status(400).json({ error: 'Missing payment information. Contact support at hello@nordicwings.net.' });
+  }
+
+  let stripeRefundId   = null;
+  let refundAmount     = 0;
+  let duffelCancelled  = false;
+  const errors         = [];
+
+  // ── Step 1: Issue Stripe refund ──────────────────────────────
+  try {
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      reason: 'requested_by_customer'
+    });
+    stripeRefundId = refund.id;
+    refundAmount   = refund.amount / 100; // convert cents → EUR
+    console.log('Refund issued: ' + refund.id + ' for booking ' + bookingRef);
+  } catch (stripeErr) {
+    console.error('Stripe refund error:', stripeErr.message);
+    if (stripeErr.code === 'charge_already_refunded') {
+      errors.push('Payment was already refunded.');
+    } else {
+      return res.status(400).json({ error: 'Refund failed: ' + stripeErr.message });
+    }
+  }
+
+  // Step 2: Cancel Duffel order (if applicable)
+  if (duffelOrderId && DUFFEL_API_KEY) {
+    try {
+      const cancelReqRes = await fetch(DUFFEL_BASE_URL + '/air/order_cancellations', {
+        method: 'POST',
+        headers: {
+          'Authorization':  'Bearer ' + DUFFEL_API_KEY,
+          'Duffel-Version': 'v2',
+          'Content-Type':   'application/json',
+          'Accept':         'application/json'
+        },
+        body: JSON.stringify({ data: { order_id: duffelOrderId } })
+      });
+      const cancelReqData = await cancelReqRes.json();
+      const cancellationId = cancelReqData && cancelReqData.data && cancelReqData.data.id;
+
+      if (cancellationId) {
+        const confirmRes = await fetch(DUFFEL_BASE_URL + '/air/order_cancellations/' + cancellationId + '/actions/confirm', {
+          method: 'POST',
+          headers: {
+            'Authorization':  'Bearer ' + DUFFEL_API_KEY,
+            'Duffel-Version': 'v2',
+            'Content-Type':   'application/json',
+            'Accept':         'application/json'
+          }
+        });
+        duffelCancelled = confirmRes.ok;
+        console.log('Duffel order ' + duffelOrderId + ' cancellation: ' + (duffelCancelled ? 'confirmed' : 'failed'));
+      }
+    } catch (duffelErr) {
+      console.error('Duffel cancel error:', duffelErr.message);
+      errors.push('Airline cancellation note: ' + duffelErr.message);
+    }
+  }
+
+  res.json({
+    success:      true,
+    refundId:     stripeRefundId,
+    refundAmount: refundAmount,
+    duffelCancelled: duffelCancelled,
+    message:      stripeRefundId
+      ? 'Refund of EUR ' + refundAmount.toFixed(2) + ' issued. It will appear on your card within 5-10 business days.'
+      : 'Cancellation recorded. Contact support for refund.',
+    warnings:     errors
+  });
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err.message);
   res.status(500).json({
@@ -923,19 +1005,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── 404 handler — catch common attack probe paths ─────────────
+// 404 handler
 app.use((req, res) => {
   const path = req.path.toLowerCase();
-  // Log suspicious probe attempts
   const probes = ['.php', '.asp', '.aspx', 'wp-admin', 'xmlrpc', '.env', 'config.json', 'admin/', '/.git', '/backup'];
   if (probes.some(p => path.includes(p))) {
-    console.warn(`⚠️  Suspicious probe blocked: ${req.method} ${req.path} from ${req.ip}`);
+    console.warn('Suspicious probe blocked: ' + req.method + ' ' + req.path + ' from ' + req.ip);
     return res.status(404).json({ error: 'Not found.' });
   }
   res.status(404).json({ error: 'Not found.' });
 });
 
-// ── Start server ─────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log('NordicWings is running on port ' + PORT);
   console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
