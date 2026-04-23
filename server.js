@@ -903,7 +903,7 @@ app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
       amount:   Math.round(cleanAmount * 100), // Stripe uses cents
       currency: cleanCurrency,
       // Explicitly list methods — forces Klarna, PayPal etc to always show
-      payment_method_types: ['card', 'klarna', 'paypal', 'link'],
+      payment_method_types: ['card', 'klarna', 'paypal'],
       metadata: {
         flight: JSON.stringify(flightDetails || {}).substring(0, 500)
       }

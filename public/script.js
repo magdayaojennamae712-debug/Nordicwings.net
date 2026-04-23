@@ -1480,7 +1480,8 @@ async function setupStripePayment(amount, currency) {
       }
     });
     const paymentElement = stripeElements.create('payment', {
-      layout: { type: 'accordion', defaultCollapsed: false, radios: false, spacedAccordionItems: true }
+      layout: { type: 'tabs', defaultCollapsed: false },
+      wallets: { link: 'never', applePay: 'auto', googlePay: 'auto' }
     });
     paymentElement.mount('#payment-element');
   } catch (err) {
