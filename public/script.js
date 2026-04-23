@@ -1047,7 +1047,11 @@ function showAgencyPage() {
           <div class="itin-seg-airport">${s.arrival.iataCode}</div>
         </div>
       </div>
-      ${idx < allSegs.length - 1 ? `<div class="itin-layover">🕐 Layover at ${s.arrival.iataCode} — approx 1h 30min</div>` : ''}
+      ${idx < allSegs.length - 1 ? (
+        allSegs[idx+1] && s.arrival.iataCode !== allSegs[idx+1].departure.iataCode
+          ? `<div class="itin-layover" style="color:#dc2626;background:#fef2f2;border-radius:6px;padding:4px 8px;">⚠️ <strong>Airport change:</strong> Arrive ${s.arrival.iataCode}, depart from ${allSegs[idx+1].departure.iataCode} — self-transfer required (collect & re-check bags)</div>`
+          : `<div class="itin-layover">🕐 Layover at ${s.arrival.iataCode} — approx 1h 30min</div>`
+      ) : ''}
     `;
   });
   itinHtml += `<div class="itin-arrival">🛬 Arrives ${formatDate(lastSeg.arrival.at)} · Total: ${formatDuration(f.itineraries[0].duration)}</div></div>`;
@@ -1285,10 +1289,15 @@ async function setupBookingPage() {
             Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${s.aircraft?.code || aircraftMap[s.carrierCode] || aircraft}
           </div>
         </div>
-        ${nextSeg ? `
-        <div style="font-size:.78rem;color:#d97706;padding:6px 0 6px 8px;display:flex;align-items:center;gap:6px;">
-          🕐 <span><strong>Layover at ${s.arrival.iataCode}</strong> — ${layoverStr} connection time</span>
-        </div>` : ''}
+        ${nextSeg ? (
+          s.arrival.iataCode !== nextSeg.departure.iataCode
+            ? `<div style="font-size:.78rem;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:6px 8px;margin:4px 0;display:flex;align-items:flex-start;gap:6px;">
+                ⚠️ <span><strong>Airport change required!</strong> You arrive at <strong>${s.arrival.iataCode}</strong> but your next flight departs from <strong>${nextSeg.departure.iataCode}</strong>. You have ${layoverStr} to travel between airports, collect your bags, and re-check in. This is a <strong>self-transfer</strong> — not a protected connection.</span>
+               </div>`
+            : `<div style="font-size:.78rem;color:#d97706;padding:6px 0 6px 8px;display:flex;align-items:center;gap:6px;">
+                🕐 <span><strong>Layover at ${s.arrival.iataCode}</strong> — ${layoverStr} connection time</span>
+               </div>`
+        ) : ''}
         `;
       }).join('')}
     </div>
@@ -1357,7 +1366,11 @@ async function setupBookingPage() {
             </div>
             <div style="font-size:.72rem;color:#6b7280;padding-left:20px;">Flight ${s.carrierCode}${s.number}${s.duration?' · '+formatDuration(s.duration):''}</div>
           </div>
-          ${nxt ? `<div style="font-size:.75rem;color:#d97706;padding:4px 0 4px 8px;">🕐 <strong>Layover at ${s.arrival.iataCode}</strong> — ${lay}</div>` : ''}
+          ${nxt ? (
+            s.arrival.iataCode !== nxt.departure.iataCode
+              ? `<div style="font-size:.75rem;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;border-radius:5px;padding:5px 8px;margin:3px 0;">⚠️ <strong>Airport change:</strong> Arrive ${s.arrival.iataCode} → depart ${nxt.departure.iataCode} (${lay}) — self-transfer, collect & re-check bags</div>`
+              : `<div style="font-size:.75rem;color:#d97706;padding:4px 0 4px 8px;">🕐 <strong>Layover at ${s.arrival.iataCode}</strong> — ${lay}</div>`
+          ) : ''}
           `;
         }).join('')}
       </div>
@@ -1413,8 +1426,20 @@ async function setupStripePayment(amount, currency) {
     if (error) throw new Error(error);
 
     // Mount the Stripe Payment Element into #payment-element
-    stripeElements = stripe.elements({ clientSecret, appearance: { theme: 'stripe' } });
-    const paymentElement = stripeElements.create('payment');
+    stripeElements = stripe.elements({
+      clientSecret,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#2563eb',
+          borderRadius: '8px',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }
+      }
+    });
+    const paymentElement = stripeElements.create('payment', {
+      layout: { type: 'tabs', defaultCollapsed: false }
+    });
     paymentElement.mount('#payment-element');
   } catch (err) {
     document.getElementById('booking-error').textContent = 'Could not load payment form. Please try again.';
@@ -1957,57 +1982,3 @@ function renderAdminTable(bookings) {
   document.getElementById('admin-table').style.display = 'table';
 
   document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
-    <tr>
-      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
-      <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</div>
-        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
-      </td>
-      <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td>${b.passengers?.length || 1} pax</td>
-      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
-      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
-    </tr>
-  `).join('');
-}
-
-function filterAdminBookings() {
-  const q = (document.getElementById('admin-search')?.value || '').toLowerCase();
-  const filtered = q
-    ? _allAdminBookings.filter(b =>
-        (b.bookingRef || '').toLowerCase().includes(q) ||
-        (b.contact?.email || b.userEmail || '').toLowerCase().includes(q) ||
-        (b.passengers?.[0]?.firstName || '').toLowerCase().includes(q) ||
-        (b.passengers?.[0]?.lastName  || '').toLowerCase().includes(q) ||
-        (b.flight?.from || '').toLowerCase().includes(q) ||
-        (b.flight?.to   || '').toLowerCase().includes(q)
-      )
-    : _allAdminBookings;
-  renderAdminTable(filtered);
-}
-
-// ─────────────────────────────────────────────────────────────
-// FAQ ACCORDION
-// ─────────────────────────────────────────────────────────────
-function toggleFaq(btn) {
-  var answer = btn.nextElementSibling;
-  if (!answer) return;
-  var isOpen = answer.style.display === 'block';
-  document.querySelectorAll('.faq-answer, .faq-a').forEach(function(a) {
-    a.style.display = 'none';
-    a.classList.remove('open');
-  });
-  document.querySelectorAll('.faq-question, .faq-q').forEach(function(b) {
-    b.classList.remove('open');
-    var ic = b.querySelector('.faq-icon');
-    if (ic) ic.textContent = '+';
-  });
-  if (!isOpen) {
-    answer.style.display = 'block';
-    answer.classList.add('open');
-    btn.classList.add('open');
-    var icon = btn.querySelector('.faq-icon');
-    if (icon) icon.textContent = '-';
-  }
-}

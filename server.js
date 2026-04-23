@@ -892,8 +892,8 @@ app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
   }
 
   // Validate currency
-  const allowedCurrencies = ['usd', 'eur', 'gbp'];
-  const cleanCurrency = (currency || 'usd').toLowerCase();
+  const allowedCurrencies = ['usd', 'eur', 'gbp', 'sek', 'nok', 'dkk', 'pln', 'czk', 'huf'];
+  const cleanCurrency = (currency || 'eur').toLowerCase();
   if (!allowedCurrencies.includes(cleanCurrency)) {
     return res.status(400).json({ error: 'Invalid currency.' });
   }
@@ -902,6 +902,8 @@ app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount:   Math.round(cleanAmount * 100), // Stripe uses cents
       currency: cleanCurrency,
+      // automatic_payment_methods shows ALL enabled methods (cards, Klarna, PayPal, etc.)
+      // Enable additional methods in Stripe Dashboard → Settings → Payment methods
       automatic_payment_methods: { enabled: true },
       metadata: {
         flight: JSON.stringify(flightDetails || {}).substring(0, 500)
@@ -1013,10 +1015,4 @@ app.use((req, res) => {
     console.warn('Suspicious probe blocked: ' + req.method + ' ' + req.path + ' from ' + req.ip);
     return res.status(404).json({ error: 'Not found.' });
   }
-  res.status(404).json({ error: 'Not found.' });
-});
-
-app.listen(PORT, () => {
-  console.log('NordicWings is running on port ' + PORT);
-  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
-});
+  r
