@@ -937,9 +937,31 @@
           </div>
           <div class="divider"></div>
           <h3>Payment</h3>
+          <!-- Accepted payment methods -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:.75rem;color:#6b7280;margin-bottom:8px;">Accepted payment methods:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+              <!-- Visa -->
+              <div style="background:#1a1f71;color:#fff;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:5px;letter-spacing:.5px;">VISA</div>
+              <!-- Mastercard -->
+              <div style="display:flex;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:5px;padding:3px 8px;gap:3px;">
+                <div style="width:14px;height:14px;border-radius:50%;background:#eb001b;"></div>
+                <div style="width:14px;height:14px;border-radius:50%;background:#f79e1b;margin-left:-6px;"></div>
+                <span style="font-size:.65rem;font-weight:700;color:#333;margin-left:4px;">Mastercard</span>
+              </div>
+              <!-- Amex -->
+              <div style="background:#007bc1;color:#fff;font-size:.67rem;font-weight:700;padding:4px 8px;border-radius:5px;">AMEX</div>
+              <!-- Klarna -->
+              <div style="background:#ffb3c7;color:#000;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:5px;letter-spacing:.3px;">Klarna</div>
+              <!-- PayPal -->
+              <div style="background:#003087;color:#fff;font-size:.67rem;font-weight:700;padding:4px 8px;border-radius:5px;">Pay<span style="color:#009cde;">Pal</span></div>
+              <!-- Apple/Google Pay -->
+              <div style="background:#000;color:#fff;font-size:.67rem;font-weight:600;padding:4px 8px;border-radius:5px;"> Pay</div>
+            </div>
+          </div>
           <div id="payment-element-container">
             <div id="payment-element"></div>
-            <p class="payment-note">🔒 Your payment is secured by Stripe</p>
+            <p class="payment-note">🔒 Your payment is secured by Stripe · PCI DSS compliant</p>
           </div>
           <p class="form-error" id="booking-error"></p>
           <button class="btn-book" id="pay-btn" onclick="submitBooking()">
