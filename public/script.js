@@ -1480,7 +1480,7 @@ async function setupStripePayment(amount, currency) {
       }
     });
     const paymentElement = stripeElements.create('payment', {
-      layout: { type: 'tabs', defaultCollapsed: false }
+      layout: { type: 'accordion', defaultCollapsed: false, radios: false, spacedAccordionItems: true }
     });
     paymentElement.mount('#payment-element');
   } catch (err) {
@@ -1539,7 +1539,7 @@ async function submitBooking() {
           billing_details: { email, phone }
         }
       },
-      redirect: 'if_required' // Don't redirect for card payments, handle result here
+      redirect: 'always' // Klarna/PayPal require redirect — use return_url to come back
     });
 
     if (stripeError) {
