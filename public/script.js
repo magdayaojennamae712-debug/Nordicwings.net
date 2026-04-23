@@ -1982,3 +1982,31 @@ function renderAdminTable(bookings) {
   document.getElementById('admin-table').style.display = 'table';
 
   document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td>${b.passengers?.length || 1} pax</td>
+      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// FAQ accordion toggle
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  if (!answer) return;
+  var isOpen = answer.style.display === 'block';
+  if (isOpen) {
+    answer.style.display = 'none';
+    btn.classList.remove('open');
+  } else {
+    answer.style.display = 'block';
+    btn.classList.add('open');
+  }
+}
