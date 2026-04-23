@@ -44,6 +44,19 @@ let stripeElements       = null;    // Stripe Elements instance
 let cancelBookingId      = null;    // Booking being cancelled
 
 // ─────────────────────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────────────────────
+function setError(el, msg) {
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function toggleBtnLoading(textId, spinnerId, loading) {
+  const t = document.getElementById(textId);
+  const s = document.getElementById(spinnerId);
+  if (t) t.style.display = loading ? 'none' : 'inline';
+  if (s) s.style.display = loading ? 'inline-block' : 'none';
+}
+
+// ─────────────────────────────────────────────────────────────
 // DATE / TIME / DURATION HELPERS
 // ─────────────────────────────────────────────────────────────
 function formatDate(isoStr) {
