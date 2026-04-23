@@ -1015,4 +1015,10 @@ app.use((req, res) => {
     console.warn('Suspicious probe blocked: ' + req.method + ' ' + req.path + ' from ' + req.ip);
     return res.status(404).json({ error: 'Not found.' });
   }
-  r
+  res.status(404).json({ error: 'Not found.' });
+});
+
+app.listen(PORT, () => {
+  console.log('NordicWings is running on port ' + PORT);
+  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
+});
