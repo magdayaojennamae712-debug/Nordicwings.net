@@ -120,6 +120,48 @@ function updateNavForAuth(user) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// SEO — update canonical tag + page title per route URL
+// ─────────────────────────────────────────────────────────────
+const ROUTE_NAMES = {
+  MNL:'Manila', DVO:'Davao', CEB:'Cebu', CRK:'Clark', ILO:'Iloilo',
+  BKK:'Bangkok', SIN:'Singapore', KUL:'Kuala Lumpur', DXB:'Dubai',
+  HKG:'Hong Kong', NRT:'Tokyo', ICN:'Seoul', CGK:'Jakarta',
+  LHR:'London', CDG:'Paris', AMS:'Amsterdam', BCN:'Barcelona',
+  FCO:'Rome', FRA:'Frankfurt', ARN:'Stockholm', CPH:'Copenhagen',
+  HEL:'Helsinki', OUL:'Oulu', TMP:'Tampere', TKU:'Turku'
+};
+function updateSeoForRoute(from, to) {
+  const fromName = ROUTE_NAMES[from] || from;
+  const toName   = ROUTE_NAMES[to]   || to;
+  const url      = 'https://nordicwings.net/?from=' + from + '&to=' + to;
+  // Canonical
+  let link = document.querySelector('link[rel="canonical"]');
+  if (link) link.href = url;
+  // Title & description
+  document.title = 'Cheap Flights ' + fromName + ' to ' + toName + ' | NordicWings';
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.content = 'Find cheap flights from ' + fromName + ' (' + from + ') to ' + toName + ' (' + to + '). Compare airlines and book securely via NordicWings powered by Duffel.';
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.content = 'Flights ' + fromName + ' → ' + toName + ' | NordicWings';
+}
+function checkUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const from   = (params.get('from') || '').toUpperCase();
+  const to     = (params.get('to')   || '').toUpperCase();
+  if (from && to) {
+    updateSeoForRoute(from, to);
+    // Pre-fill and auto-search
+    const originEl = document.getElementById('origin');
+    const destEl   = document.getElementById('destination');
+    if (originEl) originEl.value = from;
+    if (destEl)   destEl.value   = to;
+    searchFlights();
+  }
+}
+// Run on page load
+document.addEventListener('DOMContentLoaded', checkUrlParams);
+
+// ─────────────────────────────────────────────────────────────
 // PAGE NAVIGATION
 // ─────────────────────────────────────────────────────────────
 function showPage(pageId) {
