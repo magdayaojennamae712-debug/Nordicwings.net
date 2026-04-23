@@ -902,9 +902,12 @@ app.post('/api/payments/create-intent', paymentLimiter, async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount:   Math.round(cleanAmount * 100), // Stripe uses cents
       currency: cleanCurrency,
-      // automatic_payment_methods shows ALL enabled methods (cards, Klarna, PayPal, etc.)
-      // Enable additional methods in Stripe Dashboard → Settings → Payment methods
-      automatic_payment_methods: { enabled: true },
+      // Explicitly list payment methods so Klarna, PayPal etc always appear
+      // (automatic_payment_methods can suppress them depending on context)
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: 'always'
+      },
       metadata: {
         flight: JSON.stringify(flightDetails || {}).substring(0, 500)
       }

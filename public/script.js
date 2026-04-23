@@ -1455,7 +1455,7 @@ async function setupStripePayment(amount, currency) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
         amount,
-        currency: currency || 'USD',
+        currency: (currency || 'EUR').toLowerCase(),
         flightDetails: {
           from: searchParams.origin,
           to:   searchParams.dest,
@@ -1517,7 +1517,7 @@ async function submitBooking() {
     const _retP = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
     await setupStripePayment(
       (parseFloat(selectedFlight.price.grandTotal) + _retP) * (searchParams.passengers || 1),
-      selectedFlight.price.currency || 'USD'
+      selectedFlight.price.currency || 'EUR'
     );
     // Give it 2 seconds to mount
     await new Promise(resolve => setTimeout(resolve, 2000));
