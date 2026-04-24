@@ -1999,34 +1999,34 @@
     var greeted = false;
 
     var KB = [
-      { k:['book','how','start','search','find flight'],
-        a:'To book a flight: 1️⃣ Enter your origin & destination. 2️⃣ Choose your travel dates. 3️⃣ Click Search Flights. 4️⃣ Pick a flight and click Select. 5️⃣ Fill in passenger details and pay. You'll receive a confirmation email instantly!' },
-      { k:['cancel','refund','money back'],
-        a:'Yes, you can cancel your booking! Go to <b>My Bookings</b> → find your booking → click <b>Cancel & Refund</b>. Refunds are processed within 5–10 business days back to your original payment method.' },
-      { k:['baggage','luggage','bag','suitcase','kg','kilo'],
-        a:'Flights booked via NordicWings include <b>1× checked bag (23kg)</b> and a carry-on bag. Exact baggage details are shown on your booking confirmation.' },
-      { k:['payment','pay','card','klarna','visa','mastercard','paypal','google pay','apple pay'],
-        a:'We accept: 💳 Visa, Mastercard, Amex, Klarna (buy now pay later), PayPal, Google Pay and Apple Pay. All payments are secured by Stripe.' },
-      { k:['price','cost','cheap','expensive','how much'],
-        a:'Prices vary by route and date. We show real-time fares from hundreds of airlines — no hidden markups. Search your route to see live prices!' },
-      { k:['real','legit','safe','trust','scam','fake'],
-        a:'NordicWings is 100% legitimate. ✅ Real flights via Duffel (official airline GDS). ✅ Payments secured by Stripe. ✅ Registered in Finland. ✅ GDPR compliant.' },
-      { k:['confirm','ticket','email','receipt'],
-        a:'After booking you'll get a confirmation email with your booking reference and itinerary. Not received within 15 minutes? Check spam or contact us at hello@nordicwings.net.' },
-      { k:['change','modify','update','name','date'],
-        a:'Flight changes depend on your ticket type and airline policy. Email us at <b>hello@nordicwings.net</b> and we'll assist with any changes.' },
-      { k:['contact','email','reach','support','help'],
-        a:'Reach us at 📧 <b>hello@nordicwings.net</b> — we typically reply within a few hours. You can also visit our Support page for FAQs.' },
-      { k:['human','agent','person','talk','speak','jennamae','owner'],
-        a:'Of course! 👋 Email us at <b>hello@nordicwings.net</b> and our team will get back to you as soon as possible!' },
-      { k:['return','round trip','roundtrip','back'],
-        a:'Yes! 🔄 Select <b>Round Trip</b> on the search page, add your return date, and we'll show both outbound and return options to book in one go.' },
-      { k:['passport','document','id','visa'],
-        a:'You need a valid passport for international flights — valid for at least 6 months beyond your travel date. Visa requirements depend on your nationality and destination.' },
-      { k:['klarna','pay later','installment'],
-        a:'Yes, Klarna is available at checkout! 🛍️ Split your flight payment into installments — just select Klarna when paying.' },
-      { k:['finland','helsinki','hel','oulu','tampere','turku'],
-        a:'We specialise in flights from Finland! 🇫🇮 Routes from Helsinki (HEL), Oulu, Tampere and Turku to the Philippines, Asia, Europe, Middle East and more.' },
+      { k:["book","how","start","search","find flight"],
+        a:"To book a flight: enter your origin and destination, choose dates, click Search Flights, pick a flight, fill in passenger details and pay. You will receive a confirmation email instantly!" },
+      { k:["cancel","refund","money back"],
+        a:"Yes, you can cancel! Go to <b>My Bookings</b>, find your booking and click <b>Cancel and Refund</b>. Refunds are processed within 5-10 business days." },
+      { k:["baggage","luggage","bag","suitcase","kg","kilo"],
+        a:"Flights via NordicWings include <b>1x checked bag (23kg)</b> and a carry-on bag. Exact details are shown on your booking confirmation." },
+      { k:["payment","pay","card","klarna","visa","mastercard","paypal"],
+        a:"We accept: Visa, Mastercard, Amex, Klarna (buy now pay later), PayPal, Google Pay and Apple Pay. All payments are secured by Stripe." },
+      { k:["price","cost","cheap","expensive","how much"],
+        a:"Prices vary by route and date. We show real-time fares from hundreds of airlines with no hidden markups. Search your route to see live prices!" },
+      { k:["real","legit","safe","trust","scam","fake"],
+        a:"NordicWings is 100% legitimate. Real flights via Duffel (official airline GDS). Payments secured by Stripe. Registered in Finland. GDPR compliant." },
+      { k:["confirm","ticket","email","receipt"],
+        a:"After booking you will get a confirmation email with your booking reference and itinerary. Not received within 15 minutes? Check spam or contact hello@nordicwings.net." },
+      { k:["change","modify","update","name","date"],
+        a:"Flight changes depend on your ticket type and airline policy. Email us at <b>hello@nordicwings.net</b> and we will assist with any changes." },
+      { k:["contact","email","reach","support","help"],
+        a:"Reach us at <b>hello@nordicwings.net</b> - we typically reply within a few hours. You can also visit our Support page for FAQs." },
+      { k:["human","agent","person","talk","speak","owner"],
+        a:"Of course! Email us at <b>hello@nordicwings.net</b> and our team will get back to you as soon as possible!" },
+      { k:["return","round trip","roundtrip","back"],
+        a:"Yes! Select <b>Round Trip</b> on the search page, add your return date, and we will show both outbound and return options." },
+      { k:["passport","document","id","visa"],
+        a:"You need a valid passport for international flights - valid for at least 6 months beyond your travel date. Visa requirements depend on your nationality and destination." },
+      { k:["klarna","pay later","installment"],
+        a:"Yes, Klarna is available at checkout! Split your flight payment into installments - just select Klarna when paying." },
+      { k:["finland","helsinki","hel","oulu","tampere","turku"],
+        a:"We specialise in flights from Finland! Routes from Helsinki (HEL), Oulu, Tampere and Turku to the Philippines, Asia, Europe, Middle East and more." },
     ];
 
     function getBotReply(msg) {
@@ -2036,51 +2036,51 @@
           if (lower.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
         }
       }
-      return 'Thanks for your message! 😊 Our team can help with that — please email <b>hello@nordicwings.net</b> or try one of the quick questions below.';
+      return "Thanks for your message! Our team can help - please email <b>hello@nordicwings.net</b> or try one of the quick questions below.";
     }
 
     function addMsg(text, who) {
-      var msgs = document.getElementById('nw-chat-messages');
-      var wrap = document.createElement('div');
-      wrap.className = 'nw-msg ' + who;
-      if (who === 'bot') {
-        wrap.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble">' + text + '</div>';
+      var msgs = document.getElementById("nw-chat-messages");
+      var wrap = document.createElement("div");
+      wrap.className = "nw-msg " + who;
+      if (who === "bot") {
+        wrap.innerHTML = '<div class="bot-avatar">&#129302;</div><div class="bubble">' + text + "</div>";
       } else {
-        wrap.innerHTML = '<div class="bubble">' + text + '</div>';
+        wrap.innerHTML = '<div class="bubble">' + text + "</div>";
       }
       msgs.appendChild(wrap);
       msgs.scrollTop = msgs.scrollHeight;
     }
 
     function showTyping() {
-      var msgs = document.getElementById('nw-chat-messages');
-      var t = document.createElement('div');
-      t.className = 'nw-msg bot'; t.id = 'nw-typing';
-      t.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble"><div class="nw-typing"><span></span><span></span><span></span></div></div>';
+      var msgs = document.getElementById("nw-chat-messages");
+      var t = document.createElement("div");
+      t.className = "nw-msg bot"; t.id = "nw-typing";
+      t.innerHTML = '<div class="bot-avatar">&#129302;</div><div class="bubble"><div class="nw-typing"><span></span><span></span><span></span></div></div>';
       msgs.appendChild(t);
       msgs.scrollTop = msgs.scrollHeight;
     }
 
     function hideTyping() {
-      var t = document.getElementById('nw-typing');
+      var t = document.getElementById("nw-typing");
       if (t) t.remove();
     }
 
     window.nwToggleChat = function() {
       opened = !opened;
-      var win = document.getElementById('nw-chat-window');
-      var badge = document.getElementById('nw-chat-badge');
-      win.style.display = opened ? 'flex' : 'none';
-      if (badge) badge.style.display = 'none';
+      var win = document.getElementById("nw-chat-window");
+      var badge = document.getElementById("nw-chat-badge");
+      win.style.display = opened ? "flex" : "none";
+      if (badge) badge.style.display = "none";
       if (opened && !greeted) {
         greeted = true;
         setTimeout(function(){
-          addMsg('👋 Hi! I'm the <b>NordicWings Assistant</b>. I can help with booking flights, cancellations, baggage, payments and more!<br><br>How can I help you today?', 'bot');
+          addMsg("&#128075; Hi! I am the <b>NordicWings Assistant</b>. I can help with booking flights, cancellations, baggage, payments and more! How can I help you today?", "bot");
         }, 300);
       }
       if (opened) {
         setTimeout(function(){
-          var inp = document.getElementById('nw-chat-input');
+          var inp = document.getElementById("nw-chat-input");
           if (inp) inp.focus();
         }, 100);
       }
@@ -2088,24 +2088,24 @@
 
     window.nwQuickAsk = function(btn) {
       var q = btn.textContent;
-      addMsg(q, 'user');
+      addMsg(q, "user");
       showTyping();
       setTimeout(function(){
         hideTyping();
-        addMsg(getBotReply(q), 'bot');
+        addMsg(getBotReply(q), "bot");
       }, 800);
     };
 
     window.nwSendMessage = function() {
-      var inp = document.getElementById('nw-chat-input');
+      var inp = document.getElementById("nw-chat-input");
       var msg = inp.value.trim();
       if (!msg) return;
-      addMsg(msg, 'user');
-      inp.value = '';
+      addMsg(msg, "user");
+      inp.value = "";
       showTyping();
       setTimeout(function(){
         hideTyping();
-        addMsg(getBotReply(msg), 'bot');
+        addMsg(getBotReply(msg), "bot");
       }, 900);
     };
 
