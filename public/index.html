@@ -1773,5 +1773,262 @@
     <option value="CGP">Chittagong, Bangladesh</option>
     <option value="CMB">Colombo Bandaranaike, Sri Lanka</option>
   </datalist>
+
+  <!-- ═══════════════════════════════════════════════════════
+       NORDICWINGS AI CHAT WIDGET
+  ════════════════════════════════════════════════════════ -->
+  <style>
+    #nw-chat-bubble {
+      position:fixed; bottom:24px; right:24px; z-index:9999;
+      width:56px; height:56px; border-radius:50%;
+      background:linear-gradient(135deg,#1e40af,#2563eb);
+      box-shadow:0 4px 20px rgba(37,99,235,.5);
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; transition:transform .2s;
+      animation: nw-pulse 2.5s infinite;
+    }
+    @keyframes nw-pulse {
+      0%,100%{box-shadow:0 4px 20px rgba(37,99,235,.5)}
+      50%{box-shadow:0 4px 32px rgba(37,99,235,.85)}
+    }
+    #nw-chat-bubble:hover { transform:scale(1.1); }
+    #nw-chat-badge {
+      position:absolute; top:-4px; right:-4px;
+      background:#ef4444; color:#fff; font-size:.6rem; font-weight:700;
+      width:18px; height:18px; border-radius:50%; display:flex;
+      align-items:center; justify-content:center;
+    }
+    #nw-chat-window {
+      position:fixed; bottom:92px; right:24px; z-index:9998;
+      width:340px; max-width:calc(100vw - 32px);
+      background:#fff; border-radius:16px;
+      box-shadow:0 8px 40px rgba(0,0,0,.18);
+      display:none; flex-direction:column; overflow:hidden;
+      font-family:inherit; max-height:520px;
+    }
+    #nw-chat-header {
+      background:linear-gradient(135deg,#1e40af,#2563eb);
+      color:#fff; padding:14px 16px;
+      display:flex; align-items:center; gap:10px;
+    }
+    #nw-chat-header .avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.1rem; flex-shrink:0;
+    }
+    #nw-chat-header .info { flex:1; }
+    #nw-chat-header .name { font-weight:700; font-size:.9rem; }
+    #nw-chat-header .status { font-size:.72rem; opacity:.85; }
+    #nw-chat-header .close-btn {
+      background:transparent; border:none; color:#fff;
+      font-size:1.3rem; cursor:pointer; padding:0 4px; line-height:1;
+    }
+    #nw-chat-messages {
+      flex:1; overflow-y:auto; padding:14px;
+      display:flex; flex-direction:column; gap:10px;
+      max-height:320px; background:#f8fafc;
+    }
+    .nw-msg { display:flex; gap:8px; align-items:flex-end; }
+    .nw-msg.bot { flex-direction:row; }
+    .nw-msg.user { flex-direction:row-reverse; }
+    .nw-msg .bubble {
+      max-width:82%; padding:9px 13px; border-radius:14px;
+      font-size:.82rem; line-height:1.45;
+    }
+    .nw-msg.bot .bubble {
+      background:#fff; border:1px solid #e2e8f0; color:#1e293b;
+      border-bottom-left-radius:4px;
+    }
+    .nw-msg.user .bubble {
+      background:#2563eb; color:#fff;
+      border-bottom-right-radius:4px;
+    }
+    .nw-msg .bot-avatar {
+      width:26px; height:26px; border-radius:50%;
+      background:#dbeafe; display:flex; align-items:center;
+      justify-content:center; font-size:.85rem; flex-shrink:0;
+    }
+    #nw-chat-suggestions {
+      padding:8px 14px; display:flex; flex-wrap:wrap; gap:6px;
+      background:#f8fafc; border-top:1px solid #f1f5f9;
+    }
+    .nw-suggestion {
+      background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
+      border-radius:20px; padding:5px 12px; font-size:.75rem;
+      cursor:pointer; white-space:nowrap; transition:background .15s;
+      font-family:inherit;
+    }
+    .nw-suggestion:hover { background:#dbeafe; }
+    #nw-chat-input-row {
+      display:flex; gap:8px; padding:10px 12px;
+      border-top:1px solid #e2e8f0; background:#fff;
+    }
+    #nw-chat-input {
+      flex:1; border:1px solid #e2e8f0; border-radius:20px;
+      padding:8px 14px; font-size:.82rem; outline:none;
+      font-family:inherit;
+    }
+    #nw-chat-input:focus { border-color:#2563eb; }
+    #nw-chat-send {
+      background:#2563eb; color:#fff; border:none;
+      border-radius:50%; width:34px; height:34px;
+      cursor:pointer; display:flex; align-items:center;
+      justify-content:center; font-size:1rem; flex-shrink:0;
+    }
+    .nw-typing { display:flex; gap:4px; align-items:center; padding:4px 0; }
+    .nw-typing span {
+      width:7px; height:7px; border-radius:50%; background:#94a3b8;
+      animation:nw-bounce .9s infinite;
+    }
+    .nw-typing span:nth-child(2){animation-delay:.15s}
+    .nw-typing span:nth-child(3){animation-delay:.3s}
+    @keyframes nw-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+  </style>
+
+  <!-- Chat Bubble -->
+  <div id="nw-chat-bubble" onclick="nwToggleChat()" title="Chat with us">
+    ✈
+    <div id="nw-chat-badge">1</div>
+  </div>
+
+  <!-- Chat Window -->
+  <div id="nw-chat-window">
+    <div id="nw-chat-header">
+      <div class="avatar">🤖</div>
+      <div class="info">
+        <div class="name">NordicWings Assistant</div>
+        <div class="status">🟢 Online — usually replies instantly</div>
+      </div>
+      <button class="close-btn" onclick="nwToggleChat()">×</button>
+    </div>
+    <div id="nw-chat-messages"></div>
+    <div id="nw-chat-suggestions">
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">How do I book?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Can I cancel?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Baggage policy</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Payment methods</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Talk to human</button>
+    </div>
+    <div id="nw-chat-input-row">
+      <input id="nw-chat-input" type="text" placeholder="Type your question..."
+        onkeydown="if(event.key==='Enter')nwSendMessage()"/>
+      <button id="nw-chat-send" onclick="nwSendMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var opened = false;
+    var greeted = false;
+
+    var KB = [
+      { k:['book','how','start','search','find flight'],
+        a:'To book a flight: 1️⃣ Enter your origin & destination on the home page. 2️⃣ Choose your travel dates. 3️⃣ Click Search Flights. 4️⃣ Pick a flight and click Select. 5️⃣ Fill in passenger details and pay. You'll receive a confirmation email instantly!' },
+      { k:['cancel','refund','money back'],
+        a:'Yes, you can cancel your booking! Go to <b>My Bookings</b> → find your booking → click <b>Cancel & Refund</b>. Refunds are processed within 5–10 business days back to your original payment method. Please check our Cancellations & Refunds FAQ on the Support page for full details.' },
+      { k:['baggage','luggage','bag','suitcase','kg','kilo'],
+        a:'All flights booked through NordicWings include <b>1× checked bag (23kg)</b> and a carry-on bag. Baggage allowance may vary by airline — exact details are shown on your booking confirmation.' },
+      { k:['payment','pay','card','klarna','visa','mastercard','paypal'],
+        a:'We accept all major payment methods: 💳 Visa, Mastercard, Amex, Klarna (buy now, pay later), PayPal, Google Pay, and Apple Pay. All payments are secured by Stripe.' },
+      { k:['price','cost','cheap','expensive','how much'],
+        a:'Flight prices vary by route and date. We source real-time prices directly from airlines via Duffel — so you always get the real fare, no markups hidden. Search your route to see current prices!' },
+      { k:['real','legit','safe','trust','scam','fake'],
+        a:'NordicWings is a legitimate flight booking platform. ✅ We use Duffel (official airline GDS) to source real tickets directly from airlines. ✅ Payments secured by Stripe. ✅ Registered in Finland. ✅ GDPR compliant.' },
+      { k:['confirm','ticket','email','receipt'],
+        a:'After booking, you'll receive a confirmation email with your booking reference and full itinerary. If you don't receive it within 15 minutes, check your spam folder or contact us.' },
+      { k:['change','modify','update','name','date'],
+        a:'Flight changes depend on your ticket type and the airline's policy. Please contact us at <b>hello@nordicwings.net</b> and we'll do our best to assist with any changes.' },
+      { k:['contact','email','reach','support','help'],
+        a:'You can reach us at 📧 <b>hello@nordicwings.net</b>. We typically respond within a few hours. You can also visit our Support page for FAQs.' },
+      { k:['human','agent','person','real','talk','speak','jennamae','owner'],
+        a:'Of course! 👋 Our team will be happy to help personally. Please send your question to <b>hello@nordicwings.net</b> and we'll get back to you as soon as possible. Typically within a few hours!' },
+      { k:['return','round trip','roundtrip','back'],
+        a:'Yes, we support round trips! 🔄 On the search page, select <b>Round Trip</b>, enter your return date, and we'll show both outbound and return flights. You can book both in one go.' },
+      { k:['passport','document','id','visa'],
+        a:'You'll need a valid passport for international flights. Make sure your passport is valid for at least 6 months beyond your travel date. Visa requirements depend on your nationality and destination.' },
+      { k:['klarna'],
+        a:'Yes, Klarna is available at checkout! 🛍️ You can split your flight payment into installments. Just select Klarna when you reach the payment step.' },
+      { k:['finland','helsinki','hel','oulu','tampere','turku'],
+        a:'We specialise in flights departing from Finland! 🇫🇮 We offer routes from Helsinki (HEL), Oulu (OUL), Tampere (TMP), and Turku (TKU) to destinations worldwide — Philippines, Asia, Europe, Middle East and more.' },
+    ];
+
+    function getBotReply(msg) {
+      var lower = msg.toLowerCase();
+      for (var i = 0; i < KB.length; i++) {
+        for (var j = 0; j < KB[i].k.length; j++) {
+          if (lower.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
+        }
+      }
+      return 'Thanks for your message! 😊 I'm not sure about that one, but our team can help. Please email us at <b>hello@nordicwings.net</b> or try one of the quick questions below.';
+    }
+
+    function addMsg(text, who) {
+      var msgs = document.getElementById('nw-chat-messages');
+      var wrap = document.createElement('div');
+      wrap.className = 'nw-msg ' + who;
+      if (who === 'bot') {
+        wrap.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble">' + text + '</div>';
+      } else {
+        wrap.innerHTML = '<div class="bubble">' + text + '</div>';
+      }
+      msgs.appendChild(wrap);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function showTyping() {
+      var msgs = document.getElementById('nw-chat-messages');
+      var t = document.createElement('div');
+      t.className = 'nw-msg bot'; t.id = 'nw-typing';
+      t.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble"><div class="nw-typing"><span></span><span></span><span></span></div></div>';
+      msgs.appendChild(t);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function hideTyping() {
+      var t = document.getElementById('nw-typing');
+      if (t) t.remove();
+    }
+
+    window.nwToggleChat = function() {
+      opened = !opened;
+      var win = document.getElementById('nw-chat-window');
+      var badge = document.getElementById('nw-chat-badge');
+      win.style.display = opened ? 'flex' : 'none';
+      if (badge) badge.style.display = 'none';
+      if (opened && !greeted) {
+        greeted = true;
+        setTimeout(function(){
+          addMsg('👋 Hi! I'm the <b>NordicWings Assistant</b>. I can help you with booking flights, cancellations, baggage, payments and more!<br><br>How can I help you today?', 'bot');
+        }, 400);
+      }
+      if (opened) document.getElementById('nw-chat-input').focus();
+    };
+
+    window.nwQuickAsk = function(btn) {
+      var q = btn.textContent;
+      addMsg(q, 'user');
+      showTyping();
+      setTimeout(function(){
+        hideTyping();
+        addMsg(getBotReply(q), 'bot');
+      }, 800);
+    };
+
+    window.nwSendMessage = function() {
+      var inp = document.getElementById('nw-chat-input');
+      var msg = inp.value.trim();
+      if (!msg) return;
+      addMsg(msg, 'user');
+      inp.value = '';
+      showTyping();
+      setTimeout(function(){
+        hideTyping();
+        addMsg(getBotReply(msg), 'bot');
+      }, 900);
+    };
+  })();
+  </script>
+
 </body>
 </html>
