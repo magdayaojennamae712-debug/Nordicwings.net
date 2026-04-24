@@ -425,6 +425,9 @@
           </button>
         </div>
         <p class="search-error" id="search-error"></p>
+        <p style="text-align:center;font-size:.78rem;color:#64748b;margin-top:8px;">
+          &#9432; Prices may vary &mdash; we show real available fares directly from airlines.
+        </p>
 
         <!-- Quick Route Buttons -->
         <div class="quick-routes">
@@ -1999,10 +2002,10 @@
     var greeted = false;
 
     var KB = [
-      { k:["book","how","start","search","find flight"],
+      { k:["cancel","refund","money back","cancelled","was cancel","been cancel"],
+        a:"To check if your booking was cancelled: go to <b>My Bookings</b> in the menu. If the booking shows as Cancelled, you will also receive a cancellation confirmation email. Refunds are processed within 5-10 business days back to your original payment method." },
+      { k:["book","start","search","find flight","how do i","how to book"],
         a:"To book a flight: enter your origin and destination, choose dates, click Search Flights, pick a flight, fill in passenger details and pay. You will receive a confirmation email instantly!" },
-      { k:["cancel","refund","money back"],
-        a:"Yes, you can cancel! Go to <b>My Bookings</b>, find your booking and click <b>Cancel and Refund</b>. Refunds are processed within 5-10 business days." },
       { k:["baggage","luggage","bag","suitcase","kg","kilo"],
         a:"Flights via NordicWings include <b>1x checked bag (23kg)</b> and a carry-on bag. Exact details are shown on your booking confirmation." },
       { k:["payment","pay","card","klarna","visa","mastercard","paypal"],
