@@ -1853,6 +1853,266 @@
   </datalist>
 
 
+  <!-- ═══════════════════════════════════════════════════════
+       NORDICWINGS AI CHAT WIDGET
+  ════════════════════════════════════════════════════════ -->
+  <style>
+    #nw-chat-bubble {
+      position:fixed; bottom:24px; right:24px; z-index:9999;
+      width:60px; height:60px; border-radius:50%;
+      background:linear-gradient(135deg,#1e40af,#2563eb);
+      box-shadow:0 4px 20px rgba(37,99,235,.5);
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; transition:transform .2s;
+      animation: nw-pulse 2.5s infinite;
+      border:none; outline:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes nw-pulse {
+      0%,100%{box-shadow:0 4px 20px rgba(37,99,235,.5)}
+      50%{box-shadow:0 4px 32px rgba(37,99,235,.85)}
+    }
+    #nw-chat-bubble:hover { transform:scale(1.1); }
+    #nw-chat-badge {
+      position:absolute; top:-4px; right:-4px;
+      background:#ef4444; color:#fff; font-size:.6rem; font-weight:700;
+      width:18px; height:18px; border-radius:50%; display:flex;
+      align-items:center; justify-content:center;
+    }
+    #nw-chat-window {
+      position:fixed; bottom:96px; right:16px; z-index:9998;
+      width:340px; max-width:calc(100vw - 32px);
+      background:#fff; border-radius:16px;
+      box-shadow:0 8px 40px rgba(0,0,0,.18);
+      display:none; flex-direction:column; overflow:hidden;
+      font-family:inherit; max-height:520px;
+    }
+    #nw-chat-header {
+      background:linear-gradient(135deg,#1e40af,#2563eb);
+      color:#fff; padding:14px 16px;
+      display:flex; align-items:center; gap:10px;
+    }
+    #nw-chat-header .avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.1rem; flex-shrink:0;
+    }
+    #nw-chat-header .info { flex:1; }
+    #nw-chat-header .name { font-weight:700; font-size:.9rem; }
+    #nw-chat-header .status { font-size:.72rem; opacity:.85; }
+    #nw-chat-header .close-btn {
+      background:transparent; border:none; color:#fff;
+      font-size:1.5rem; cursor:pointer; padding:0 6px; line-height:1;
+    }
+    #nw-chat-messages {
+      flex:1; overflow-y:auto; padding:14px 12px;
+      display:flex; flex-direction:column; gap:10px;
+      min-height:180px; max-height:300px;
+      background:#f8faff;
+    }
+    .nw-msg { display:flex; align-items:flex-end; gap:6px; }
+    .nw-msg.bot { justify-content:flex-start; }
+    .nw-msg.user { justify-content:flex-end; }
+    .nw-msg .bot-avatar {
+      width:28px; height:28px; border-radius:50%;
+      background:#e0e7ff; display:flex; align-items:center;
+      justify-content:center; font-size:.85rem; flex-shrink:0;
+    }
+    .nw-msg .bubble {
+      max-width:78%; padding:9px 13px; border-radius:14px;
+      font-size:.82rem; line-height:1.45;
+    }
+    .nw-msg.bot .bubble { background:#fff; border:1px solid #e2e8f0; border-bottom-left-radius:4px; color:#1e293b; }
+    .nw-msg.user .bubble { background:#2563eb; color:#fff; border-bottom-right-radius:4px; }
+    #nw-chat-suggestions {
+      display:flex; flex-wrap:wrap; gap:6px;
+      padding:8px 12px; background:#f8faff;
+      border-top:1px solid #e2e8f0;
+    }
+    .nw-suggestion {
+      background:#e0e7ff; color:#1e40af; border:none;
+      padding:5px 11px; border-radius:20px; font-size:.75rem;
+      cursor:pointer; font-weight:500;
+    }
+    .nw-suggestion:hover { background:#c7d2fe; }
+    #nw-chat-input-row {
+      display:flex; gap:8px; padding:10px 12px;
+      border-top:1px solid #e2e8f0; background:#fff;
+    }
+    #nw-chat-input {
+      flex:1; border:1px solid #e2e8f0; border-radius:20px;
+      padding:8px 14px; font-size:.82rem; outline:none;
+    }
+    #nw-chat-input:focus { border-color:#2563eb; }
+    #nw-chat-send {
+      background:#2563eb; color:#fff; border:none;
+      border-radius:50%; width:34px; height:34px;
+      cursor:pointer; font-size:1rem; display:flex;
+      align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .nw-typing { display:flex; gap:4px; align-items:center; padding:2px 0; }
+    .nw-typing span {
+      width:7px; height:7px; border-radius:50%;
+      background:#94a3b8; display:inline-block;
+      animation:nw-bounce .9s infinite;
+    }
+    .nw-typing span:nth-child(2){animation-delay:.15s}
+    .nw-typing span:nth-child(3){animation-delay:.3s}
+    @keyframes nw-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+  </style>
+
+  <!-- Chat Bubble Button -->
+  <button id="nw-chat-bubble" onclick="nwToggleChat()" title="Chat with us" aria-label="Open chat">
+    💬
+    <div id="nw-chat-badge">1</div>
+  </button>
+
+  <!-- Chat Window -->
+  <div id="nw-chat-window">
+    <div id="nw-chat-header">
+      <div class="avatar">🤖</div>
+      <div class="info">
+        <div class="name">NordicWings Assistant</div>
+        <div class="status">🟢 Online — replies instantly</div>
+      </div>
+      <button class="close-btn" onclick="nwToggleChat()" aria-label="Close chat">×</button>
+    </div>
+    <div id="nw-chat-messages"></div>
+    <div id="nw-chat-suggestions">
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">How do I book?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Can I cancel?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Baggage policy</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Payment methods</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Talk to human</button>
+    </div>
+    <div id="nw-chat-input-row">
+      <input id="nw-chat-input" type="text" placeholder="Type your question..."
+        onkeydown="if(event.key==='Enter')nwSendMessage()"/>
+      <button id="nw-chat-send" onclick="nwSendMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var opened = false;
+    var greeted = false;
+
+    var KB = [
+      { k:['book','how','start','search','find flight'],
+        a:'To book a flight: 1️⃣ Enter your origin & destination. 2️⃣ Choose your travel dates. 3️⃣ Click Search Flights. 4️⃣ Pick a flight and click Select. 5️⃣ Fill in passenger details and pay. You'll receive a confirmation email instantly!' },
+      { k:['cancel','refund','money back'],
+        a:'Yes, you can cancel your booking! Go to <b>My Bookings</b> → find your booking → click <b>Cancel & Refund</b>. Refunds are processed within 5–10 business days back to your original payment method.' },
+      { k:['baggage','luggage','bag','suitcase','kg','kilo'],
+        a:'Flights booked via NordicWings include <b>1× checked bag (23kg)</b> and a carry-on bag. Exact baggage details are shown on your booking confirmation.' },
+      { k:['payment','pay','card','klarna','visa','mastercard','paypal','google pay','apple pay'],
+        a:'We accept: 💳 Visa, Mastercard, Amex, Klarna (buy now pay later), PayPal, Google Pay and Apple Pay. All payments are secured by Stripe.' },
+      { k:['price','cost','cheap','expensive','how much'],
+        a:'Prices vary by route and date. We show real-time fares from hundreds of airlines — no hidden markups. Search your route to see live prices!' },
+      { k:['real','legit','safe','trust','scam','fake'],
+        a:'NordicWings is 100% legitimate. ✅ Real flights via Duffel (official airline GDS). ✅ Payments secured by Stripe. ✅ Registered in Finland. ✅ GDPR compliant.' },
+      { k:['confirm','ticket','email','receipt'],
+        a:'After booking you'll get a confirmation email with your booking reference and itinerary. Not received within 15 minutes? Check spam or contact us at hello@nordicwings.net.' },
+      { k:['change','modify','update','name','date'],
+        a:'Flight changes depend on your ticket type and airline policy. Email us at <b>hello@nordicwings.net</b> and we'll assist with any changes.' },
+      { k:['contact','email','reach','support','help'],
+        a:'Reach us at 📧 <b>hello@nordicwings.net</b> — we typically reply within a few hours. You can also visit our Support page for FAQs.' },
+      { k:['human','agent','person','talk','speak','jennamae','owner'],
+        a:'Of course! 👋 Email us at <b>hello@nordicwings.net</b> and our team will get back to you as soon as possible!' },
+      { k:['return','round trip','roundtrip','back'],
+        a:'Yes! 🔄 Select <b>Round Trip</b> on the search page, add your return date, and we'll show both outbound and return options to book in one go.' },
+      { k:['passport','document','id','visa'],
+        a:'You need a valid passport for international flights — valid for at least 6 months beyond your travel date. Visa requirements depend on your nationality and destination.' },
+      { k:['klarna','pay later','installment'],
+        a:'Yes, Klarna is available at checkout! 🛍️ Split your flight payment into installments — just select Klarna when paying.' },
+      { k:['finland','helsinki','hel','oulu','tampere','turku'],
+        a:'We specialise in flights from Finland! 🇫🇮 Routes from Helsinki (HEL), Oulu, Tampere and Turku to the Philippines, Asia, Europe, Middle East and more.' },
+    ];
+
+    function getBotReply(msg) {
+      var lower = msg.toLowerCase();
+      for (var i = 0; i < KB.length; i++) {
+        for (var j = 0; j < KB[i].k.length; j++) {
+          if (lower.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
+        }
+      }
+      return 'Thanks for your message! 😊 Our team can help with that — please email <b>hello@nordicwings.net</b> or try one of the quick questions below.';
+    }
+
+    function addMsg(text, who) {
+      var msgs = document.getElementById('nw-chat-messages');
+      var wrap = document.createElement('div');
+      wrap.className = 'nw-msg ' + who;
+      if (who === 'bot') {
+        wrap.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble">' + text + '</div>';
+      } else {
+        wrap.innerHTML = '<div class="bubble">' + text + '</div>';
+      }
+      msgs.appendChild(wrap);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function showTyping() {
+      var msgs = document.getElementById('nw-chat-messages');
+      var t = document.createElement('div');
+      t.className = 'nw-msg bot'; t.id = 'nw-typing';
+      t.innerHTML = '<div class="bot-avatar">🤖</div><div class="bubble"><div class="nw-typing"><span></span><span></span><span></span></div></div>';
+      msgs.appendChild(t);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function hideTyping() {
+      var t = document.getElementById('nw-typing');
+      if (t) t.remove();
+    }
+
+    window.nwToggleChat = function() {
+      opened = !opened;
+      var win = document.getElementById('nw-chat-window');
+      var badge = document.getElementById('nw-chat-badge');
+      win.style.display = opened ? 'flex' : 'none';
+      if (badge) badge.style.display = 'none';
+      if (opened && !greeted) {
+        greeted = true;
+        setTimeout(function(){
+          addMsg('👋 Hi! I'm the <b>NordicWings Assistant</b>. I can help with booking flights, cancellations, baggage, payments and more!<br><br>How can I help you today?', 'bot');
+        }, 300);
+      }
+      if (opened) {
+        setTimeout(function(){
+          var inp = document.getElementById('nw-chat-input');
+          if (inp) inp.focus();
+        }, 100);
+      }
+    };
+
+    window.nwQuickAsk = function(btn) {
+      var q = btn.textContent;
+      addMsg(q, 'user');
+      showTyping();
+      setTimeout(function(){
+        hideTyping();
+        addMsg(getBotReply(q), 'bot');
+      }, 800);
+    };
+
+    window.nwSendMessage = function() {
+      var inp = document.getElementById('nw-chat-input');
+      var msg = inp.value.trim();
+      if (!msg) return;
+      addMsg(msg, 'user');
+      inp.value = '';
+      showTyping();
+      setTimeout(function(){
+        hideTyping();
+        addMsg(getBotReply(msg), 'bot');
+      }, 900);
+    };
+
+  })();
+  </script>
+
+
   <!-- Google Translate -->
   <div id="google_translate_element" style="display:none;"></div>
   <script type="text/javascript">
