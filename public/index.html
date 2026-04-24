@@ -285,37 +285,15 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════════════
-       PROMO BANNER
-  ════════════════════════════════════════════════════════ -->
-  <div id="promo-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#1e40af,#2563eb);color:#fff;text-align:center;padding:12px 50px;font-size:.88rem;font-weight:500;box-shadow:0 2px 12px rgba(30,64,175,.5);display:block;">
-    &#9992;&#65039; <strong>Special Offer:</strong> Book your flight today &mdash; real tickets, real airlines, secured by Stripe.
-    &nbsp;<span style="text-decoration:underline;cursor:pointer;font-weight:700;" onclick="document.getElementById('promo-banner').style.display='none';window.scrollTo({top:0,behavior:'smooth'});">Search now &rarr;</span>
-    <button onclick="document.getElementById('promo-banner').style.display='none';"
-      style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:4px;"
-      title="Close">&times;</button>
+  <!-- PROMO BANNER -->
+  <div id="promo-banner" style="background:#1e40af;color:#fff;text-align:center;padding:10px 44px 10px 12px;font-size:.85rem;font-weight:500;position:relative;width:100%;box-sizing:border-box;">
+    &#9992; <strong>Special Offer:</strong> Book today &mdash; real tickets, real airlines, secured by Stripe. &nbsp;<strong style="text-decoration:underline;cursor:pointer;" onclick="window.scrollTo({top:400,behavior:'smooth'})">Search now &rarr;</strong>
+    <button onclick="this.parentElement.style.display='none';" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.25);border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:4px;">&times;</button>
   </div>
-  <style>
-    /* Push page content down so header is not hidden under promo banner */
-    #promo-banner ~ * { }
-    body { padding-top: 44px; }
-    #promo-banner[style*="display:none"] ~ * { }
-    #promo-banner[style*="display: none"] + * { padding-top: 0; }
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var pb = document.getElementById('promo-banner');
-      if (pb && pb.style.display !== 'none') {
-        document.body.style.paddingTop = pb.offsetHeight + 'px';
-        pb.querySelector('button').addEventListener('click', function() {
-          document.body.style.paddingTop = '0';
-        });
-      }
-    });
-  </script>
 
   <!-- ═══════════════════════════════════════════════════════
        HEADER
+
   ════════════════════════════════════════════════════════ -->
   <header id="site-header">
     <div class="header-inner">
