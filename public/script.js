@@ -134,15 +134,29 @@ function updateSeoForRoute(from, to) {
   const fromName = ROUTE_NAMES[from] || from;
   const toName   = ROUTE_NAMES[to]   || to;
   const url      = 'https://nordicwings.net/?from=' + from + '&to=' + to;
+  const desc     = 'Find cheap flights from ' + fromName + ' (' + from + ') to ' + toName + ' (' + to + '). Compare airlines, see real-time prices and book securely via NordicWings.';
   // Canonical
   let link = document.querySelector('link[rel="canonical"]');
   if (link) link.href = url;
-  // Title & description
+  // Page title
   document.title = 'Cheap Flights ' + fromName + ' to ' + toName + ' | NordicWings';
+  // Meta description
   let metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) metaDesc.content = 'Find cheap flights from ' + fromName + ' (' + from + ') to ' + toName + ' (' + to + '). Compare airlines and book securely via NordicWings powered by Duffel.';
+  if (metaDesc) metaDesc.content = desc;
+  // Open Graph
   let ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) ogTitle.content = 'Flights ' + fromName + ' → ' + toName + ' | NordicWings';
+  if (ogTitle) ogTitle.content = 'Cheap Flights ' + fromName + ' → ' + toName + ' | NordicWings';
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.content = desc;
+  let ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.content = url;
+  // Twitter/X
+  let twTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twTitle) twTitle.content = 'Cheap Flights ' + fromName + ' → ' + toName + ' | NordicWings';
+  let twDesc = document.querySelector('meta[name="twitter:description"]');
+  if (twDesc) twDesc.content = desc;
+  let twUrl = document.querySelector('meta[name="twitter:url"]');
+  if (twUrl) twUrl.content = url;
 }
 function checkUrlParams() {
   const params = new URLSearchParams(window.location.search);
