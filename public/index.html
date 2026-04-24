@@ -228,6 +228,23 @@
 <body>
 
   <!-- ═══════════════════════════════════════════════════════
+       PROMO BANNER
+  ════════════════════════════════════════════════════════ -->
+  <div id="promo-banner" style="background:linear-gradient(90deg,#1e40af,#2563eb);color:#fff;text-align:center;padding:10px 16px;font-size:.85rem;font-weight:500;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;z-index:1000;">
+    <span>✈ Book your flight today and fly with confidence — real tickets, real airlines, secured by Stripe</span>
+    <button onclick="document.getElementById('promo-banner').style.display='none';localStorage.setItem('nw_promo_dismissed','1');"
+      style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1;padding:4px 8px;opacity:.8;"
+      title="Dismiss">×</button>
+  </div>
+  <script>
+    // Hide promo banner if already dismissed
+    if (localStorage.getItem('nw_promo_dismissed')) {
+      var pb = document.getElementById('promo-banner');
+      if (pb) pb.style.display = 'none';
+    }
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════
        HEADER
   ════════════════════════════════════════════════════════ -->
   <header id="site-header">
@@ -1546,11 +1563,16 @@
   </div>
 
   <!-- COOKIE CONSENT BANNER -->
-  <div id="cookie-banner" class="cookie-banner">
-    <p>🍪 We use cookies to improve your experience and analyse traffic. By using NordicWings you agree to our <a href="javascript:void(0)" onclick="openPolicyModal('privacy')">Privacy Policy</a>.</p>
-    <div class="cookie-actions">
-      <button onclick="acceptCookies()" class="btn-primary">Accept All</button>
-      <button onclick="declineCookies()" class="btn-ghost">Essential Only</button>
+  <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1e293b;color:#f1f5f9;padding:16px 24px;box-shadow:0 -4px 20px rgba(0,0,0,.3);font-family:inherit;">
+    <div style="max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
+      <div style="flex:1;min-width:260px;font-size:.85rem;line-height:1.5;">
+        🍪 <strong>We use cookies</strong> to improve your experience and analyse traffic (Google Analytics). Required by EU/GDPR law.
+        <a href="javascript:void(0)" onclick="openPolicyModal('privacy')" style="color:#60a5fa;text-decoration:underline;margin-left:4px;">Privacy Policy</a>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button onclick="declineCookies()" style="background:transparent;border:1px solid #475569;color:#cbd5e1;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.82rem;font-family:inherit;">Essential Only</button>
+        <button onclick="acceptCookies()" style="background:#2563eb;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600;font-family:inherit;">Accept All</button>
+      </div>
     </div>
   </div>
 
