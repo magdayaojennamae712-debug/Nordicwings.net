@@ -288,18 +288,30 @@
   <!-- ═══════════════════════════════════════════════════════
        PROMO BANNER
   ════════════════════════════════════════════════════════ -->
-  <div id="promo-banner" style="background:linear-gradient(90deg,#1e40af,#2563eb);color:#fff;text-align:center;padding:11px 48px 11px 16px;font-size:.85rem;font-weight:500;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;z-index:1000;box-shadow:0 2px 8px rgba(30,64,175,.4);">
-    <span style="letter-spacing:.01em;">&#127748; <strong>Special Offer:</strong> Book your flight today &mdash; real tickets, real airlines, secured by Stripe. <span style="text-decoration:underline;cursor:pointer;" onclick="document.getElementById('origin-input').focus();window.scrollTo({top:0,behavior:'smooth'})">Search now &rarr;</span></span>
-    <button id="promo-close" onclick="document.getElementById('promo-banner').style.display='none';sessionStorage.setItem('nw_promo_closed','1');"
-      style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1rem;cursor:pointer;line-height:1;padding:4px 8px;border-radius:4px;opacity:.9;"
+  <div id="promo-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#1e40af,#2563eb);color:#fff;text-align:center;padding:12px 50px;font-size:.88rem;font-weight:500;box-shadow:0 2px 12px rgba(30,64,175,.5);display:block;">
+    &#9992;&#65039; <strong>Special Offer:</strong> Book your flight today &mdash; real tickets, real airlines, secured by Stripe.
+    &nbsp;<span style="text-decoration:underline;cursor:pointer;font-weight:700;" onclick="document.getElementById('promo-banner').style.display='none';window.scrollTo({top:0,behavior:'smooth'});">Search now &rarr;</span>
+    <button onclick="document.getElementById('promo-banner').style.display='none';"
+      style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:4px;"
       title="Close">&times;</button>
   </div>
+  <style>
+    /* Push page content down so header is not hidden under promo banner */
+    #promo-banner ~ * { }
+    body { padding-top: 44px; }
+    #promo-banner[style*="display:none"] ~ * { }
+    #promo-banner[style*="display: none"] + * { padding-top: 0; }
+  </style>
   <script>
-    // Hide promo banner only for this session (shows again on next visit)
-    if (sessionStorage.getItem('nw_promo_closed')) {
+    document.addEventListener('DOMContentLoaded', function() {
       var pb = document.getElementById('promo-banner');
-      if (pb) pb.style.display = 'none';
-    }
+      if (pb && pb.style.display !== 'none') {
+        document.body.style.paddingTop = pb.offsetHeight + 'px';
+        pb.querySelector('button').addEventListener('click', function() {
+          document.body.style.paddingTop = '0';
+        });
+      }
+    });
   </script>
 
   <!-- ═══════════════════════════════════════════════════════
