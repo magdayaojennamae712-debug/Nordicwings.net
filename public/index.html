@@ -265,6 +265,26 @@
           <span id="nav-username"></span>
           <button class="btn-ghost small" onclick="signOutUser()">Sign Out</button>
         </div>
+
+        <!-- Language Selector -->
+        <div id="nw-lang-selector" style="position:relative;display:inline-block;">
+          <button onclick="nwToggleLang(event)" title="Change language"
+            style="background:transparent;border:1px solid rgba(255,255,255,.3);color:inherit;
+                   padding:5px 10px;border-radius:20px;cursor:pointer;font-size:.8rem;
+                   display:flex;align-items:center;gap:5px;white-space:nowrap;">
+            🌐 <span id="nw-lang-label">EN</span> ▾
+          </button>
+          <div id="nw-lang-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);
+               background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.15);
+               z-index:9999;min-width:180px;overflow:hidden;border:1px solid #e2e8f0;">
+            <div style="padding:8px 12px;font-size:.7rem;font-weight:700;color:#94a3b8;
+                        text-transform:uppercase;letter-spacing:.05em;background:#f8fafc;">
+              Select Language
+            </div>
+            <div id="nw-lang-list" style="max-height:280px;overflow-y:auto;">
+            </div>
+          </div>
+        </div>
       </nav>
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
     </div>
@@ -2030,5 +2050,115 @@
   })();
   </script>
 
+  <!-- Google Translate -->
+  <div id="google_translate_element" style="display:none;"></div>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <script>
+  (function(){
+    var LANGS = [
+      {code:'en', label:'English',    flag:'🇬🇧'},
+      {code:'fi', label:'Suomi',      flag:'🇫🇮'},
+      {code:'tl', label:'Filipino',   flag:'🇵🇭'},
+      {code:'sv', label:'Svenska',    flag:'🇸🇪'},
+      {code:'ar', label:'العربية',    flag:'🇦🇪'},
+      {code:'zh-CN', label:'中文',    flag:'🇨🇳'},
+      {code:'ja', label:'日本語',     flag:'🇯🇵'},
+      {code:'ko', label:'한국어',     flag:'🇰🇷'},
+      {code:'de', label:'Deutsch',    flag:'🇩🇪'},
+      {code:'fr', label:'Français',   flag:'🇫🇷'},
+      {code:'es', label:'Español',    flag:'🇪🇸'},
+      {code:'ru', label:'Русский',    flag:'🇷🇺'},
+      {code:'th', label:'ภาษาไทย',   flag:'🇹🇭'},
+      {code:'id', label:'Indonesia',  flag:'🇮🇩'},
+      {code:'ms', label:'Melayu',     flag:'🇲🇾'},
+      {code:'hi', label:'हिन्दी',     flag:'🇮🇳'},
+      {code:'pl', label:'Polski',     flag:'🇵🇱'},
+      {code:'nl', label:'Nederlands', flag:'🇳🇱'},
+    ];
+
+    // Build language list
+    var list = document.getElementById('nw-lang-list');
+    if (list) {
+      LANGS.forEach(function(l){
+        var item = document.createElement('button');
+        item.style.cssText = 'width:100%;background:transparent;border:none;padding:9px 14px;' +
+          'text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;' +
+          'font-size:.83rem;color:#1e293b;transition:background .1s;font-family:inherit;';
+        item.innerHTML = '<span style="font-size:1.1rem;">' + l.flag + '</span>' +
+          '<span>' + l.label + '</span>';
+        item.onmouseover = function(){ this.style.background='#f1f5f9'; };
+        item.onmouseout  = function(){ this.style.background='transparent'; };
+        item.onclick = function(){
+          nwSetLang(l.code, l.label);
+          document.getElementById('nw-lang-dropdown').style.display = 'none';
+        };
+        list.appendChild(item);
+      });
+    }
+
+    window.nwToggleLang = function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('nw-lang-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    };
+    document.addEventListener('click', function(){
+      var dd = document.getElementById('nw-lang-dropdown');
+      if (dd) dd.style.display = 'none';
+    });
+
+    window.nwSetLang = function(code, label) {
+      document.getElementById('nw-lang-label').textContent =
+        code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
+
+      if (code === 'en') {
+        // Restore English — remove Google Translate cookie
+        var iframe = document.querySelector('.goog-te-banner-frame');
+        if (iframe) {
+          var restore = iframe.contentDocument &&
+            iframe.contentDocument.querySelector('.goog-te-button button');
+          if (restore) restore.click();
+        }
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+        location.reload();
+        return;
+      }
+
+      // Set Google Translate language via cookie
+      document.cookie = 'googtrans=/en/' + code + '; path=/';
+      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
+
+      // Trigger translation via hidden select
+      var sel = document.querySelector('.goog-te-combo');
+      if (sel) {
+        sel.value = code;
+        sel.dispatchEvent(new Event('change'));
+      } else {
+        // Retry after translate loads
+        setTimeout(function(){
+          var sel2 = document.querySelector('.goog-te-combo');
+          if (sel2) { sel2.value = code; sel2.dispatchEvent(new Event('change')); }
+        }, 1500);
+      }
+    };
+
+    // Hide Google Translate top bar (we use our own UI)
+    var style = document.createElement('style');
+    style.textContent = '.goog-te-banner-frame{display:none!important}' +
+      'body{top:0!important}' +
+      '.skiptranslate{display:none!important}' +
+      '#goog-gt-tt{display:none!important}';
+    document.head.appendChild(style);
+  })();
+  </script>
 </body>
 </html>
