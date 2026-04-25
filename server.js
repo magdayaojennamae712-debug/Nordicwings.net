@@ -222,11 +222,11 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
             offerIsValid = false; break;
           }
 
-          // 3) Any layover over 3 hours = bad experience
+          // 3) Any layover over 5 hours = too long
           for (let s = 0; s < checkSegs.length - 1; s++) {
             const layoverMins = (new Date(checkSegs[s+1].depAt) - new Date(checkSegs[s].arrAt)) / 60000;
-            if (layoverMins > 180) {
-              console.warn(`Skipping offer ${offer.id} — layover ${Math.round(layoverMins)}min (over 3h)`);
+            if (layoverMins > 300) {
+              console.warn(`Skipping offer ${offer.id} — layover ${Math.round(layoverMins)}min (over 5h)`);
               offerIsValid = false; break;
             }
           }
