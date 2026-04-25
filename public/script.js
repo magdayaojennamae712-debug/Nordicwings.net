@@ -1663,9 +1663,9 @@ async function setupBookingPage() {
   const infantTotal  = baseFlightPrice * 0.10 * nInfants2;
   const grandTotal   = adultTotal + childTotal + infantTotal;
 
-  const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (price / 1.02));
-  const nwFee       = Math.max(0, price - duffelBase);
-  const taxesTotal  = (duffelBase * 0.12 * nAdults2).toFixed(2);
+  const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (baseFlightPrice / 1.05));
+  const nwFee       = parseFloat(selectedFlight.nordicwingsFee) || Math.max(12, (baseFlightPrice - duffelBase));
+  const taxesTotal  = (duffelBase * 0.12).toFixed(2);
   const nwFeeTotal  = (nwFee * nAdults2).toFixed(2);
 
   let breakdownHtml = `

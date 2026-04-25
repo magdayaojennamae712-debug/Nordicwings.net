@@ -127,8 +127,9 @@ const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 // ── Duffel API config ─────────────────────────────────────────
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
-const MARKUP_DOMESTIC      = 0.01; // 1% margin for domestic flights (under €150)
-const MARKUP_INTERNATIONAL = 0.02; // 2% margin for international flights (€150+)
+// NordicWings service fee: 5% of base fare, minimum €12 per ticket
+const MARKUP_RATE    = 0.05;  // 5% on every ticket
+const MARKUP_MIN_FEE = 12;    // minimum €12 booking fee regardless of price
 
 async function searchDuffelFlights(orig, dest, date, adults, children = 0, infants = 0) {
   if (!DUFFEL_API_KEY) return null;
@@ -195,9 +196,30 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
 
         if (!segments.length) continue;
 
+        // ── Validate segment times — skip corrupted Duffel data ──
+        // Any flight segment under 30 min is impossible (shortest commercial route is ~45 min)
+        const hasImpossibleSegment = segments.some(seg => {
+          const dep = new Date(seg.departure.at);
+          const arr = new Date(seg.arrival.at);
+          const diffMins = (arr - dep) / 60000;
+          return diffMins < 30 || isNaN(diffMins);
+        });
+        if (hasImpossibleSegment) {
+          console.warn(`Skipping offer ${offer.id} — has segment under 30 min (bad Duffel data)`);
+          continue;
+        }
+
+        // Skip if total journey is over 40 hours (also likely bad data)
+        const totalJourneyMins = (new Date(segments[segments.length-1].arrival.at) - new Date(segments[0].departure.at)) / 60000;
+        if (totalJourneyMins > 2400) {
+          console.warn(`Skipping offer ${offer.id} — journey over 40h (${Math.round(totalJourneyMins/60)}h), likely bad data`);
+          continue;
+        }
+
         const basePrice   = parseFloat(offer.total_amount || 0);
-        const markup      = basePrice < 150 ? MARKUP_DOMESTIC : MARKUP_INTERNATIONAL;
-        const markedPrice = Math.round(basePrice * (1 + markup) * 100) / 100; // smart markup
+        // 5% markup with minimum €12 service fee
+        const feeAmount   = Math.max(MARKUP_MIN_FEE, basePrice * MARKUP_RATE);
+        const markedPrice = Math.round((basePrice + feeAmount) * 100) / 100;
         const cabin = offer.slices?.[0]?.segments?.[0]?.passengers?.[0]?.cabin_class_marketing_name || 'ECONOMY';
         const durationMins = slice.duration
           ? (parseInt(slice.duration.match(/(\d+)H/)?.[1] || 0) * 60 + parseInt(slice.duration.match(/(\d+)M/)?.[1] || 0))
@@ -206,11 +228,12 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
         flights.push({
           id: `duffel-${offer.id}`,
           duffelOfferId: offer.id,         // store for booking
-          duffelBasePrice: basePrice,      // what Duffel charges us
+          duffelBasePrice: basePrice,      // what Duffel charges us (before our fee)
+          nordicwingsFee: feeAmount,       // our service fee (min €12, or 5%)
           price: {
-            grandTotal: markedPrice.toFixed(2),  // what customer pays (with markup)
+            grandTotal: markedPrice.toFixed(2),  // what customer pays (base + NordicWings fee)
             currency:   offer.total_currency || 'EUR',
-            fees:       [{ amount: (basePrice * 0.10).toFixed(2) }]
+            fees:       [{ amount: feeAmount.toFixed(2) }]  // actual NordicWings fee shown
           },
           numberOfBookableSeats: offer.available_services?.length || 9,
           itineraries: [{
