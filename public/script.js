@@ -821,8 +821,9 @@ async function searchFlights() {
   outboundFlight = null;
   selectedReturnFlight = null;
 
+  const cabinClass = document.getElementById('cabin-class-input')?.value || 'economy';
   searchParams = { origin, dest, departDate, returnDate: searchReturnDate, passengers,
-                   numAdults, numChildren, numInfants, isRoundTrip };
+                   numAdults, numChildren, numInfants, isRoundTrip, cabinClass };
 
   showPage('results');
   document.getElementById('results-loading').style.display = 'flex';
@@ -843,10 +844,11 @@ async function searchFlights() {
   const originEntityId = originInput.dataset.entityId || '';
   const destEntityId   = destInput.dataset.entityId   || '';
 
-  // Build query params — pass adults, children, infants separately to backend
+  // Build query params — pass adults, children, infants, cabin class to backend
   const qs = new URLSearchParams({
     origin, destination: dest, departureDate: departDate,
-    adults: numAdults, children: numChildren, infants: numInfants
+    adults: numAdults, children: numChildren, infants: numInfants,
+    cabinClass: cabinClass
   });
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
@@ -2332,6 +2334,4 @@ function toggleFaq(btn) {
     btn.classList.remove('open');
   } else {
     answer.style.display = 'block';
-    btn.classList.add('open');
-  }
-}
+   

@@ -464,6 +464,17 @@
             </div>
           </div>
 
+          <div class="input-group">
+            <label>Cabin Class</label>
+            <select id="cabin-class-input" style="width:100%;background:#fff;border:1.5px solid #e2e8f0;
+              border-radius:10px;padding:10px 14px;font-size:.95rem;color:#1e293b;cursor:pointer;">
+              <option value="economy">💺 Economy</option>
+              <option value="premium_economy">🪑 Premium Economy</option>
+              <option value="business">🛋 Business</option>
+              <option value="first">⭐ First Class</option>
+            </select>
+          </div>
+
           <button class="btn-search" onclick="searchFlights()">
             <span id="search-btn-text">🔍 Search Flights</span>
             <span id="search-btn-spinner" class="spinner" style="display:none;"></span>
@@ -2313,19 +2324,3 @@
       var sel = document.querySelector('.goog-te-combo');
       if (sel) {
         sel.value = code;
-        sel.dispatchEvent(new Event('change'));
-      } else {
-        // Retry after translate loads
-        setTimeout(function(){
-          var sel2 = document.querySelector('.goog-te-combo');
-          if (sel2) { sel2.value = code; sel2.dispatchEvent(new Event('change')); }
-        }, 1500);
-      }
-    };
-
-    // Hide Google Translate top bar (we use our own UI)
-    var style = document.createElement('style');
-    style.textContent = '.goog-te-banner-frame{display:none!important}' +
-      'body{top:0!important}' +
-      '.skiptranslate{display:none!important}' +
-    

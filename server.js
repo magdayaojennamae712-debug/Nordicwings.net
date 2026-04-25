@@ -131,7 +131,7 @@ const DUFFEL_BASE_URL = 'https://api.duffel.com';
 const MARKUP_RATE    = 0.05;  // 5% on every ticket
 const MARKUP_MIN_FEE = 12;    // minimum €12 booking fee regardless of price
 
-async function searchDuffelFlights(orig, dest, date, adults, children = 0, infants = 0) {
+async function searchDuffelFlights(orig, dest, date, adults, children = 0, infants = 0, cabinClass = 'economy') {
   if (!DUFFEL_API_KEY) return null;
 
   // Build passengers array — Duffel supports adult, child, infant_without_seat
@@ -156,7 +156,7 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
         data: {
           slices: [{ origin: orig, destination: dest, departure_date: date }],
           passengers,
-          cabin_class: 'economy'
+          cabin_class: cabinClass
         }
       }),
       signal: controller.signal
@@ -178,9 +178,12 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
 
     console.log(`Duffel returned ${offers.length} offers`);
 
-    // Map Duffel offers to NordicWings flight format
+    // Sort cheapest first so customers always see best price at top
+    offers.sort((a, b) => parseFloat(a.total_amount || 9999) - parseFloat(b.total_amount || 9999));
+
+    // Map Duffel offers to NordicWings flight format — show up to 20
     const flights = [];
-    for (let i = 0; i < Math.min(offers.length, 10); i++) {
+    for (let i = 0; i < Math.min(offers.length, 20); i++) {
       try {
         const offer = offers[i];
         const slice = offer.slices?.[0];
@@ -349,7 +352,7 @@ app.get('/api/airports/search', async (req, res) => {
 //               originEntityId, destinationEntityId
 // ============================================================
 app.get('/api/flights/search', searchLimiter, async (req, res) => {
-  const { origin, destination, departureDate, adults, children, infants, originEntityId, destinationEntityId } = req.query;
+  const { origin, destination, departureDate, adults, children, infants, cabinClass, originEntityId, destinationEntityId } = req.query;
 
   // Validate and sanitize all inputs
   const cleanOrigin    = sanitize(origin || '').toUpperCase();
@@ -358,6 +361,8 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   const cleanAdults    = Math.min(Math.max(parseInt(adults)   || 1, 1), 9);
   const cleanChildren  = Math.min(Math.max(parseInt(children) || 0, 0), 8);
   const cleanInfants   = Math.min(Math.max(parseInt(infants)  || 0, 0), cleanAdults);
+  const validCabins    = ['economy', 'premium_economy', 'business', 'first'];
+  const cleanCabin     = validCabins.includes(cabinClass) ? cabinClass : 'economy';
 
   if (!cleanOrigin || !cleanDest || !cleanDate) {
     return res.status(400).json({ error: 'Please provide origin, destination, and date.' });
@@ -774,7 +779,7 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   // ── Try Duffel first (real flights, live API) ───────────────
   if (DUFFEL_API_KEY) {
     console.log('Trying Duffel API...');
-    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults, cleanChildren, cleanInfants);
+    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults, cleanChildren, cleanInfants, cleanCabin);
     if (duffelFlights && duffelFlights.length) {
       console.log(`Duffel returned ${duffelFlights.length} real flights!`);
       return res.json(duffelFlights);
@@ -1409,14 +1414,4 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   const path = req.path.toLowerCase();
   const probes = ['.php', '.asp', '.aspx', 'wp-admin', 'xmlrpc', '.env', 'config.json', 'admin/', '/.git', '/backup'];
-  if (probes.some(p => path.includes(p))) {
-    console.warn('Suspicious probe blocked: ' + req.method + ' ' + req.path + ' from ' + req.ip);
-    return res.status(404).json({ error: 'Not found.' });
-  }
-  res.status(404).json({ error: 'Not found.' });
-});
-
-app.listen(PORT, () => {
-  console.log('NordicWings is running on port ' + PORT);
-  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
-});
+  if (probes.some(p => path.include
