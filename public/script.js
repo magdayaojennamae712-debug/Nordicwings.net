@@ -844,7 +844,7 @@ async function searchFlights() {
   const originEntityId = originInput.dataset.entityId || '';
   const destEntityId   = destInput.dataset.entityId   || '';
 
-  // Build query params — pass adults, children, infants, cabin class to backend
+  // Build query params — pass adults, children, infants separately to backend
   const qs = new URLSearchParams({
     origin, destination: dest, departureDate: departDate,
     adults: numAdults, children: numChildren, infants: numInfants,
@@ -2334,4 +2334,6 @@ function toggleFaq(btn) {
     btn.classList.remove('open');
   } else {
     answer.style.display = 'block';
-   
+    btn.classList.add('open');
+  }
+}
