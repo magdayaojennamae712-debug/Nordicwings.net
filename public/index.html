@@ -396,72 +396,71 @@
               <span id="pax-summary">1 Adult</span>
               <span style="color:#94a3b8;font-size:.8rem;">▼</span>
             </button>
-            <!-- Dropdown panel -->
-            <div id="pax-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
-                 background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;
-                 box-shadow:0 8px 32px rgba(30,58,138,.13);z-index:999;">
+            <!-- Dropdown panel — fixed 300px wide, pops right -->
+            <div id="pax-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;
+                 width:300px;background:#fff;border:1.5px solid #dbeafe;border-radius:14px;padding:14px 16px;
+                 box-shadow:0 8px 32px rgba(30,58,138,.18);z-index:1000;">
 
-              <!-- Adults row -->
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
-                <div>
-                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👤 Adults</div>
-                  <div style="font-size:.75rem;color:#64748b;">18+ years &nbsp;·&nbsp; Full price</div>
+              <!-- Adults -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;">
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">👤 Adults</div>
+                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">18+ yrs · Full price</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
                   <button type="button" onclick="changePax('adults',-1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
-                  <span id="pax-adults-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">1</span>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
+                  <span id="pax-adults-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">1</span>
                   <button type="button" onclick="changePax('adults',1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
                 </div>
               </div>
 
-              <!-- Children row -->
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
-                <div>
-                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">🧒 Children</div>
-                  <div style="font-size:.75rem;color:#64748b;">2–17 years &nbsp;·&nbsp; Own seat &nbsp;·&nbsp; ~25% discount</div>
+              <!-- Children -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;">
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">🧒 Children</div>
+                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">2–17 yrs · Own seat · −25%</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
                   <button type="button" onclick="changePax('children',-1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
-                  <span id="pax-children-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">0</span>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
+                  <span id="pax-children-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">0</span>
                   <button type="button" onclick="changePax('children',1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
                 </div>
               </div>
 
-              <!-- Infants row -->
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
-                <div>
-                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👶 Infants</div>
-                  <div style="font-size:.75rem;color:#64748b;">0–1 year &nbsp;·&nbsp; Lap (no seat) &nbsp;·&nbsp; ~10% price</div>
+              <!-- Infants -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;">
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">👶 Infants</div>
+                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">Under 2 · Lap (no seat) · −90%</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
                   <button type="button" onclick="changePax('infants',-1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
-                  <span id="pax-infants-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">0</span>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
+                  <span id="pax-infants-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">0</span>
                   <button type="button" onclick="changePax('infants',1)"
-                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
                 </div>
               </div>
 
-              <!-- Child safety note -->
-              <div id="pax-child-note" style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #fde68a;
-                   border-radius:9px;padding:9px 12px;font-size:.78rem;color:#92400e;">
-                ⚠️ <strong>Children under 18 must travel with at least 1 adult.</strong><br>
-                Each infant also needs their own accompanying adult.
+              <!-- Warning note (only shows when children/infants added) -->
+              <div id="pax-child-note" style="display:none;margin-top:10px;background:#fef9c3;border:1px solid #fde68a;
+                   border-radius:8px;padding:8px 10px;font-size:.74rem;color:#92400e;line-height:1.4;">
+                ⚠️ Children &amp; infants must travel with at least 1 adult.
               </div>
 
               <button type="button" onclick="closePaxPanel()"
                 style="width:100%;margin-top:12px;background:#1e3a8a;color:#fff;border:none;border-radius:9px;
-                       padding:10px;font-weight:700;font-size:.9rem;cursor:pointer;">Done ✓</button>
+                       padding:9px;font-weight:700;font-size:.88rem;cursor:pointer;letter-spacing:.3px;">Done ✓</button>
             </div>
           </div>
 
