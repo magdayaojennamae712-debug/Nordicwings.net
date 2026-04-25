@@ -1272,10 +1272,12 @@ async function setupBookingPage() {
   const nChildren = searchParams.numChildren || 0;
   const nInfants  = searchParams.numInfants  || 0;
 
-  // Price breakdown: adult = full, child = 75%, infant = 10%
-  const adultPrice  = price;
-  const childPrice  = Math.round(price * 0.75 * 100) / 100;
-  const infantPrice = Math.round(price * 0.10 * 100) / 100;
+  // Price breakdown: use combined outbound + return price per person
+  const returnPriceVal = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
+  const combinedPrice  = price + returnPriceVal;
+  const adultPrice  = Math.round(combinedPrice * 100) / 100;
+  const childPrice  = Math.round(combinedPrice * 0.75 * 100) / 100;
+  const infantPrice = Math.round(combinedPrice * 0.10 * 100) / 100;
   const totalPrice  = (adultPrice * nAdults) + (childPrice * nChildren) + (infantPrice * nInfants);
 
   // Store for payment
