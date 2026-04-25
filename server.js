@@ -1340,9 +1340,8 @@ cron.schedule('0 5 * * *', async () => {
     const cleaned = reminders.filter(r => r.flightDate >= cutoffStr);
     saveReminders(cleaned);
   }
-}, {
-  timezone: 'UTC'
 });
+// Railway servers run on UTC — cron '0 5 * * *' = 05:00 UTC = 08:00 Helsinki time (EEST)
 
 console.log('📅 Flight reminder cron job scheduled (runs daily at 08:00 Helsinki time).');
 
