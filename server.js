@@ -196,8 +196,9 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
 
         if (!segments.length) continue;
 
-        // ── Validate segment times — skip corrupted Duffel data ──
-        // Any flight segment under 30 min is impossible (shortest commercial route is ~45 min)
+        // ── Validate segment times — skip bad / unacceptable Duffel data ──
+
+        // 1) Any segment under 30 min is impossible (no commercial flight is that short)
         const hasImpossibleSegment = segments.some(seg => {
           const dep = new Date(seg.departure.at);
           const arr = new Date(seg.arrival.at);
@@ -205,14 +206,28 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
           return diffMins < 30 || isNaN(diffMins);
         });
         if (hasImpossibleSegment) {
-          console.warn(`Skipping offer ${offer.id} — has segment under 30 min (bad Duffel data)`);
+          console.warn(`Skipping offer ${offer.id} — segment under 30 min (corrupt data)`);
           continue;
         }
 
-        // Skip if total journey is over 40 hours (also likely bad data)
+        // 2) Any individual layover over 6 hours = overnight stop = bad customer experience
+        let hasLongLayover = false;
+        for (let s = 0; s < segments.length - 1; s++) {
+          const layoverMins = (new Date(segments[s+1].departure.at) - new Date(segments[s].arrival.at)) / 60000;
+          if (layoverMins > 360) {  // more than 6 hours between segments
+            hasLongLayover = true;
+            break;
+          }
+        }
+        if (hasLongLayover) {
+          console.warn(`Skipping offer ${offer.id} — layover over 6 hours (overnight stop)`);
+          continue;
+        }
+
+        // 3) Total journey over 24 hours is also unacceptable (covers even long-haul routes)
         const totalJourneyMins = (new Date(segments[segments.length-1].arrival.at) - new Date(segments[0].departure.at)) / 60000;
-        if (totalJourneyMins > 2400) {
-          console.warn(`Skipping offer ${offer.id} — journey over 40h (${Math.round(totalJourneyMins/60)}h), likely bad data`);
+        if (totalJourneyMins > 1440) {
+          console.warn(`Skipping offer ${offer.id} — total journey over 24h (${Math.round(totalJourneyMins/60)}h)`);
           continue;
         }
 
