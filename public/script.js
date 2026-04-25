@@ -1665,19 +1665,18 @@ async function setupBookingPage() {
   const infantTotal  = baseFlightPrice * 0.10 * nInfants2;
   const grandTotal   = adultTotal + childTotal + infantTotal;
 
-  const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (baseFlightPrice / 1.05));
-  const nwFee       = parseFloat(selectedFlight.nordicwingsFee) || Math.max(12, (baseFlightPrice - duffelBase));
-  const taxesTotal  = (duffelBase * 0.12).toFixed(2);
-  const nwFeeTotal  = (nwFee * nAdults2).toFixed(2);
+  // NordicWings fee (combined outbound + return, already included in per-adult price)
+  const nwFeeOut    = parseFloat(selectedFlight.nordicwingsFee) || 12;
+  const nwFeeRet    = selectedReturnFlight ? (parseFloat(selectedReturnFlight.nordicwingsFee) || 12) : 0;
+  const nwFeeTotal  = (nwFeeOut + nwFeeRet).toFixed(2);
 
   let breakdownHtml = `
     <div class="price-row"><span>✈ Outbound fare / adult</span><span>€${price.toFixed(2)}</span></div>
     ${selectedReturnFlight ? `<div class="price-row"><span>✈ Return fare / adult</span><span>€${returnPrice.toFixed(2)}</span></div>` : ''}
     ${nAdults2   > 0 ? `<div class="price-row"><span>👤 Adults × ${nAdults2}</span><span>€${adultTotal.toFixed(2)}</span></div>` : ''}
-    ${nChildren2 > 0 ? `<div class="price-row" style="color:#92400e;"><span>🧒 Children × ${nChildren2} <span style="font-size:.75rem;">(25% off)</span></span><span>€${childTotal.toFixed(2)}</span></div>` : ''}
-    ${nInfants2  > 0 ? `<div class="price-row" style="color:#166534;"><span>👶 Infants × ${nInfants2} <span style="font-size:.75rem;">(90% off)</span></span><span>€${infantTotal.toFixed(2)}</span></div>` : ''}
-    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Taxes &amp; fees</span><span>€${taxesTotal}</span></div>
-    ${nwFee > 0.01 ? `<div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee</span><span>€${nwFeeTotal}</span></div>` : ''}
+    ${nChildren2 > 0 ? `<div class="price-row" style="color:#92400e;"><span>🧒 Children × ${nChildren2} <span style="font-size:.75rem;">(−25%)</span></span><span>€${(baseFlightPrice * 0.75 * nChildren2).toFixed(2)}</span></div>` : ''}
+    ${nInfants2  > 0 ? `<div class="price-row" style="color:#166534;"><span>👶 Infants × ${nInfants2} <span style="font-size:.75rem;">(−90%)</span></span><span>€${(baseFlightPrice * 0.10 * nInfants2).toFixed(2)}</span></div>` : ''}
+    <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee (incl.)</span><span>€${nwFeeTotal}</span></div>
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Baggage included ✓</span><span>€0.00</span></div>
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Meals included ✓</span><span>€0.00</span></div>
     <div class="price-row total"><span>Total</span><span>€${grandTotal.toFixed(2)}</span></div>
