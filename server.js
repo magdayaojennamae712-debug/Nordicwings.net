@@ -5,11 +5,15 @@
 // ============================================================
 
 require('dotenv').config();
-const express   = require('express');
-const cors      = require('cors');
-const helmet    = require('helmet');
-const rateLimit = require('express-rate-limit');
-const stripe    = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const express    = require('express');
+const cors       = require('cors');
+const helmet     = require('helmet');
+const rateLimit  = require('express-rate-limit');
+const stripe     = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const nodemailer = require('nodemailer');
+const cron       = require('node-cron');
+const fs         = require('fs');
+const path       = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -126,12 +130,14 @@ const DUFFEL_BASE_URL = 'https://api.duffel.com';
 const MARKUP_DOMESTIC      = 0.01; // 1% margin for domestic flights (under €150)
 const MARKUP_INTERNATIONAL = 0.02; // 2% margin for international flights (€150+)
 
-async function searchDuffelFlights(orig, dest, date, adults) {
+async function searchDuffelFlights(orig, dest, date, adults, children = 0, infants = 0) {
   if (!DUFFEL_API_KEY) return null;
 
-  // Build passengers array
+  // Build passengers array — Duffel supports adult, child, infant_without_seat
   const passengers = [];
-  for (let i = 0; i < adults; i++) passengers.push({ type: 'adult' });
+  for (let i = 0; i < adults;   i++) passengers.push({ type: 'adult' });
+  for (let i = 0; i < children; i++) passengers.push({ type: 'child' });
+  for (let i = 0; i < infants;  i++) passengers.push({ type: 'infant_without_seat' });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
@@ -292,13 +298,15 @@ app.get('/api/airports/search', async (req, res) => {
 //               originEntityId, destinationEntityId
 // ============================================================
 app.get('/api/flights/search', searchLimiter, async (req, res) => {
-  const { origin, destination, departureDate, adults, originEntityId, destinationEntityId } = req.query;
+  const { origin, destination, departureDate, adults, children, infants, originEntityId, destinationEntityId } = req.query;
 
   // Validate and sanitize all inputs
-  const cleanOrigin = sanitize(origin || '').toUpperCase();
-  const cleanDest   = sanitize(destination || '').toUpperCase();
-  const cleanDate   = sanitize(departureDate || '');
-  const cleanAdults = Math.min(Math.max(parseInt(adults) || 1, 1), 9);
+  const cleanOrigin    = sanitize(origin || '').toUpperCase();
+  const cleanDest      = sanitize(destination || '').toUpperCase();
+  const cleanDate      = sanitize(departureDate || '');
+  const cleanAdults    = Math.min(Math.max(parseInt(adults)   || 1, 1), 9);
+  const cleanChildren  = Math.min(Math.max(parseInt(children) || 0, 0), 8);
+  const cleanInfants   = Math.min(Math.max(parseInt(infants)  || 0, 0), cleanAdults);
 
   if (!cleanOrigin || !cleanDest || !cleanDate) {
     return res.status(400).json({ error: 'Please provide origin, destination, and date.' });
@@ -715,7 +723,7 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   // ── Try Duffel first (real flights, live API) ───────────────
   if (DUFFEL_API_KEY) {
     console.log('Trying Duffel API...');
-    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults, cleanChildren, cleanInfants);
     if (duffelFlights && duffelFlights.length) {
       console.log(`Duffel returned ${duffelFlights.length} real flights!`);
       return res.json(duffelFlights);
@@ -998,6 +1006,347 @@ app.post('/api/bookings/cancel', paymentLimiter, async (req, res) => {
   });
 });
 
+// ============================================================
+// FLIGHT REMINDER EMAIL SYSTEM
+// ============================================================
+
+// ── Email transporter (Gmail SMTP) ───────────────────────────
+// Set GMAIL_USER and GMAIL_PASS (app password) in Railway env vars.
+// To get a Gmail App Password: Google Account → Security → 2FA → App Passwords
+let emailTransporter = null;
+if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+  emailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS   // 16-char App Password, NOT your Gmail password
+    }
+  });
+  emailTransporter.verify((err) => {
+    if (err) console.error('Email setup error:', err.message);
+    else     console.log('✉️  Email system ready — reminders will be sent from', process.env.GMAIL_USER);
+  });
+} else {
+  console.warn('⚠️  GMAIL_USER / GMAIL_PASS not set — email reminders are disabled.');
+}
+
+// ── Reminders store (persisted as JSON file) ─────────────────
+const REMINDERS_FILE = path.join(__dirname, 'reminders.json');
+
+function loadReminders() {
+  try {
+    if (fs.existsSync(REMINDERS_FILE)) {
+      return JSON.parse(fs.readFileSync(REMINDERS_FILE, 'utf8'));
+    }
+  } catch (e) { console.error('Error loading reminders:', e.message); }
+  return [];
+}
+
+function saveReminders(list) {
+  try { fs.writeFileSync(REMINDERS_FILE, JSON.stringify(list, null, 2)); }
+  catch (e) { console.error('Error saving reminders:', e.message); }
+}
+
+// ── HTML Email Template ───────────────────────────────────────
+function buildReminderEmail(data) {
+  const {
+    passengerName, email, route, flightDate, departureTime,
+    arrivalTime, airline, bookingRef, flightNumber
+  } = data;
+
+  const firstName   = (passengerName || 'Traveller').split(' ')[0];
+  const tomorrow    = new Date(flightDate);
+  const dateDisplay = tomorrow.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const [orig, dest] = (route || 'HEL → DXB').split('→').map(s => s.trim());
+
+  // Airport city names for common codes
+  const cityMap = {
+    HEL:'Helsinki',MNL:'Manila',DVO:'Davao',CEB:'Cebu',DXB:'Dubai',
+    BKK:'Bangkok',SIN:'Singapore',LHR:'London',CDG:'Paris',AMS:'Amsterdam',
+    FRA:'Frankfurt',BCN:'Barcelona',MAD:'Madrid',FCO:'Rome',IST:'Istanbul',
+    NRT:'Tokyo',JFK:'New York',LAX:'Los Angeles',SYD:'Sydney',AUH:'Abu Dhabi',
+    KUL:'Kuala Lumpur',ICN:'Seoul',PEK:'Beijing',ARN:'Stockholm',CPH:'Copenhagen',
+    OSL:'Oslo',WAW:'Warsaw',BUD:'Budapest',PRG:'Prague',VIE:'Vienna',
+    ZRH:'Zurich',ATH:'Athens',DUB:'Dublin',MXP:'Milan',MUC:'Munich',
+  };
+  const origCity = cityMap[orig] || orig;
+  const destCity = cityMap[dest] || dest;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your flight is tomorrow! ✈ NordicWings</title>
+<style>
+  body { margin:0; padding:0; background:#f0f4ff; font-family:'Segoe UI',Arial,sans-serif; }
+  .wrapper { max-width:600px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.12); }
+  .header { background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%); padding:36px 32px 28px; text-align:center; }
+  .header img { height:36px; margin-bottom:12px; }
+  .header .logo-text { color:#fff; font-size:22px; font-weight:800; letter-spacing:-.5px; }
+  .header .logo-sub  { color:#93c5fd; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+  .hero { background:linear-gradient(135deg,#1d4ed8,#2563eb); padding:32px; text-align:center; border-top:1px solid rgba(255,255,255,.1); }
+  .hero .emoji { font-size:56px; line-height:1; margin-bottom:12px; }
+  .hero h1 { color:#fff; font-size:28px; font-weight:900; margin:0 0 8px; }
+  .hero p  { color:#bfdbfe; font-size:15px; margin:0; }
+  .body { padding:32px; }
+  .greeting { font-size:16px; color:#1e293b; margin-bottom:20px; }
+  .flight-card { background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1.5px solid #93c5fd; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .route-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; }
+  .airport { text-align:center; }
+  .airport .code { font-size:30px; font-weight:900; color:#1e3a8a; letter-spacing:-1px; }
+  .airport .city { font-size:12px; color:#64748b; font-weight:500; margin-top:2px; }
+  .route-arrow { font-size:22px; color:#3b82f6; flex-shrink:0; }
+  .flight-meta { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .meta-item { background:#fff; border-radius:10px; padding:12px 14px; border:1px solid #e0e7ff; }
+  .meta-item .label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; font-weight:700; margin-bottom:4px; }
+  .meta-item .value { font-size:14px; font-weight:700; color:#1e3a8a; }
+  .booking-ref { text-align:center; margin-top:14px; padding-top:14px; border-top:1px dashed #bfdbfe; }
+  .booking-ref .label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; font-weight:700; }
+  .booking-ref .ref { font-size:22px; font-weight:900; color:#1e3a8a; letter-spacing:3px; }
+  .checklist { margin-bottom:24px; }
+  .checklist h3 { font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+  .check-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-radius:10px; margin-bottom:8px; background:#f8faff; border:1px solid #e0e7ff; }
+  .check-icon { font-size:18px; flex-shrink:0; line-height:1.3; }
+  .check-text { font-size:14px; color:#374151; line-height:1.4; }
+  .check-text strong { color:#1e3a8a; }
+  .cta-section { text-align:center; background:#f0f4ff; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .cta-section p { font-size:14px; color:#475569; margin:0 0 16px; }
+  .cta-btn { display:inline-block; background:linear-gradient(135deg,#1e3a8a,#1d4ed8); color:#fff; text-decoration:none; padding:14px 36px; border-radius:50px; font-size:15px; font-weight:700; }
+  .support { font-size:13px; color:#64748b; text-align:center; margin-bottom:8px; }
+  .support a { color:#1d4ed8; text-decoration:none; }
+  .footer { background:#1e3a8a; padding:24px 32px; text-align:center; }
+  .footer p { color:#93c5fd; font-size:12px; margin:4px 0; }
+  .footer .brand { color:#fff; font-weight:800; font-size:14px; margin-bottom:4px; }
+  .social-links { margin-top:12px; }
+  .social-links a { color:#93c5fd; text-decoration:none; margin:0 8px; font-size:12px; }
+  @media(max-width:480px){
+    .body{padding:20px;}
+    .hero h1{font-size:22px;}
+    .flight-meta{grid-template-columns:1fr;}
+    .route-row{gap:8px;}
+    .airport .code{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-text">✈ NordicWings</div>
+    <div class="logo-sub">nordicwings.net</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="emoji">✈️</div>
+    <h1>Your flight is tomorrow!</h1>
+    <p>Here's everything you need for a smooth journey, ${firstName}.</p>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+    <p class="greeting">Hi <strong>${firstName}</strong>,<br>
+    Your flight from <strong>${origCity}</strong> to <strong>${destCity}</strong> departs <strong>tomorrow, ${dateDisplay}</strong>. We hope you're all packed and ready! Here's a quick summary:</p>
+
+    <!-- Flight card -->
+    <div class="flight-card">
+      <div class="route-row">
+        <div class="airport">
+          <div class="code">${orig}</div>
+          <div class="city">${origCity}</div>
+        </div>
+        <div class="route-arrow">✈ ──────</div>
+        <div class="airport">
+          <div class="code">${dest}</div>
+          <div class="city">${destCity}</div>
+        </div>
+      </div>
+      <div class="flight-meta">
+        <div class="meta-item">
+          <div class="label">📅 Date</div>
+          <div class="value">${dateDisplay}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">🕐 Departure</div>
+          <div class="value">${departureTime || 'Check your ticket'}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">✈️ Airline</div>
+          <div class="value">${airline || 'See your ticket'}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">🛬 Arrival</div>
+          <div class="value">${arrivalTime || 'See your ticket'}</div>
+        </div>
+      </div>
+      ${bookingRef ? `<div class="booking-ref">
+        <div class="label">Booking Reference</div>
+        <div class="ref">${bookingRef}</div>
+      </div>` : ''}
+    </div>
+
+    <!-- Pre-flight checklist -->
+    <div class="checklist">
+      <h3>✅ Pre-flight checklist</h3>
+      <div class="check-item">
+        <div class="check-icon">🛂</div>
+        <div class="check-text"><strong>Passport & ID</strong> — Make sure it's valid for at least 6 months beyond your travel date.</div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">⏰</div>
+        <div class="check-text"><strong>Arrive early</strong> — For international flights, arrive <strong>at least 3 hours</strong> before departure. For domestic, aim for 2 hours.</div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">🧳</div>
+        <div class="check-text"><strong>Baggage</strong> — Check your airline's baggage allowance. Carry-on is usually max 8kg. Keep liquids (under 100ml) in a clear bag.</div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">📱</div>
+        <div class="check-text"><strong>Your boarding pass</strong> — Download or screenshot it now in case you're offline at the airport.</div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">🔋</div>
+        <div class="check-text"><strong>Power bank</strong> — Charge your devices tonight. Note: power banks can't go in checked luggage, only carry-on.</div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">💱</div>
+        <div class="check-text"><strong>Local currency</strong> — It's a good idea to have some local cash at your destination for taxis and tips.</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <p>Need to check your booking, make changes, or contact support?</p>
+      <a href="https://nordicwings.net" class="cta-btn">Manage My Booking ✈</a>
+    </div>
+
+    <p class="support">
+      Questions? Email us at <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a><br>
+      or visit <a href="https://nordicwings.net">nordicwings.net</a>
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="brand">NordicWings</div>
+    <p>Making affordable flights easy for everyone.</p>
+    <p>nordicwings.net | hello@nordicwings.net</p>
+    <div class="social-links">
+      <a href="https://x.com/nordicwingx3j6">X (Twitter)</a>
+      <a href="https://www.linkedin.com/company/115854101">LinkedIn</a>
+      <a href="https://nordicwings.net">Website</a>
+    </div>
+    <p style="margin-top:14px;font-size:11px;color:#475a8a;">
+      You're receiving this because you booked a flight with NordicWings.<br>
+      © 2026 NordicWings — nordicwings.net
+    </p>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+// ── ROUTE: POST /api/bookings/reminder-register ───────────────
+// Called by the frontend after a booking is confirmed.
+// Saves the booking details so we can send a reminder email
+// the day before the flight.
+// Body: { email, passengerName, route, flightDate, departureTime, arrivalTime, airline, bookingRef, flightNumber }
+app.post('/api/bookings/reminder-register', (req, res) => {
+  const {
+    email, passengerName, route, flightDate, departureTime,
+    arrivalTime, airline, bookingRef, flightNumber
+  } = req.body;
+
+  if (!email || !flightDate) {
+    return res.status(400).json({ error: 'Email and flightDate are required.' });
+  }
+
+  // Basic email validation
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address.' });
+  }
+
+  const reminders = loadReminders();
+  const entry = {
+    id:            Date.now().toString(),
+    email:         sanitize(email).substring(0, 100),
+    passengerName: sanitize(passengerName || 'Traveller'),
+    route:         sanitize(route || ''),
+    flightDate,    // YYYY-MM-DD
+    departureTime: sanitize(departureTime || ''),
+    arrivalTime:   sanitize(arrivalTime || ''),
+    airline:       sanitize(airline || ''),
+    bookingRef:    sanitize(bookingRef || ''),
+    flightNumber:  sanitize(flightNumber || ''),
+    reminderSent:  false,
+    registeredAt:  new Date().toISOString()
+  };
+
+  reminders.push(entry);
+  saveReminders(reminders);
+
+  console.log(`Reminder registered for ${email} — flight on ${flightDate}`);
+  res.json({ success: true, message: 'Reminder registered. You will receive an email the day before your flight.' });
+});
+
+// ── Daily cron: send "flight tomorrow" reminders ─────────────
+// Runs every day at 08:00 Helsinki time (UTC+3 = 05:00 UTC in summer, 06:00 UTC in winter)
+// Using UTC 05:00 (covers Helsinki summer/EEST). Adjust if needed.
+cron.schedule('0 5 * * *', async () => {
+  console.log('🕔 Running flight reminder cron job...');
+
+  if (!emailTransporter) {
+    console.warn('Email transporter not configured — skipping reminders.');
+    return;
+  }
+
+  const today      = new Date();
+  const tomorrow   = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  const reminders = loadReminders();
+  const toSend    = reminders.filter(r => !r.reminderSent && r.flightDate === tomorrowStr);
+
+  console.log(`Found ${toSend.length} reminders to send for ${tomorrowStr}`);
+
+  let anySent = false;
+  for (const reminder of toSend) {
+    try {
+      const html = buildReminderEmail(reminder);
+      await emailTransporter.sendMail({
+        from:    `"NordicWings ✈" <${process.env.GMAIL_USER}>`,
+        to:      reminder.email,
+        subject: `✈ Your flight is tomorrow! ${reminder.route || ''} — NordicWings`,
+        html
+      });
+      reminder.reminderSent = true;
+      reminder.sentAt       = new Date().toISOString();
+      console.log(`✅ Reminder sent to ${reminder.email} for ${reminder.flightDate}`);
+      anySent = true;
+    } catch (err) {
+      console.error(`❌ Failed to send reminder to ${reminder.email}:`, err.message);
+    }
+  }
+
+  if (anySent) {
+    // Clean up old reminders (flights more than 7 days ago)
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const cleaned = reminders.filter(r => r.flightDate >= cutoffStr);
+    saveReminders(cleaned);
+  }
+}, {
+  timezone: 'UTC'
+});
+
+console.log('📅 Flight reminder cron job scheduled (runs daily at 08:00 Helsinki time).');
+
+// ============================================================
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err.message);

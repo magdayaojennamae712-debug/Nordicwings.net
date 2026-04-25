@@ -382,15 +382,87 @@
             <input type="date" id="return-input" />
           </div>
 
-          <div class="input-group">
+          <div class="input-group" style="position:relative;">
             <label>Passengers</label>
-            <select id="passengers-input">
-              <option value="1">1 Adult</option>
-              <option value="2">2 Adults</option>
-              <option value="3">3 Adults</option>
-              <option value="4">4 Adults</option>
-              <option value="5">5 Adults</option>
-            </select>
+            <!-- Hidden inputs carry the actual values -->
+            <input type="hidden" id="pax-adults-val"   value="1">
+            <input type="hidden" id="pax-children-val" value="0">
+            <input type="hidden" id="pax-infants-val"  value="0">
+            <!-- Trigger button -->
+            <button type="button" id="pax-btn" onclick="togglePaxPanel()"
+              style="width:100%;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;
+                     padding:10px 14px;font-size:.95rem;color:#1e293b;text-align:left;
+                     cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+              <span id="pax-summary">1 Adult</span>
+              <span style="color:#94a3b8;font-size:.8rem;">▼</span>
+            </button>
+            <!-- Dropdown panel -->
+            <div id="pax-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+                 background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;
+                 box-shadow:0 8px 32px rgba(30,58,138,.13);z-index:999;">
+
+              <!-- Adults row -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👤 Adults</div>
+                  <div style="font-size:.75rem;color:#64748b;">18+ years &nbsp;·&nbsp; Full price</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button type="button" onclick="changePax('adults',-1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
+                  <span id="pax-adults-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">1</span>
+                  <button type="button" onclick="changePax('adults',1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                </div>
+              </div>
+
+              <!-- Children row -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">🧒 Children</div>
+                  <div style="font-size:.75rem;color:#64748b;">2–17 years &nbsp;·&nbsp; Own seat &nbsp;·&nbsp; ~25% discount</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button type="button" onclick="changePax('children',-1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
+                  <span id="pax-children-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">0</span>
+                  <button type="button" onclick="changePax('children',1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                </div>
+              </div>
+
+              <!-- Infants row -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+                <div>
+                  <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👶 Infants</div>
+                  <div style="font-size:.75rem;color:#64748b;">0–1 year &nbsp;·&nbsp; Lap (no seat) &nbsp;·&nbsp; ~10% price</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button type="button" onclick="changePax('infants',-1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">−</button>
+                  <span id="pax-infants-disp" style="font-weight:800;font-size:1rem;color:#1e3a8a;min-width:18px;text-align:center;">0</span>
+                  <button type="button" onclick="changePax('infants',1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
+                           font-size:1.1rem;cursor:pointer;color:#1e3a8a;font-weight:700;line-height:1;">+</button>
+                </div>
+              </div>
+
+              <!-- Child safety note -->
+              <div id="pax-child-note" style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #fde68a;
+                   border-radius:9px;padding:9px 12px;font-size:.78rem;color:#92400e;">
+                ⚠️ <strong>Children under 18 must travel with at least 1 adult.</strong><br>
+                Each infant also needs their own accompanying adult.
+              </div>
+
+              <button type="button" onclick="closePaxPanel()"
+                style="width:100%;margin-top:12px;background:#1e3a8a;color:#fff;border:none;border-radius:9px;
+                       padding:10px;font-weight:700;font-size:.9rem;cursor:pointer;">Done ✓</button>
+            </div>
           </div>
 
           <button class="btn-search" onclick="searchFlights()">

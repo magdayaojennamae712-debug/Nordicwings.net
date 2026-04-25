@@ -57,6 +57,73 @@ function toggleBtnLoading(textId, spinnerId, loading) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// PASSENGER PICKER (Adults / Children / Infants)
+// ─────────────────────────────────────────────────────────────
+var paxCounts = { adults: 1, children: 0, infants: 0 };
+
+function changePax(type, delta) {
+  var next = (paxCounts[type] || 0) + delta;
+  if (next < 0) return;
+  if (type === 'adults'   && next > 9) return;
+  if (type === 'children' && next > 8) return;
+  if (type === 'infants'  && next > paxCounts.adults) {
+    alert('Each infant needs their own adult. Please add more adults first.');
+    return;
+  }
+  paxCounts[type] = next;
+  if ((paxCounts.adults + paxCounts.children + paxCounts.infants) < 1) {
+    paxCounts.adults = 1;
+  }
+  updatePaxUI();
+}
+
+function updatePaxUI() {
+  var adEl = document.getElementById('pax-adults-disp');
+  var chEl = document.getElementById('pax-children-disp');
+  var inEl = document.getElementById('pax-infants-disp');
+  if (adEl) adEl.textContent = paxCounts.adults;
+  if (chEl) chEl.textContent = paxCounts.children;
+  if (inEl) inEl.textContent = paxCounts.infants;
+
+  var hAdEl = document.getElementById('pax-adults-val');
+  var hChEl = document.getElementById('pax-children-val');
+  var hInEl = document.getElementById('pax-infants-val');
+  if (hAdEl) hAdEl.value = paxCounts.adults;
+  if (hChEl) hChEl.value = paxCounts.children;
+  if (hInEl) hInEl.value = paxCounts.infants;
+
+  var parts = [];
+  if (paxCounts.adults   > 0) parts.push(paxCounts.adults   + ' Adult'   + (paxCounts.adults   > 1 ? 's'   : ''));
+  if (paxCounts.children > 0) parts.push(paxCounts.children + ' Child'   + (paxCounts.children > 1 ? 'ren' : ''));
+  if (paxCounts.infants  > 0) parts.push(paxCounts.infants  + ' Infant'  + (paxCounts.infants  > 1 ? 's'   : ''));
+  var sumEl = document.getElementById('pax-summary');
+  if (sumEl) sumEl.textContent = parts.join(', ') || '1 Adult';
+
+  var noteEl = document.getElementById('pax-child-note');
+  if (noteEl) noteEl.style.display = (paxCounts.children > 0 || paxCounts.infants > 0) ? 'block' : 'none';
+}
+
+function togglePaxPanel() {
+  var panel = document.getElementById('pax-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function closePaxPanel() {
+  var panel = document.getElementById('pax-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('pax-panel');
+  var btn   = document.getElementById('pax-btn');
+  if (!panel || !btn || panel.style.display === 'none') return;
+  if (!panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.style.display = 'none';
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
 // DATE / TIME / DURATION HELPERS
 // ─────────────────────────────────────────────────────────────
 function formatDate(isoStr) {
@@ -631,8 +698,21 @@ async function searchFlights() {
   const originInput = document.getElementById('origin-input');
   const destInput   = document.getElementById('dest-input');
   const departDate  = document.getElementById('depart-input').value;
-  const passengers  = parseInt(document.getElementById('passengers-input').value) || 1;
   const errorEl     = document.getElementById('search-error');
+
+  // Read passenger counts from picker
+  const numAdults   = parseInt(document.getElementById('pax-adults-val')?.value)   || paxCounts.adults   || 1;
+  const numChildren = parseInt(document.getElementById('pax-children-val')?.value) || paxCounts.children || 0;
+  const numInfants  = parseInt(document.getElementById('pax-infants-val')?.value)  || paxCounts.infants  || 0;
+  const passengers  = numAdults + numChildren + numInfants; // total for display
+
+  // Validate: children/infants require at least 1 adult
+  if ((numChildren > 0 || numInfants > 0) && numAdults === 0) {
+    return setError(errorEl, 'Children and infants must travel with at least 1 adult.');
+  }
+  if (numInfants > numAdults) {
+    return setError(errorEl, 'Each infant needs their own adult. Please add more adults.');
+  }
 
   // City / country → IATA code (very comprehensive)
   const cityToCode = {
@@ -741,7 +821,8 @@ async function searchFlights() {
   outboundFlight = null;
   selectedReturnFlight = null;
 
-  searchParams = { origin, dest, departDate, returnDate: searchReturnDate, passengers, isRoundTrip };
+  searchParams = { origin, dest, departDate, returnDate: searchReturnDate, passengers,
+                   numAdults, numChildren, numInfants, isRoundTrip };
 
   showPage('results');
   document.getElementById('results-loading').style.display = 'flex';
@@ -750,16 +831,22 @@ async function searchFlights() {
   const _banner = document.getElementById('outbound-selected-banner');
   if (_banner) _banner.style.display = 'none';
   document.getElementById('results-heading').textContent   = `${origin} \u2192 ${dest}`;
+  // Build passenger summary for results page
+  var paxParts2 = [];
+  if (numAdults   > 0) paxParts2.push(numAdults   + ' Adult'   + (numAdults   > 1 ? 's'   : ''));
+  if (numChildren > 0) paxParts2.push(numChildren + ' Child'   + (numChildren > 1 ? 'ren' : ''));
+  if (numInfants  > 0) paxParts2.push(numInfants  + ' Infant'  + (numInfants  > 1 ? 's'   : ''));
   document.getElementById('results-subheading').textContent =
-    `${formatDate(departDate)} \u00B7 ${passengers} passenger${passengers > 1 ? 's' : ''}`;
+    `${formatDate(departDate)} \u00B7 ${paxParts2.join(', ')}`;
 
   // Pass entity IDs from autocomplete selection (if user picked from dropdown)
   const originEntityId = originInput.dataset.entityId || '';
   const destEntityId   = destInput.dataset.entityId   || '';
 
-  // Build query params
+  // Build query params — pass adults, children, infants separately to backend
   const qs = new URLSearchParams({
-    origin, destination: dest, departureDate: departDate, adults: passengers
+    origin, destination: dest, departureDate: departDate,
+    adults: numAdults, children: numChildren, infants: numInfants
   });
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
@@ -1180,61 +1267,188 @@ async function setupBookingPage() {
     document.getElementById('contact-email').value = currentUser.email || '';
   }
 
-  // Build passenger forms (Duffel requires title, gender, DOB, email)
-  let formsHtml = '';
-  for (let i = 1; i <= passengerCount; i++) {
-    formsHtml += `
-      <p class="passenger-header">Passenger ${i}</p>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Title</label>
-          <select class="pax-title">
-            <option value="mr">Mr</option>
-            <option value="ms">Ms</option>
-            <option value="mrs">Mrs</option>
-            <option value="dr">Dr</option>
-          </select>
+  // Build passenger forms — separate sections for Adults, Children, Infants
+  const nAdults   = searchParams.numAdults   || passengerCount;
+  const nChildren = searchParams.numChildren || 0;
+  const nInfants  = searchParams.numInfants  || 0;
+
+  // Price breakdown: adult = full, child = 75%, infant = 10%
+  const adultPrice  = price;
+  const childPrice  = Math.round(price * 0.75 * 100) / 100;
+  const infantPrice = Math.round(price * 0.10 * 100) / 100;
+  const totalPrice  = (adultPrice * nAdults) + (childPrice * nChildren) + (infantPrice * nInfants);
+
+  // Store for payment
+  window._paxBreakdown = { nAdults, nChildren, nInfants, adultPrice, childPrice, infantPrice, totalPrice };
+
+  function buildAdultForm(num) {
+    return `
+      <div class="pax-form-block" style="background:#f8faff;border:1.5px solid #dbeafe;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <p class="passenger-header" style="margin:0;">👤 Adult ${num}</p>
+          <span style="background:#dbeafe;color:#1d4ed8;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:20px;">Full price · €${adultPrice.toFixed(2)}</span>
         </div>
-        <div class="form-group">
-          <label>Gender</label>
-          <select class="pax-gender">
-            <option value="m">Male</option>
-            <option value="f">Female</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title</label>
+            <select class="pax-title">
+              <option value="mr">Mr</option>
+              <option value="ms">Ms</option>
+              <option value="mrs">Mrs</option>
+              <option value="dr">Dr</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select class="pax-gender">
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>First Name</label>
-          <input type="text" class="pax-first" placeholder="As on passport" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" class="pax-first" placeholder="As on passport" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" class="pax-last" placeholder="As on passport" />
+          </div>
         </div>
-        <div class="form-group">
-          <label>Last Name</label>
-          <input type="text" class="pax-last" placeholder="As on passport" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" class="pax-dob" />
+          </div>
+          <div class="form-group">
+            <label>Passport / ID Number</label>
+            <input type="text" class="pax-passport" placeholder="Passport number" />
+          </div>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Date of Birth</label>
-          <input type="date" class="pax-dob" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="pax-email" placeholder="For ticket delivery" />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" class="pax-phone" placeholder="+358..." />
+          </div>
         </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" class="pax-email" placeholder="For ticket delivery" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" class="pax-phone" placeholder="+358..." />
-        </div>
-        <div class="form-group">
-          <label>Passport / ID Number</label>
-          <input type="text" class="pax-passport" placeholder="Passport number" />
-        </div>
-      </div>
-    `;
+      </div>`;
   }
+
+  function buildChildForm(num) {
+    return `
+      <div class="pax-form-block" style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <p class="passenger-header" style="margin:0;">🧒 Child ${num} <span style="font-size:.75rem;color:#92400e;font-weight:500;">(2–17 yrs)</span></p>
+          <span style="background:#fed7aa;color:#92400e;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:20px;">~25% off · €${childPrice.toFixed(2)}</span>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:.78rem;color:#92400e;margin-bottom:12px;">
+          ⚠️ Children aged 2–17 must travel with at least one adult.
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select class="pax-gender">
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Birth <span style="color:#d97706;font-size:.75rem;">(must be 2–17)</span></label>
+            <input type="date" class="pax-dob pax-dob-child" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" class="pax-first" placeholder="As on passport" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" class="pax-last" placeholder="As on passport" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Passport / ID Number</label>
+            <input type="text" class="pax-passport" placeholder="Passport number" />
+          </div>
+          <div class="form-group">
+            <label>Email <span style="color:#94a3b8;font-size:.75rem;">(optional)</span></label>
+            <input type="email" class="pax-email" placeholder="Parent's email if under 18" />
+          </div>
+        </div>
+        <input type="hidden" class="pax-title" value="ms">
+        <input type="hidden" class="pax-phone" value="">
+      </div>`;
+  }
+
+  function buildInfantForm(num) {
+    return `
+      <div class="pax-form-block" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <p class="passenger-header" style="margin:0;">👶 Infant ${num} <span style="font-size:.75rem;color:#166534;font-weight:500;">(0–1 yr · lap)</span></p>
+          <span style="background:#dcfce7;color:#166534;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:20px;">~90% off · €${infantPrice.toFixed(2)}</span>
+        </div>
+        <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:.78rem;color:#065f46;margin-bottom:12px;">
+          👶 Infants travel on a parent/guardian's lap — no separate seat. Must be under 2 years old on the date of travel.
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" class="pax-first" placeholder="As on passport" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" class="pax-last" placeholder="As on passport" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date of Birth <span style="color:#16a34a;font-size:.75rem;">(must be under 2)</span></label>
+            <input type="date" class="pax-dob pax-dob-infant" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select class="pax-gender">
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
+          </div>
+        </div>
+        <input type="hidden" class="pax-title" value="ms">
+        <input type="hidden" class="pax-passport" value="">
+        <input type="hidden" class="pax-email" value="">
+        <input type="hidden" class="pax-phone" value="">
+      </div>`;
+  }
+
+  let formsHtml = '';
+  // Adults section
+  for (let i = 1; i <= nAdults; i++)   formsHtml += buildAdultForm(i);
+  // Children section
+  for (let i = 1; i <= nChildren; i++) formsHtml += buildChildForm(i);
+  // Infants section
+  for (let i = 1; i <= nInfants; i++)  formsHtml += buildInfantForm(i);
+
+  // Price breakdown banner
+  if (nChildren > 0 || nInfants > 0) {
+    formsHtml += `
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <div style="font-weight:800;color:#1e3a8a;font-size:.9rem;margin-bottom:8px;">💶 Price Breakdown</div>
+        ${nAdults   > 0 ? `<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;"><span>👤 Adults × ${nAdults}</span><span>€${(adultPrice * nAdults).toFixed(2)}</span></div>` : ''}
+        ${nChildren > 0 ? `<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;"><span>🧒 Children × ${nChildren} <span style="color:#92400e;">(−25%)</span></span><span>€${(childPrice * nChildren).toFixed(2)}</span></div>` : ''}
+        ${nInfants  > 0 ? `<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;"><span>👶 Infants × ${nInfants} <span style="color:#166534;">(−90%)</span></span><span>€${(infantPrice * nInfants).toFixed(2)}</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:800;color:#1e3a8a;padding-top:8px;border-top:1px solid #bfdbfe;margin-top:6px;">
+          <span>Total</span><span>€${totalPrice.toFixed(2)}</span>
+        </div>
+      </div>`;
+  }
+
   document.getElementById('passenger-forms').innerHTML = formsHtml;
 
   // Build full route string including stopovers
@@ -1435,28 +1649,42 @@ async function setupBookingPage() {
     document.getElementById('booking-flight-summary').innerHTML += returnHtml;
   }
 
-  // Use real Duffel base price if available, otherwise estimate
-  const returnPrice = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
-  const totalPrice  = price + returnPrice;
+  // Price calculation with age-based breakdown
+  const nAdults2   = searchParams.numAdults   || passengerCount;
+  const nChildren2 = searchParams.numChildren || 0;
+  const nInfants2  = searchParams.numInfants  || 0;
+
+  const returnPrice    = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
+  const baseFlightPrice = price + returnPrice;
+
+  // Age-based pricing: adults full, children 75%, infants 10%
+  const adultTotal   = baseFlightPrice * nAdults2;
+  const childTotal   = baseFlightPrice * 0.75 * nChildren2;
+  const infantTotal  = baseFlightPrice * 0.10 * nInfants2;
+  const grandTotal   = adultTotal + childTotal + infantTotal;
+
   const duffelBase  = parseFloat(selectedFlight.duffelBasePrice || (price / 1.02));
   const nwFee       = Math.max(0, price - duffelBase);
-  const airlineFare = (duffelBase * 0.88 * passengerCount).toFixed(2);
-  const taxesTotal  = (duffelBase * 0.12 * passengerCount).toFixed(2);
-  const nwFeeTotal  = (nwFee * passengerCount).toFixed(2);
+  const taxesTotal  = (duffelBase * 0.12 * nAdults2).toFixed(2);
+  const nwFeeTotal  = (nwFee * nAdults2).toFixed(2);
 
-  document.getElementById('price-breakdown').innerHTML = `
-    <div class="price-row"><span>Outbound fare × ${passengerCount}</span><span>€${(price * passengerCount).toFixed(2)}</span></div>
-    ${selectedReturnFlight ? `<div class="price-row"><span>Return fare × ${passengerCount}</span><span>€${(returnPrice * passengerCount).toFixed(2)}</span></div>` : ''}
+  let breakdownHtml = `
+    <div class="price-row"><span>✈ Outbound fare / adult</span><span>€${price.toFixed(2)}</span></div>
+    ${selectedReturnFlight ? `<div class="price-row"><span>✈ Return fare / adult</span><span>€${returnPrice.toFixed(2)}</span></div>` : ''}
+    ${nAdults2   > 0 ? `<div class="price-row"><span>👤 Adults × ${nAdults2}</span><span>€${adultTotal.toFixed(2)}</span></div>` : ''}
+    ${nChildren2 > 0 ? `<div class="price-row" style="color:#92400e;"><span>🧒 Children × ${nChildren2} <span style="font-size:.75rem;">(25% off)</span></span><span>€${childTotal.toFixed(2)}</span></div>` : ''}
+    ${nInfants2  > 0 ? `<div class="price-row" style="color:#166534;"><span>👶 Infants × ${nInfants2} <span style="font-size:.75rem;">(90% off)</span></span><span>€${infantTotal.toFixed(2)}</span></div>` : ''}
     <div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  Taxes &amp; fees</span><span>€${taxesTotal}</span></div>
     ${nwFee > 0.01 ? `<div class="price-row" style="font-size:.82rem;color:#6b7280;"><span>  NordicWings fee</span><span>€${nwFeeTotal}</span></div>` : ''}
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Baggage included ✓</span><span>€0.00</span></div>
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  Meals included ✓</span><span>€0.00</span></div>
-    <div class="price-row total"><span>Total</span><span>€${(totalPrice * passengerCount).toFixed(2)}</span></div>
+    <div class="price-row total"><span>Total</span><span>€${grandTotal.toFixed(2)}</span></div>
     <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Price guaranteed · No hidden fees</div>
   `;
+  document.getElementById('price-breakdown').innerHTML = breakdownHtml;
 
-  // Setup Stripe payment element with combined price
-  await setupStripePayment(totalPrice * passengerCount, currency);
+  // Setup Stripe payment element with the correct total
+  await setupStripePayment(grandTotal, currency);
 }
 
 async function setupStripePayment(amount, currency) {
@@ -1569,7 +1797,11 @@ async function submitBooking() {
     const seg     = selectedFlight.itineraries[0].segments[0];
     const lastSeg = selectedFlight.itineraries[0].segments[selectedFlight.itineraries[0].segments.length - 1];
     const _retPx  = selectedReturnFlight ? parseFloat(selectedReturnFlight.price.grandTotal) : 0;
-    const price   = (parseFloat(selectedFlight.price.grandTotal) + _retPx) * (searchParams.passengers || 1);
+    const _baseP  = parseFloat(selectedFlight.price.grandTotal) + _retPx;
+    const _nA = searchParams.numAdults   || searchParams.passengers || 1;
+    const _nC = searchParams.numChildren || 0;
+    const _nI = searchParams.numInfants  || 0;
+    const price   = (_baseP * _nA) + (_baseP * 0.75 * _nC) + (_baseP * 0.10 * _nI);
 
     // Collect all passenger details from form
     const titles   = Array.from(document.querySelectorAll('.pax-title')).map(el => el.value);
@@ -1657,6 +1889,32 @@ async function submitBooking() {
     };
 
     await db.collection('bookings').add(booking);
+
+    // Register flight reminder email (sent the day before the flight)
+    try {
+      var reminderEmail   = booking.contact.email || booking.userEmail || '';
+      var passengerFirst  = (booking.passengers && booking.passengers[0]) ? booking.passengers[0].firstName + ' ' + booking.passengers[0].lastName : 'Traveller';
+      var flightDateOnly  = booking.flight.departTime ? booking.flight.departTime.split('T')[0] : '';
+      if (reminderEmail && flightDateOnly) {
+        fetch('/api/bookings/reminder-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email:         reminderEmail,
+            passengerName: passengerFirst,
+            route:         booking.flight.from + ' → ' + booking.flight.to,
+            flightDate:    flightDateOnly,
+            departureTime: booking.flight.departTime ? formatTime(booking.flight.departTime) : '',
+            arrivalTime:   booking.flight.arriveTime ? formatTime(booking.flight.arriveTime)  : '',
+            airline:       booking.flight.airline || '',
+            bookingRef:    booking.bookingRef || '',
+            flightNumber:  booking.flight.flightNum || ''
+          })
+        }).catch(function(e) { console.warn('Reminder registration failed (non-critical):', e.message); });
+      }
+    } catch (reminderErr) {
+      console.warn('Reminder registration error (non-critical):', reminderErr.message);
+    }
 
     // Show confirmation page
     showConfirmationPage(booking);
