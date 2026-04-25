@@ -486,109 +486,118 @@
           <button class="route-tab" onclick="filterRoutes('mideast',this)">🌙 Middle East</button>
         </div>
 
+        <!-- Currency Toggle -->
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:.82rem;color:#64748b;">Show prices in:</span>
+          <div style="display:flex;background:#f1f5f9;border-radius:20px;padding:3px;gap:2px;">
+            <button id="btn-eur" onclick="setCurrency('eur')" style="background:#1e40af;color:#fff;border:none;border-radius:16px;padding:5px 14px;font-size:.82rem;font-weight:600;cursor:pointer;">€ EUR</button>
+            <button id="btn-php" onclick="setCurrency('php')" style="background:transparent;color:#64748b;border:none;border-radius:16px;padding:5px 14px;font-size:.82rem;font-weight:600;cursor:pointer;">₱ PHP</button>
+          </div>
+        </div>
+
         <div class="destinations-grid" id="destinations-grid">
           <!-- Europe -->
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','LHR')">
             <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" />
-            <div class="dest-info"><h3>Helsinki → London</h3><p>HEL → LHR · 3h 15m</p><span class="dest-price">From €130</span></div>
+            <div class="dest-info"><h3>Helsinki → London</h3><p>HEL → LHR · 3h 15m</p><span class="dest-price" data-eur="130" data-php="8060">From €130</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','CDG')">
             <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" />
-            <div class="dest-info"><h3>Helsinki → Paris</h3><p>HEL → CDG · 3h 30m</p><span class="dest-price">From €138</span></div>
+            <div class="dest-info"><h3>Helsinki → Paris</h3><p>HEL → CDG · 3h 30m</p><span class="dest-price" data-eur="138" data-php="8556">From €138</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','BCN')">
             <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" />
-            <div class="dest-info"><h3>Helsinki → Barcelona</h3><p>HEL → BCN · ~8h (1 stop)</p><span class="dest-price">From €145</span></div>
+            <div class="dest-info"><h3>Helsinki → Barcelona</h3><p>HEL → BCN · ~8h (1 stop)</p><span class="dest-price" data-eur="145" data-php="8990">From €145</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','AMS')">
             <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" />
-            <div class="dest-info"><h3>Helsinki → Amsterdam</h3><p>HEL → AMS · ~3h 0m</p><span class="dest-price">From €125</span></div>
+            <div class="dest-info"><h3>Helsinki → Amsterdam</h3><p>HEL → AMS · ~3h 0m</p><span class="dest-price" data-eur="125" data-php="7750">From €125</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','FCO')">
             <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" />
-            <div class="dest-info"><h3>Helsinki → Rome</h3><p>HEL → FCO · ~3h 45m</p><span class="dest-price">From €142</span></div>
+            <div class="dest-info"><h3>Helsinki → Rome</h3><p>HEL → FCO · ~3h 45m</p><span class="dest-price" data-eur="142" data-php="8804">From €142</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','WAW')">
             <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" />
-            <div class="dest-info"><h3>Helsinki → Warsaw</h3><p>HEL → WAW · ~2h 0m</p><span class="dest-price">From €98</span></div>
+            <div class="dest-info"><h3>Helsinki → Warsaw</h3><p>HEL → WAW · ~2h 0m</p><span class="dest-price" data-eur="98" data-php="6076">From €98</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','MAD')">
             <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400&q=80" alt="Madrid" />
-            <div class="dest-info"><h3>Helsinki → Madrid</h3><p>HEL → MAD · ~7h 30m (1 stop)</p><span class="dest-price">From €148</span></div>
+            <div class="dest-info"><h3>Helsinki → Madrid</h3><p>HEL → MAD · ~7h 30m (1 stop)</p><span class="dest-price" data-eur="148" data-php="9176">From €148</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','ATH')">
             <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&q=80" alt="Athens" />
-            <div class="dest-info"><h3>Helsinki → Athens</h3><p>HEL → ATH · ~5h 55m (1 stop)</p><span class="dest-price">From €155</span></div>
+            <div class="dest-info"><h3>Helsinki → Athens</h3><p>HEL → ATH · ~5h 55m (1 stop)</p><span class="dest-price" data-eur="155" data-php="9610">From €155</span></div>
           </div>
 
           <!-- Asia -->
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','BKK')">
             <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" />
-            <div class="dest-info"><h3>Helsinki → Bangkok</h3><p>HEL → BKK · ~13h (1 stop)</p><span class="dest-price">From €390</span></div>
+            <div class="dest-info"><h3>Helsinki → Bangkok</h3><p>HEL → BKK · ~13h (1 stop)</p><span class="dest-price" data-eur="390" data-php="24180">From €390</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','MNL')">
             <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Manila" />
-            <div class="dest-info"><h3>Helsinki → Manila</h3><p>HEL → MNL · ~16h (1-2 stops)</p><span class="dest-price">From €450</span></div>
+            <div class="dest-info"><h3>Helsinki → Manila</h3><p>HEL → MNL · ~16h (1-2 stops)</p><span class="dest-price" data-eur="450" data-php="27900">From €450</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','SIN')">
             <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&q=80" alt="Singapore" />
-            <div class="dest-info"><h3>Helsinki → Singapore</h3><p>HEL → SIN · ~14h (1 stop)</p><span class="dest-price">From €420</span></div>
+            <div class="dest-info"><h3>Helsinki → Singapore</h3><p>HEL → SIN · ~14h (1 stop)</p><span class="dest-price" data-eur="420" data-php="26040">From €420</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','NRT')">
             <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&q=80" alt="Tokyo" />
-            <div class="dest-info"><h3>Helsinki → Tokyo</h3><p>HEL → NRT · ~14h (1 stop)</p><span class="dest-price">From €480</span></div>
+            <div class="dest-info"><h3>Helsinki → Tokyo</h3><p>HEL → NRT · ~14h (1 stop)</p><span class="dest-price" data-eur="480" data-php="29760">From €480</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','DPS')">
             <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80" alt="Bali" />
-            <div class="dest-info"><h3>Helsinki → Bali</h3><p>HEL → DPS · ~16h (1-2 stops)</p><span class="dest-price">From €510</span></div>
+            <div class="dest-info"><h3>Helsinki → Bali</h3><p>HEL → DPS · ~16h (1-2 stops)</p><span class="dest-price" data-eur="510" data-php="31620">From €510</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','KUL')">
             <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400&q=80" alt="Kuala Lumpur" />
-            <div class="dest-info"><h3>Helsinki → Kuala Lumpur</h3><p>HEL → KUL · ~13h (1 stop)</p><span class="dest-price">From €400</span></div>
+            <div class="dest-info"><h3>Helsinki → Kuala Lumpur</h3><p>HEL → KUL · ~13h (1 stop)</p><span class="dest-price" data-eur="400" data-php="24800">From €400</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','DVO')">
             <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" alt="Davao City" />
-            <div class="dest-info"><h3>Manila → Davao</h3><p>MNL → DVO · 1h 30m</p><span class="dest-price">From €38</span></div>
+            <div class="dest-info"><h3>Manila → Davao</h3><p>MNL → DVO · 1h 30m</p><span class="dest-price" data-eur="38" data-php="2356">From €38</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','CEB')">
             <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80" alt="Cebu Beach" />
-            <div class="dest-info"><h3>Manila → Cebu</h3><p>MNL → CEB · 1h 0m</p><span class="dest-price">From €28</span></div>
+            <div class="dest-info"><h3>Manila → Cebu</h3><p>MNL → CEB · 1h 0m</p><span class="dest-price" data-eur="28" data-php="1736">From €28</span></div>
           </div>
 
           <!-- Americas -->
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','JFK')">
             <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" />
-            <div class="dest-info"><h3>Helsinki → New York</h3><p>HEL → JFK · ~9h 30m (1 stop)</p><span class="dest-price">From €480</span></div>
+            <div class="dest-info"><h3>Helsinki → New York</h3><p>HEL → JFK · ~9h 30m (1 stop)</p><span class="dest-price" data-eur="480" data-php="29760">From €480</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','LAX')">
             <img src="https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=400&q=80" alt="Los Angeles" />
-            <div class="dest-info"><h3>Helsinki → Los Angeles</h3><p>HEL → LAX · ~13h (1 stop)</p><span class="dest-price">From €540</span></div>
+            <div class="dest-info"><h3>Helsinki → Los Angeles</h3><p>HEL → LAX · ~13h (1 stop)</p><span class="dest-price" data-eur="540" data-php="33480">From €540</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','MIA')">
             <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80" alt="Miami" />
-            <div class="dest-info"><h3>Helsinki → Miami</h3><p>HEL → MIA · ~12h (1 stop)</p><span class="dest-price">From €520</span></div>
+            <div class="dest-info"><h3>Helsinki → Miami</h3><p>HEL → MIA · ~12h (1 stop)</p><span class="dest-price" data-eur="520" data-php="32240">From €520</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','CUN')">
             <img src="https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=400&q=80" alt="Cancun" />
-            <div class="dest-info"><h3>Helsinki → Cancun</h3><p>HEL → CUN · 13h 0m</p><span class="dest-price">From €580</span></div>
+            <div class="dest-info"><h3>Helsinki → Cancun</h3><p>HEL → CUN · 13h 0m</p><span class="dest-price" data-eur="580" data-php="35960">From €580</span></div>
           </div>
 
           <!-- Middle East -->
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DXB')">
             <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" />
-            <div class="dest-info"><h3>Helsinki → Dubai</h3><p>HEL → DXB · ~6h 30m</p><span class="dest-price">From €310</span></div>
+            <div class="dest-info"><h3>Helsinki → Dubai</h3><p>HEL → DXB · ~6h 30m</p><span class="dest-price" data-eur="310" data-php="19220">From €310</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DOH')">
             <img src="https://images.unsplash.com/photo-1546412414-e1885259563a?w=400&q=80" alt="Doha" />
-            <div class="dest-info"><h3>Helsinki → Doha</h3><p>HEL → DOH · ~6h 0m</p><span class="dest-price">From €290</span></div>
+            <div class="dest-info"><h3>Helsinki → Doha</h3><p>HEL → DOH · ~6h 0m</p><span class="dest-price" data-eur="290" data-php="17980">From €290</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','IST')">
             <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&q=80" alt="Istanbul" />
-            <div class="dest-info"><h3>Helsinki → Istanbul</h3><p>HEL → IST · ~3h 45m</p><span class="dest-price">From €160</span></div>
+            <div class="dest-info"><h3>Helsinki → Istanbul</h3><p>HEL → IST · ~3h 45m</p><span class="dest-price" data-eur="160" data-php="9920">From €160</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','TLV')">
             <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=400&q=80" alt="Tel Aviv" />
-            <div class="dest-info"><h3>Helsinki → Tel Aviv</h3><p>HEL → TLV · 4h 0m</p><span class="dest-price">From €220</span></div>
+            <div class="dest-info"><h3>Helsinki → Tel Aviv</h3><p>HEL → TLV · 4h 0m</p><span class="dest-price" data-eur="220" data-php="13640">From €220</span></div>
           </div>
         </div>
       </div>
@@ -722,6 +731,30 @@
             </button>
             <div class="faq-answer">
               NordicWings searches over 500 airlines worldwide including major carriers like Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, and many more budget and regional airlines.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              What payment methods are accepted? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              We accept all major credit and debit cards (Visa, Mastercard, Amex) through Stripe. We also support Klarna (buy now, pay later), Google Pay, and Apple Pay. All payments are encrypted and secure.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              What happens if my flight is cancelled by the airline? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              If your flight is cancelled by the airline, you are entitled to a full refund or rebooking under aviation regulations. Log in to My Bookings and contact us at hello@nordicwings.net &mdash; we will assist you in processing your refund or finding an alternative flight.
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              Can I see prices in Philippine Peso (PHP)? <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Yes! On the Destinations section of our homepage, use the EUR / PHP toggle button to switch all prices to Philippine Peso. This makes it easier to understand the cost without doing currency conversions yourself.
             </div>
           </div>
         </div>
@@ -1653,6 +1686,26 @@
         if (icon) icon.textContent = '-';
       }
     }
+    /* ── Currency Toggle ── */
+    var currentCurrency = 'eur';
+    function setCurrency(cur) {
+      currentCurrency = cur;
+      document.getElementById('btn-eur').style.background = cur === 'eur' ? '#1e40af' : 'transparent';
+      document.getElementById('btn-eur').style.color = cur === 'eur' ? '#fff' : '#64748b';
+      document.getElementById('btn-php').style.background = cur === 'php' ? '#1e40af' : 'transparent';
+      document.getElementById('btn-php').style.color = cur === 'php' ? '#fff' : '#64748b';
+      document.querySelectorAll('.dest-price').forEach(function(el) {
+        var eur = el.getAttribute('data-eur');
+        var php = el.getAttribute('data-php');
+        if (!eur) return;
+        if (cur === 'php') {
+          el.textContent = 'From \u20B1' + Number(php).toLocaleString();
+        } else {
+          el.textContent = 'From \u20AC' + eur;
+        }
+      });
+    }
+
     function quickSearch(from, to) {
       document.getElementById('origin-input').value = from;
       document.getElementById('origin-input').dataset.code = from;
@@ -1679,7 +1732,7 @@
     var POLICY_CONTENT = {
       about: {
         title: '\u2708 About NordicWings',
-        html: '<p><strong>NordicWings</strong> is an online flight search and booking platform dedicated to making air travel simple, transparent, and accessible for everyone worldwide.</p><h3>Our Mission</h3><p>We connect travelers to real-time flight data from 500+ airlines globally, giving you the best selection and prices in one place.</p><h3>Security &amp; Trust</h3><ul><li>All payments processed by <strong>Stripe</strong> &mdash; the world&#39;s leading payment platform</li><li>Your card details are <strong>never stored</strong> on our servers</li><li><strong>SSL encryption</strong> protects all data in transit</li><li>Fully <strong>GDPR compliant</strong></li></ul><h3>Contact</h3><ul><li><strong>Website:</strong> nordicwings.net</li><li><strong>Email:</strong> hello@nordicwings.net</li></ul><div class=\'policy-contact-box\'><p>&#128231; <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response within 24 hours, Monday&ndash;Friday.</p></div>'
+        html: '<p><strong>NordicWings</strong> is an online flight search and booking platform built to make international travel simple, affordable, and accessible for everyone &mdash; no matter where in the world you are flying from or to.</p><h3>Our Story</h3><p>NordicWings was founded with one clear goal: to make booking real flights as easy and transparent as possible. We saw how complicated and expensive booking international flights can be, especially for travelers connecting between Europe, Asia, and the Philippines. We built NordicWings to bridge that gap &mdash; giving you access to real fares from 500+ airlines, all in one place, with secure payment and instant confirmation.</p><h3>Our Mission</h3><p>We believe everyone deserves to travel without stress. Whether you are booking a family trip from Manila to Helsinki, a quick domestic hop from Manila to Cebu, or a European adventure from Helsinki to Barcelona &mdash; NordicWings is here to find you the best real price and make the booking process feel effortless.</p><h3>Why Trust Us?</h3><ul><li>&#9989; <strong>Real flight data</strong> &mdash; live prices from 500+ airlines updated every minute via Duffel</li><li>&#9989; <strong>Secure payments</strong> &mdash; all transactions protected by Stripe, the world\'s leading payment platform</li><li>&#9989; <strong>Your card details are never stored</strong> on our servers</li><li>&#9989; <strong>SSL encryption</strong> protects all data in transit</li><li>&#9989; Fully <strong>GDPR compliant</strong></li><li>&#9989; Supports Visa, Mastercard, Klarna, Google Pay &amp; more</li></ul><h3>Get in Touch</h3><div class=\'policy-contact-box\'><p>&#128231; <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">We respond within 24 hours, Monday&ndash;Friday. We are happy to help with any questions about your booking.</p></div>'
       },
       howitworks: {
         title: '&#128640; How NordicWings Works',
