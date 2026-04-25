@@ -1414,4 +1414,14 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   const path = req.path.toLowerCase();
   const probes = ['.php', '.asp', '.aspx', 'wp-admin', 'xmlrpc', '.env', 'config.json', 'admin/', '/.git', '/backup'];
-  if (probes.some(p => path.include
+  if (probes.some(p => path.includes(p))) {
+    console.warn('Suspicious probe blocked: ' + req.method + ' ' + req.path + ' from ' + req.ip);
+    return res.status(404).json({ error: 'Not found.' });
+  }
+  res.status(404).json({ error: 'Not found.' });
+});
+
+app.listen(PORT, () => {
+  console.log('NordicWings is running on port ' + PORT);
+  console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
+});
