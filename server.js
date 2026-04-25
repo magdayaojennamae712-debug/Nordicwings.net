@@ -196,40 +196,47 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
 
         if (!segments.length) continue;
 
-        // ── Validate segment times — skip bad / unacceptable Duffel data ──
+        // ── Validate ALL slices (outbound + return) — skip bad / unacceptable Duffel data ──
+        let offerIsValid = true;
 
-        // 1) Any segment under 30 min is impossible (no commercial flight is that short)
-        const hasImpossibleSegment = segments.some(seg => {
-          const dep = new Date(seg.departure.at);
-          const arr = new Date(seg.arrival.at);
-          const diffMins = (arr - dep) / 60000;
-          return diffMins < 30 || isNaN(diffMins);
-        });
-        if (hasImpossibleSegment) {
-          console.warn(`Skipping offer ${offer.id} — segment under 30 min (corrupt data)`);
-          continue;
-        }
+        for (const checkSlice of (offer.slices || [])) {
+          const checkSegs = (checkSlice.segments || []).map(seg => ({
+            depAt: seg.departing_at,
+            arrAt: seg.arriving_at
+          }));
+          if (!checkSegs.length) continue;
 
-        // 2) Any individual layover over 6 hours = overnight stop = bad customer experience
-        let hasLongLayover = false;
-        for (let s = 0; s < segments.length - 1; s++) {
-          const layoverMins = (new Date(segments[s+1].departure.at) - new Date(segments[s].arrival.at)) / 60000;
-          if (layoverMins > 360) {  // more than 6 hours between segments
-            hasLongLayover = true;
-            break;
+          // 1) Any segment under 30 min is impossible (corrupt data)
+          for (const seg of checkSegs) {
+            const diffMins = (new Date(seg.arrAt) - new Date(seg.depAt)) / 60000;
+            if (diffMins < 30 || isNaN(diffMins)) {
+              console.warn(`Skipping offer ${offer.id} — segment under 30 min (corrupt data)`);
+              offerIsValid = false; break;
+            }
+          }
+          if (!offerIsValid) break;
+
+          // 2) Any layover over 3 hours = bad experience (was 6h — too loose)
+          for (let s = 0; s < checkSegs.length - 1; s++) {
+            const layoverMins = (new Date(checkSegs[s+1].depAt) - new Date(checkSegs[s].arrAt)) / 60000;
+            if (layoverMins > 180) {
+              console.warn(`Skipping offer ${offer.id} — layover ${Math.round(layoverMins)}min (over 3h)`);
+              offerIsValid = false; break;
+            }
+          }
+          if (!offerIsValid) break;
+
+          // 3) Total journey over 15 hours is unrealistic for any normal route
+          const firstDep = new Date(checkSegs[0].depAt);
+          const lastArr  = new Date(checkSegs[checkSegs.length - 1].arrAt);
+          const totalMins = (lastArr - firstDep) / 60000;
+          if (totalMins > 900) {
+            console.warn(`Skipping offer ${offer.id} — total journey ${Math.round(totalMins/60)}h (over 15h)`);
+            offerIsValid = false; break;
           }
         }
-        if (hasLongLayover) {
-          console.warn(`Skipping offer ${offer.id} — layover over 6 hours (overnight stop)`);
-          continue;
-        }
 
-        // 3) Total journey over 24 hours is also unacceptable (covers even long-haul routes)
-        const totalJourneyMins = (new Date(segments[segments.length-1].arrival.at) - new Date(segments[0].departure.at)) / 60000;
-        if (totalJourneyMins > 1440) {
-          console.warn(`Skipping offer ${offer.id} — total journey over 24h (${Math.round(totalJourneyMins/60)}h)`);
-          continue;
-        }
+        if (!offerIsValid) continue;
 
         const basePrice   = parseFloat(offer.total_amount || 0);
         // 5% markup with minimum €12 service fee
