@@ -216,7 +216,13 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
           }
           if (!offerIsValid) break;
 
-          // 2) Any layover over 3 hours = bad experience (was 6h — too loose)
+          // 2) More than 1 stop (3+ segments) = suspicious routing, block it
+          if (checkSegs.length > 2) {
+            console.warn(`Skipping offer ${offer.id} — ${checkSegs.length} legs (more than 1 stop)`);
+            offerIsValid = false; break;
+          }
+
+          // 3) Any layover over 3 hours = bad experience
           for (let s = 0; s < checkSegs.length - 1; s++) {
             const layoverMins = (new Date(checkSegs[s+1].depAt) - new Date(checkSegs[s].arrAt)) / 60000;
             if (layoverMins > 180) {
