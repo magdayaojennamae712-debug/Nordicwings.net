@@ -1896,9 +1896,18 @@ function closeAuthModal(e) {
 function switchAuthTab(tab) {
   document.getElementById('form-login').style.display  = tab === 'login'  ? 'block' : 'none';
   document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
-  document.getElementById('tab-login').classList.toggle('active',  tab === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-  // Clear errors
+  var tLogin  = document.getElementById('tab-login');
+  var tSignup = document.getElementById('tab-signup');
+  if (tLogin && tSignup) {
+    tLogin.style.background  = tab === 'login'  ? '#fff' : 'rgba(255,255,255,.2)';
+    tLogin.style.color       = tab === 'login'  ? '#1e3a8a' : '#fff';
+    tSignup.style.background = tab === 'signup' ? '#fff' : 'rgba(255,255,255,.2)';
+    tSignup.style.color      = tab === 'signup' ? '#1e3a8a' : '#fff';
+  }
+  var title = document.getElementById('auth-modal-title');
+  var sub   = document.getElementById('auth-modal-sub');
+  if (title) title.textContent = tab === 'login' ? 'Welcome back' : 'Join NordicWings';
+  if (sub)   sub.textContent   = tab === 'login' ? 'Sign in to manage your bookings' : 'Create your free account in seconds';
   document.getElementById('login-error').textContent  = '';
   document.getElementById('signup-error').textContent = '';
 }

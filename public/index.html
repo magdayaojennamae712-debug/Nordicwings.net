@@ -1567,52 +1567,75 @@
 
   <!-- AUTH MODAL -->
   <div id="auth-overlay" class="modal-overlay" onclick="closeAuthModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
-        <button class="modal-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-        <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width:420px;width:95%;border-radius:22px;overflow:hidden;padding:0;">
+
+      <!-- Modal top header -->
+      <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:24px 24px 20px;position:relative;">
+        <button onclick="closeAuthModal()" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        <div style="font-size:2rem;margin-bottom:6px;">✈</div>
+        <div id="auth-modal-title" style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:2px;">Welcome to NordicWings</div>
+        <div id="auth-modal-sub" style="color:#93c5fd;font-size:.85rem;">Sign in to manage your bookings</div>
+        <!-- Tabs -->
+        <div style="display:flex;gap:6px;margin-top:16px;">
+          <button id="tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:8px;border-radius:20px;border:none;font-size:.85rem;font-weight:600;cursor:pointer;background:#fff;color:#1e3a8a;">Sign In</button>
+          <button id="tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:8px;border-radius:20px;border:none;font-size:.85rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,.2);color:#fff;">Sign Up Free</button>
+        </div>
       </div>
-      <div id="form-login" class="auth-form">
-        <h2>Welcome back</h2>
-        <p class="auth-subtitle">Sign in to your NordicWings account</p>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="login-email" placeholder="you@email.com" />
+
+      <!-- Login Form -->
+      <div id="form-login" class="auth-form" style="padding:24px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label style="font-size:.8rem;font-weight:700;color:#475569;display:block;margin-bottom:5px;">Email address</label>
+          <input type="email" id="login-email" placeholder="you@email.com" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:11px;font-size:.95rem;outline:none;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"/>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="login-password" placeholder="Your password" />
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:.8rem;font-weight:700;color:#475569;display:block;margin-bottom:5px;">Password</label>
+          <input type="password" id="login-password" placeholder="Your password" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:11px;font-size:.95rem;outline:none;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"/>
         </div>
-        <p class="form-error" id="login-error"></p>
-        <button class="btn-primary full-width" onclick="signInUser()">
-          <span id="login-btn-text">Sign In</span>
+        <p class="form-error" id="login-error" style="color:#dc2626;font-size:.82rem;min-height:18px;margin-bottom:6px;"></p>
+        <button class="btn-primary full-width" onclick="signInUser()" style="width:100%;padding:13px;border-radius:11px;font-size:.95rem;font-weight:700;background:linear-gradient(90deg,#1e3a8a,#1d4ed8);border:none;color:#fff;cursor:pointer;margin-bottom:14px;">
+          <span id="login-btn-text">Sign In →</span>
           <span id="login-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Don't have an account? <a href="javascript:void(0)" onclick="switchAuthTab('signup')">Sign up free</a></p>
+        <div style="background:#f8faff;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:.78rem;color:#64748b;font-weight:600;margin-bottom:6px;">Why sign in?</div>
+          <div style="font-size:.8rem;color:#475569;display:flex;flex-direction:column;gap:3px;">
+            <span>✅ View and manage your bookings</span>
+            <span>✅ Receive instant booking confirmations</span>
+            <span>✅ Secure access to your travel history</span>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:.83rem;color:#64748b;">No account yet? <a href="javascript:void(0)" onclick="switchAuthTab('signup')" style="color:#1d4ed8;font-weight:600;">Create one free →</a></p>
       </div>
-      <div id="form-signup" class="auth-form" style="display:none;">
-        <h2>Create your account</h2>
-        <p class="auth-subtitle">Join NordicWings and start booking flights</p>
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="signup-name" placeholder="Your full name" />
+
+      <!-- Sign Up Form -->
+      <div id="form-signup" class="auth-form" style="display:none;padding:24px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label style="font-size:.8rem;font-weight:700;color:#475569;display:block;margin-bottom:5px;">Full name</label>
+          <input type="text" id="signup-name" placeholder="Your full name" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:11px;font-size:.95rem;outline:none;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"/>
         </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="signup-email" placeholder="you@email.com" />
+        <div class="form-group" style="margin-bottom:14px;">
+          <label style="font-size:.8rem;font-weight:700;color:#475569;display:block;margin-bottom:5px;">Email address</label>
+          <input type="email" id="signup-email" placeholder="you@email.com" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:11px;font-size:.95rem;outline:none;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"/>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="signup-password" placeholder="Min. 6 characters" />
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:.8rem;font-weight:700;color:#475569;display:block;margin-bottom:5px;">Password</label>
+          <input type="password" id="signup-password" placeholder="Min. 6 characters" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:11px;font-size:.95rem;outline:none;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"/>
         </div>
-        <p class="form-error" id="signup-error"></p>
-        <button class="btn-primary full-width" onclick="signUpUser()">
-          <span id="signup-btn-text">Create Account</span>
+        <p class="form-error" id="signup-error" style="color:#dc2626;font-size:.82rem;min-height:18px;margin-bottom:6px;"></p>
+        <button class="btn-primary full-width" onclick="signUpUser()" style="width:100%;padding:13px;border-radius:11px;font-size:.95rem;font-weight:700;background:linear-gradient(90deg,#1e3a8a,#1d4ed8);border:none;color:#fff;cursor:pointer;margin-bottom:12px;">
+          <span id="signup-btn-text">Create Free Account →</span>
           <span id="signup-btn-spinner" class="spinner" style="display:none;"></span>
         </button>
-        <p class="auth-switch">Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign in</a></p>
+        <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center;flex-wrap:wrap;">
+          <span style="font-size:.75rem;color:#94a3b8;display:flex;align-items:center;gap:4px;">🔒 SSL Secured</span>
+          <span style="font-size:.75rem;color:#94a3b8;display:flex;align-items:center;gap:4px;">💳 Stripe Payments</span>
+          <span style="font-size:.75rem;color:#94a3b8;display:flex;align-items:center;gap:4px;">✅ Free forever</span>
+        </div>
+        <p style="text-align:center;font-size:.8rem;color:#94a3b8;">By signing up you agree to our <a href="javascript:void(0)" onclick="openPolicyModal('terms')" style="color:#1d4ed8;">Terms</a> &amp; <a href="javascript:void(0)" onclick="openPolicyModal('privacy')" style="color:#1d4ed8;">Privacy Policy</a>.</p>
+        <p style="text-align:center;font-size:.83rem;color:#64748b;margin-top:10px;">Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#1d4ed8;font-weight:600;">Sign in →</a></p>
       </div>
+
     </div>
   </div>
 
