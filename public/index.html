@@ -223,9 +223,9 @@
   <script src="https://js.stripe.com/v3/" defer></script>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <!-- ===== SEO: Structured Data (Google Rich Results) ===== -->
   <script type="application/ld+json">
@@ -362,14 +362,14 @@
         <div class="search-form">
           <div class="input-group autocomplete-wrap" id="origin-wrap">
             <label>From</label>
-            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="airportSearch('origin')" />
+            <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" oninput="airportSearch('origin')" />
           </div>
 
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
 
           <div class="input-group autocomplete-wrap" id="dest-wrap">
             <label>To</label>
-            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" list="airports-datalist" oninput="airportSearch('dest')" />
+            <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" oninput="airportSearch('dest')" />
           </div>
 
           <div class="input-group">

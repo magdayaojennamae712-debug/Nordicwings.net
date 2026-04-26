@@ -528,18 +528,26 @@ const POPULAR_AIRPORTS = [
 
 function showAcList(listEl, inputEl, airports, field) {
   var rect = inputEl.getBoundingClientRect();
+  var screenW = window.innerWidth;
+  var listW = Math.min(rect.width, screenW - 16);
+  var leftPos = rect.left;
+  if (leftPos + listW > screenW - 8) leftPos = screenW - listW - 8;
+  if (leftPos < 8) leftPos = 8;
   listEl.style.display = 'block';
   listEl.style.position = 'fixed';
   listEl.style.top = (rect.bottom + 4) + 'px';
-  listEl.style.left = rect.left + 'px';
-  listEl.style.width = rect.width + 'px';
+  listEl.style.left = leftPos + 'px';
+  listEl.style.width = listW + 'px';
   listEl.style.zIndex = '99999';
+  listEl.style.maxHeight = '260px';
+  listEl.style.overflowY = 'auto';
+  listEl.style.webkitOverflowScrolling = 'touch';
   if (airports.length === 0) {
     listEl.innerHTML = '<li style="padding:12px 16px;color:#aaa;font-size:.88rem;">No results found</li>';
     return;
   }
   var html = '';
-  for (var i = 0; i < Math.min(airports.length, 7); i++) {
+  for (var i = 0; i < Math.min(airports.length, 8); i++) {
     var a = airports[i];
     var city = (a.cityName || a.name).replace(/'/g, "&#39;");
     var aname = a.name.replace(/'/g, "&#39;");
