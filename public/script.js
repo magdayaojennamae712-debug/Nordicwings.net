@@ -916,7 +916,7 @@ function renderFlightCards(flights) {
   const kiwiOrigin = searchParams.origin || '';
   const kiwiDest = searchParams.dest || '';
   const kiwiDate = searchParams.departDate || '';
-  const kiwiUrl = `https://tp.media/r?marker=719573&p=4114&u=https%3A%2F%2Fwww.kiwi.com%2Fsearch%2Fresults%3Forigins%3D${kiwiOrigin}%26destinations%3D${kiwiDest}%26depart%3D${kiwiDate}%26adults%3D${searchParams.numAdults||1}`;
+  const kiwiUrl = `https://kiwi.tpk.mx/Imxir0ir`;
   const kiwiBanner = `
     <div style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4);border:1.5px solid #bae6fd;border-radius:12px;
       padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -2002,22 +2002,35 @@ function showConfirmationPage(booking) {
       border-radius:12px;padding:14px 16px;">
       <div style="font-weight:700;color:#92400e;font-size:.9rem;margin-bottom:4px;">✈️ Flight delayed or cancelled?</div>
       <div style="font-size:.8rem;color:#b45309;margin-bottom:10px;">You could be entitled to up to €600 compensation per person. AirHelp handles your claim for free.</div>
-      <a href="https://tp.media/r?marker=719573&p=airhelp&u=https%3A%2F%2Fwww.airhelp.com%2Fen%2F" target="_blank" rel="noopener"
+      <a href="https://airhelp.tpk.mx/2qYxqDeS" target="_blank" rel="noopener"
         style="display:inline-block;background:#f59e0b;color:#fff;padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;">
         Check my compensation →
       </a>
     </div>
 
-    <!-- Compensair affiliate banner -->
+    <!-- Searadar affiliate banner -->
     <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid #bfdbfe;
       border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div>
         <div style="font-weight:700;color:#1e40af;font-size:.85rem;">🛡️ Protect future trips</div>
-        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Travel insurance from €8 — cancel for any reason, medical cover, luggage</div>
+        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Travel insurance — cancel for any reason, medical cover, luggage</div>
       </div>
-      <a href="https://tp.media/r?marker=719573&p=compensair&u=https%3A%2F%2Fcompensair.com%2F" target="_blank" rel="noopener"
+      <a href="https://searadar.tpk.mx/XaNzHXVR" target="_blank" rel="noopener"
         style="background:#1d4ed8;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
         Get insured →
+      </a>
+    </div>
+
+    <!-- Klook banner — tours & activities at destination -->
+    <div style="margin-top:10px;background:linear-gradient(135deg,#fdf4ff,#fef3c7);border:1.5px solid #e9d5ff;
+      border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;color:#7c3aed;font-size:.85rem;">🎡 Things to do at your destination</div>
+        <div style="font-size:.78rem;color:#6d28d9;margin-top:2px;">Tours, attractions & activities — book experiences at your destination with Klook</div>
+      </div>
+      <a href="https://tp.media/r?marker=719573&trs=519663&p=4110&u=https%3A%2F%2Fklook.com&campaign_id=137" target="_blank" rel="noopener"
+        style="background:#7c3aed;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Explore activities →
       </a>
     </div>
   `;
