@@ -1223,12 +1223,9 @@ function showAgencyPage() {
   document.getElementById('agency-route-sub').textContent =
     `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
 
-  // Agencies list — NordicWings Direct first if Duffel flight, then partners
-  const isDuffelFlight = !!(f.duffelOfferId);
+  // Agencies list — NordicWings Direct always shown first, then partners
   const agencies = [
-    ...(isDuffelFlight ? [
-      { name: 'NordicWings', rating: 5.0, reviews: 0, price: price, perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true, stars: 5, highlight: true }
-    ] : []),
+    { name: 'NordicWings', rating: 5.0, reviews: 0, price: price, perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true, stars: 5, highlight: true },
     { name: 'Skyscanner',     rating: 4.8, reviews: 52400, price: price,    perks: '✓ Real flights · Best price guarantee · Trusted worldwide', direct: false, stars: 5, highlight: true },
     { name: 'Jetradar',       rating: 4.7, reviews: 41800, price: price+1,  perks: '✓ Compare 728 airlines · Earn cashback · Best deals',      direct: false, stars: 5, highlight: true },
     { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
