@@ -199,6 +199,7 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
           arrival:   { iataCode: seg.destination?.iata_code || dest, at: seg.arriving_at || date },
           carrierCode: seg.marketing_carrier?.iata_code || seg.operating_carrier?.iata_code || 'XX',
           number: seg.marketing_carrier_flight_designator?.flight_number || String(i * 10 + 100),
+          aircraft: seg.aircraft?.iata_code || null,
           duration: seg.duration || 'PT2H0M'
         }));
 

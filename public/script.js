@@ -1556,14 +1556,31 @@ async function setupBookingPage() {
     ? '<span style="color:#16a34a;font-size:.8rem;font-weight:600;">✅ Nonstop</span>'
     : `<span style="color:#d97706;font-size:.8rem;font-weight:600;">🔄 ${stopCodes.length} stop via ${stopCodes.join(', ')}</span>`;
 
-  // Aircraft info per airline
-  const aircraftMap = {
-    'EK': 'Boeing 777-300ER', 'QR': 'Airbus A350-900',
-    'BA': 'Boeing 787-9 Dreamliner', 'LH': 'Airbus A340-300',
-    'TK': 'Boeing 777-300ER', 'AY': 'Airbus A330-300',
-    'AF': 'Airbus A380-800', 'KL': 'Boeing 777-200',
+  // IATA aircraft code → full name (real data from Duffel API)
+  const iataAircraftMap = {
+    '319':'Airbus A319','320':'Airbus A320','321':'Airbus A321',
+    '32A':'Airbus A320neo','32B':'Airbus A321neo','32N':'Airbus A321neo',
+    '32S':'Airbus A320neo','32K':'Airbus A321XLR',
+    '330':'Airbus A330','332':'Airbus A330-200','333':'Airbus A330-300',
+    '338':'Airbus A330-800neo','339':'Airbus A330-900neo',
+    '343':'Airbus A340-300','346':'Airbus A340-600',
+    '350':'Airbus A350','359':'Airbus A350-900','351':'Airbus A350-1000',
+    '380':'Airbus A380','388':'Airbus A380-800',
+    '737':'Boeing 737-800','738':'Boeing 737-800','739':'Boeing 737-900',
+    '7M8':'Boeing 737 MAX 8','7M9':'Boeing 737 MAX 9',
+    '763':'Boeing 767-300','772':'Boeing 777-200','773':'Boeing 777-300',
+    '77W':'Boeing 777-300ER','788':'Boeing 787-8','789':'Boeing 787-9','78X':'Boeing 787-10',
+    'E90':'Embraer E190','E95':'Embraer E195','E75':'Embraer E175',
+    'AT7':'ATR 72','CR9':'Bombardier CRJ-900',
   };
-  const aircraft = aircraftMap[seg.carrierCode] || 'Boeing 737-800';
+  // Fallback per airline if Duffel gives no aircraft code
+  const airlineAircraftMap = {
+    'EK':'Boeing 777-300ER','QR':'Airbus A350-900','BA':'Boeing 787-9',
+    'LH':'Airbus A320','TK':'Boeing 777-300ER','AY':'Airbus A321neo',
+    'AF':'Airbus A350-900','KL':'Boeing 777-200','SK':'Airbus A320neo',
+    'FI':'Boeing 757-200','FR':'Boeing 737-800','W6':'Airbus A320',
+  };
+  const aircraft = iataAircraftMap[seg.aircraft] || airlineAircraftMap[seg.carrierCode] || 'Airbus A320';
   const cabin    = selectedFlight.travelerPricings[0]?.fareDetailsBySegment[0]?.cabin || 'ECONOMY';
   const isBiz    = cabin === 'BUSINESS';
 
