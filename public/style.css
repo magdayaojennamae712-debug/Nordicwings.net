@@ -11,25 +11,12 @@ a, button, input, select, textarea, label, [onclick], [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Mobile: smoother scrolling & GPU acceleration ── */
+/* ── Mobile: smoother scrolling ── */
 html {
-  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
 body {
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
-}
-/* GPU-accelerate animations so they never block the main thread */
-.hero, .search-box, .flight-card, .fc-card, nav {
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-/* Lazy-load offscreen content */
-section:not(:first-child) {
-  content-visibility: auto;
 }
 
 :root {
