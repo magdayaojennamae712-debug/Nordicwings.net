@@ -159,9 +159,9 @@ document.addEventListener('click', function(e) {
   var btn   = document.getElementById('pax-btn');
   if (!panel || !btn || panel.style.display === 'none') return;
   if (!panel.contains(e.target) && !btn.contains(e.target)) {
-    panel.style.display = 'none';
+    closePaxPanel();
   }
-});
+}, { passive: true });
 
 // ─────────────────────────────────────────────────────────────
 // DATE / TIME / DURATION HELPERS
@@ -602,7 +602,7 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.autocomplete-wrap')) {
     document.querySelectorAll('.autocomplete-list').forEach(l => { l.innerHTML = ''; l.style.display = 'none'; });
   }
-});
+}, { passive: true });
 
 function swapAirports() {
   const originInput = document.getElementById('origin-input');
