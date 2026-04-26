@@ -795,10 +795,11 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     console.log('Duffel returned no results — trying Sky Scrapper...');
   }
 
-  // If no RapidAPI key configured, return empty (no fake flights)
+  // If no RapidAPI key configured, fall back to demo flights
   if (!RAPIDAPI_KEY) {
-    console.log('No RAPIDAPI_KEY set — no flights found');
-    return res.json([]);
+    console.log('No RAPIDAPI_KEY set — using demo flights');
+    const demo = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
+    return res.json(demo);
   }
 
   try {
@@ -820,8 +821,8 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
 
     const itineraries = data?.data?.itineraries || [];
     if (!itineraries.length) {
-      console.log('API returned 0 flights — no results for this route');
-      return res.json([]);
+      console.log('API returned 0 flights — using demo flights');
+      return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
     }
 
     const flights = [];
@@ -859,14 +860,14 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     }
 
     if (!flights.length) {
-      console.log('All flights failed to map — no results');
-      return res.json([]);
+      console.log('All flights failed to map — using demo flights');
+      return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
     }
 
     return res.json(flights);
   } catch (err) {
     console.error('Flight search error:', err.message);
-    return res.json([]);
+    return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
   }
 });
 
