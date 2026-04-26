@@ -917,17 +917,27 @@ function renderFlightCards(flights) {
   const kiwiDest = searchParams.dest || '';
   const kiwiDate = searchParams.departDate || '';
   const kiwiUrl = `https://kiwi.tpk.mx/Imxir0ir`;
+  const tripUrl = `https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585`;
   const kiwiBanner = `
     <div style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4);border:1.5px solid #bae6fd;border-radius:12px;
-      padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div>
-        <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;">💡 Looking for cheaper flights?</div>
-        <div style="font-size:.78rem;color:#0369a1;margin-top:2px;">Kiwi.com searches budget airlines like Ryanair & Wizz Air too</div>
+      padding:12px 16px;margin-bottom:12px;">
+      <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;margin-bottom:6px;">💡 Looking for cheaper flights? Compare other platforms:</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:.78rem;color:#0369a1;margin-bottom:6px;">🌍 Kiwi.com — budget airlines like Ryanair &amp; Wizz Air</div>
+          <a href="${kiwiUrl}" target="_blank" rel="noopener"
+            style="background:#0284c7;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
+            Compare on Kiwi.com →
+          </a>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:.78rem;color:#1d4ed8;margin-bottom:6px;">✈️ Trip.com — hotels, flights &amp; packages worldwide</div>
+          <a href="${tripUrl}" target="_blank" rel="noopener"
+            style="background:#1d4ed8;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
+            Compare on Trip.com →
+          </a>
+        </div>
       </div>
-      <a href="${kiwiUrl}" target="_blank" rel="noopener"
-        style="background:#0284c7;color:#fff;padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;">
-        Compare on Kiwi.com →
-      </a>
     </div>`;
 
   list.innerHTML = kiwiBanner + sortBarHtml + '<div id="flights-container"></div>';
@@ -2026,11 +2036,24 @@ function showConfirmationPage(booking) {
       border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div>
         <div style="font-weight:700;color:#7c3aed;font-size:.85rem;">🎡 Things to do at your destination</div>
-        <div style="font-size:.78rem;color:#6d28d9;margin-top:2px;">Tours, attractions & activities — book experiences at your destination with Klook</div>
+        <div style="font-size:.78rem;color:#6d28d9;margin-top:2px;">Tours, attractions & activities — book experiences with Klook</div>
       </div>
       <a href="https://tp.media/r?marker=719573&trs=519663&p=4110&u=https%3A%2F%2Fklook.com&campaign_id=137" target="_blank" rel="noopener"
         style="background:#7c3aed;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
         Explore activities →
+      </a>
+    </div>
+
+    <!-- Trip.com banner -->
+    <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1.5px solid #93c5fd;
+      border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;color:#1e3a8a;font-size:.85rem;">🌏 Need a hotel for your trip?</div>
+        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Book hotels, tours & transfers at your destination with Trip.com</div>
+      </div>
+      <a href="https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585" target="_blank" rel="noopener"
+        style="background:#1d4ed8;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Find hotels →
       </a>
     </div>
   `;
