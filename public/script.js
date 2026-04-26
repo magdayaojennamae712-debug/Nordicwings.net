@@ -1615,19 +1615,19 @@ async function setupBookingPage() {
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Checked Baggage</div>
-        <div style="font-weight:700;color:#1a2b4a;">${isBiz ? '2 × 32kg' : '1 × 23kg'} included</div>
+        <div style="font-weight:700;color:#1a2b4a;">${(selectedFlight.baggage?.checkedQty > 0) ? selectedFlight.baggage.checkedQty + ' × bag included' : (isBiz ? '2 × bag included' : 'Not included — check airline')}</div>
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Carry-on</div>
-        <div style="font-weight:700;color:#1a2b4a;">${isBiz ? '2 × 12kg' : '1 × 7kg'} included</div>
+        <div style="font-weight:700;color:#1a2b4a;">${(selectedFlight.baggage?.cabinQty > 0) ? selectedFlight.baggage.cabinQty + ' × bag included' : '1 × personal item'}</div>
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Meal Service</div>
-        <div style="font-weight:700;color:#16a34a;">🍽 ${isBiz ? 'Multi-course dining' : 'Complimentary meal'}</div>
+        <div style="font-weight:700;color:#1a2b4a;">🍽 ${isBiz ? 'Included' : 'Varies by airline'}</div>
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Entertainment</div>
-        <div style="font-weight:700;color:#16a34a;">📺 ${isBiz ? 'Private screen 23"' : 'Seatback screen'}</div>
+        <div style="font-weight:700;color:#1a2b4a;">📺 Varies by aircraft</div>
       </div>
     </div>
 
@@ -1687,13 +1687,11 @@ async function setupBookingPage() {
     <div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
       <div style="font-size:.78rem;font-weight:700;color:#15803d;margin-bottom:6px;">✅ WHAT'S INCLUDED</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.78rem;color:#374151;">
-        <div>✓ Checked baggage</div>
+        ${(selectedFlight.baggage?.checkedQty > 0) ? '<div>✓ Checked baggage</div>' : '<div style=\"color:#6b7280\">✗ No checked bag</div>'}
         <div>✓ Carry-on bag</div>
-        <div>✓ Complimentary meals</div>
-        <div>✓ Beverages & snacks</div>
-        <div>✓ In-flight entertainment</div>
-        <div>✓ USB charging port</div>
-        ${isBiz ? '<div>✓ Lie-flat bed seat</div><div>✓ Airport lounge access</div>' : '<div>✓ Blanket & pillow</div><div>✓ Wi-Fi available</div>'}
+        ${isBiz ? '<div>✓ Meals included</div><div>✓ Lounge access</div><div>✓ Lie-flat seat</div><div>✓ Priority boarding</div>' : '<div>✓ Seat included</div><div>✓ 24/7 support</div>'}
+        <div>✓ Real e-ticket</div>
+        <div>✓ Secure Stripe payment</div>
       </div>
     </div>
   `;

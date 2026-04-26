@@ -269,6 +269,14 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
         const refundPenalty = conds.refund_before_departure?.penalty_amount || null;
         const changePenalty = conds.change_before_departure?.penalty_amount || null;
 
+        // Extract real baggage from Duffel per passenger per segment
+        const firstPassenger = offer.slices?.[0]?.segments?.[0]?.passengers?.[0];
+        const baggages = firstPassenger?.baggages || [];
+        const checkedBags = baggages.filter(b => b.type === 'checked_baggage');
+        const cabinBags   = baggages.filter(b => b.type === 'carry_on_baggage');
+        const checkedQty  = checkedBags.reduce((sum, b) => sum + (b.quantity || 0), 0);
+        const cabinQty    = cabinBags.reduce((sum, b) => sum + (b.quantity || 0), 0);
+
         flights.push({
           id: `duffel-${offer.id}`,
           duffelOfferId: offer.id,
@@ -280,6 +288,7 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
             fees:       [{ amount: feeAmount.toFixed(2) }]
           },
           conditions: { refundable, changeable, refundPenalty, changePenalty },
+          baggage: { checkedQty, cabinQty },
           numberOfBookableSeats: offer.available_services?.length || 9,
           itineraries: [{
             duration: slice.duration || `PT${Math.floor(durationMins/60)}H${durationMins%60}M`,
