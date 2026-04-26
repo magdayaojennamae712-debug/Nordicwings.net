@@ -105,8 +105,19 @@ function updatePaxUI() {
 
 function togglePaxPanel() {
   var panel = document.getElementById('pax-panel');
-  if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  var btn   = document.getElementById('pax-btn');
+  if (!panel || !btn) return;
+  if (panel.style.display === 'none' || panel.style.display === '') {
+    // Position using fixed so hero overflow:hidden doesn't clip it
+    var rect = btn.getBoundingClientRect();
+    panel.style.position = 'fixed';
+    panel.style.top  = (rect.bottom + 6) + 'px';
+    panel.style.left = rect.left + 'px';
+    panel.style.width = Math.max(rect.width, 300) + 'px';
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
 }
 
 function closePaxPanel() {
