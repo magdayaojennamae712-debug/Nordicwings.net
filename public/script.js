@@ -527,72 +527,79 @@ const POPULAR_AIRPORTS = [
 ];
 
 function showAcList(listEl, inputEl, airports, field) {
-  var rect = inputEl.getBoundingClientRect();
+  var rect    = inputEl.getBoundingClientRect();
   var screenW = window.innerWidth;
-  var listW = Math.min(rect.width, screenW - 16);
-  var leftPos = rect.left;
-  if (leftPos + listW > screenW - 8) leftPos = screenW - listW - 8;
-  if (leftPos < 8) leftPos = 8;
-  listEl.style.display = 'block';
-  listEl.style.position = 'fixed';
-  listEl.style.top = (rect.bottom + 4) + 'px';
-  listEl.style.left = leftPos + 'px';
-  listEl.style.width = listW + 'px';
-  listEl.style.zIndex = '99999';
-  listEl.style.maxHeight = '260px';
-  listEl.style.overflowY = 'auto';
-  listEl.style.webkitOverflowScrolling = 'touch';
+  var screenH = window.innerHeight;
+  var listW   = Math.min(Math.max(rect.width, 280), screenW - 16);
+  var leftPos = Math.max(8, Math.min(rect.left, screenW - listW - 8));
+  // If near bottom of visible screen, show ABOVE the input instead
+  var spaceBelow = screenH - rect.bottom;
+  var topPos = spaceBelow > 180 ? (rect.bottom + 4) : Math.max(8, rect.top - 270);
+  listEl.style.cssText = 'display:block;position:fixed;top:'+topPos+'px;left:'+leftPos+'px;width:'+listW+'px;z-index:99999;max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid #dde3f0;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);list-style:none;padding:4px 0;';
+
   if (airports.length === 0) {
-    listEl.innerHTML = '<li style="padding:12px 16px;color:#aaa;font-size:.88rem;">No results found</li>';
+    listEl.innerHTML = '<li style="padding:14px 16px;color:#aaa;font-size:.9rem;text-align:center;">No airport found</li>';
     return;
   }
   var html = '';
   for (var i = 0; i < Math.min(airports.length, 8); i++) {
-    var a = airports[i];
+    var a    = airports[i];
     var city = (a.cityName || a.name).replace(/'/g, "&#39;");
     var aname = a.name.replace(/'/g, "&#39;");
     var country = (a.countryName || '').replace(/'/g, "&#39;");
     var code = a.iataCode;
-    var eid = (a.entityId || '').replace(/'/g, "&#39;");
-    html += '<li onclick="selectAirport(\'' + field + '\',\'' + code + '\',\'' + city + '\',\'' + eid + '\')" style="padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f2f8;">';
-    html += '<span style="width:30px;height:30px;background:#e8efff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">&#9992;</span>';
-    html += '<span><strong style="color:#1a2b4a;font-size:.95rem;">' + city + '</strong> <span style="background:#3b6fc9;color:#fff;font-size:.7rem;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:4px;">' + code + '</span><br>';
-    html += '<span style="font-size:.78rem;color:#7a8aaa;">' + aname + (country ? ' &middot; ' + country : '') + '</span></span>';
+    var eid  = (a.entityId || '').replace(/'/g, "&#39;");
+    var fn   = "selectAirport('" + field + "','" + code + "','" + city + "','" + eid + "')";
+    // Use both ontouchend and onclick for instant mobile response
+    html += '<li ontouchend="event.preventDefault();'+fn+'" onclick="'+fn+'" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f2f8;-webkit-tap-highlight-color:transparent;">';
+    html += '<span style="width:32px;height:32px;background:#e8efff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">✈️</span>';
+    html += '<span><strong style="color:#1a2b4a;font-size:.95rem;">' + city + '</strong>';
+    html += ' <span style="background:#1d4ed8;color:#fff;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:4px;">' + code + '</span><br>';
+    html += '<span style="font-size:.78rem;color:#7a8aaa;">' + country + '</span></span>';
     html += '</li>';
   }
   listEl.innerHTML = html;
 }
 
+var _acTimers = {};
 function airportSearch(field) {
+  // Debounce — wait 200ms after user stops typing before searching
+  clearTimeout(_acTimers[field]);
+  _acTimers[field] = setTimeout(function() {
+    _doAirportSearch(field);
+  }, 200);
+}
+
+function _doAirportSearch(field) {
   var inputEl = document.getElementById(field === 'origin' ? 'origin-input' : 'dest-input');
   var listEl  = document.getElementById(field === 'origin' ? 'origin-list' : 'dest-list');
+  if (!inputEl || !listEl) return;
   var keyword = inputEl.value.trim().toLowerCase();
   if (keyword.length < 1) { listEl.innerHTML = ''; listEl.style.display = 'none'; return; }
-  // Search local airport list — instant, no API call needed
+
   var results = POPULAR_AIRPORTS.filter(function(a) {
-    var k = keyword;
-    return a.cityName.toLowerCase().indexOf(k) !== -1 ||
-           a.iataCode.toLowerCase().indexOf(k) !== -1 ||
-           a.countryName.toLowerCase().indexOf(k) !== -1 ||
-           a.name.toLowerCase().indexOf(k) !== -1;
+    return a.cityName.toLowerCase().indexOf(keyword) !== -1 ||
+           a.iataCode.toLowerCase().indexOf(keyword) !== -1 ||
+           a.countryName.toLowerCase().indexOf(keyword) !== -1 ||
+           a.name.toLowerCase().indexOf(keyword) !== -1;
   });
-  // Prioritise exact starts
   results.sort(function(a, b) {
     var aStart = a.cityName.toLowerCase().indexOf(keyword) === 0 ? 0 : 1;
     var bStart = b.cityName.toLowerCase().indexOf(keyword) === 0 ? 0 : 1;
     return aStart - bStart;
   });
+
   if (results.length > 0) {
     showAcList(listEl, inputEl, results, field);
   } else {
-    listEl.innerHTML = '<li style="padding:12px 16px;color:#aaa;font-size:.88rem;">No airport found. Try typing the IATA code (e.g. WAW, LHR)</li>';
-    listEl.style.display = 'block';
-    listEl.style.position = 'fixed';
     var rect = inputEl.getBoundingClientRect();
-    listEl.style.top = (rect.bottom + 4) + 'px';
-    listEl.style.left = rect.left + 'px';
-    listEl.style.width = rect.width + 'px';
-    listEl.style.zIndex = '99999';
+    var screenW = window.innerWidth;
+    var listW = Math.min(Math.max(rect.width, 280), screenW - 16);
+    var leftPos = Math.max(8, Math.min(rect.left, screenW - listW - 8));
+    // Position above input if near bottom of screen
+    var topPos = rect.bottom + 4;
+    listEl.innerHTML = '<li style="padding:14px 16px;color:#aaa;font-size:.9rem;text-align:center;">No airport found — try typing e.g. HEL, CDG, LHR</li>';
+    listEl.style.cssText = 'display:block;position:fixed;top:'+topPos+'px;left:'+leftPos+'px;width:'+listW+'px;z-index:99999;max-height:260px;overflow-y:auto;';
   }
 }
 
