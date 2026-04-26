@@ -15,6 +15,12 @@ a, button, input, select, textarea, label, [onclick], [role="button"] {
 html {
   scroll-behavior: smooth;
 }
+/* ── Hide Google Translate bar that causes dark line on mobile ── */
+.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt { display: none !important; }
+body { top: 0 !important; }
+.skiptranslate { display: none !important; }
+iframe.goog-te-banner-frame { display: none !important; }
+
 body {
   -webkit-font-smoothing: antialiased;
 }

@@ -27,8 +27,11 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
-// Stripe instance (for payment elements)
-const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+// Stripe instance — lazy init after page loads (Stripe.js has defer)
+let stripe = null;
+window.addEventListener('load', function() {
+  if (typeof Stripe !== 'undefined') stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+});
 
 // ─────────────────────────────────────────────────────────────
 // STATE — app-level variables
