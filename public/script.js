@@ -108,21 +108,50 @@ function togglePaxPanel() {
   var btn   = document.getElementById('pax-btn');
   if (!panel || !btn) return;
   if (panel.style.display === 'none' || panel.style.display === '') {
-    // Position using fixed so hero overflow:hidden doesn't clip it
-    var rect = btn.getBoundingClientRect();
-    panel.style.position = 'fixed';
-    panel.style.top  = (rect.bottom + 6) + 'px';
-    panel.style.left = rect.left + 'px';
-    panel.style.width = Math.max(rect.width, 300) + 'px';
+    var rect    = btn.getBoundingClientRect();
+    var screenW = window.innerWidth;
+    var isMobile = screenW < 600;
+    if (isMobile) {
+      // On mobile: center panel horizontally, show below button
+      var panelW = Math.min(screenW - 24, 340);
+      var leftPos = (screenW - panelW) / 2;
+      panel.style.position = 'fixed';
+      panel.style.top   = (rect.bottom + 8) + 'px';
+      panel.style.left  = leftPos + 'px';
+      panel.style.width = panelW + 'px';
+      // Add backdrop
+      var bd = document.getElementById('pax-backdrop');
+      if (!bd) {
+        bd = document.createElement('div');
+        bd.id = 'pax-backdrop';
+        bd.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.25);';
+        bd.addEventListener('click', closePaxPanel);
+        document.body.appendChild(bd);
+      }
+      bd.style.display = 'block';
+    } else {
+      // On desktop: position below button, keep within screen
+      var panelW = 300;
+      var leftPos = rect.left;
+      if (leftPos + panelW > screenW - 8) leftPos = screenW - panelW - 8;
+      if (leftPos < 8) leftPos = 8;
+      panel.style.position = 'fixed';
+      panel.style.top   = (rect.bottom + 6) + 'px';
+      panel.style.left  = leftPos + 'px';
+      panel.style.width = panelW + 'px';
+    }
+    panel.style.zIndex = '99999';
     panel.style.display = 'block';
   } else {
-    panel.style.display = 'none';
+    closePaxPanel();
   }
 }
 
 function closePaxPanel() {
   var panel = document.getElementById('pax-panel');
   if (panel) panel.style.display = 'none';
+  var bd = document.getElementById('pax-backdrop');
+  if (bd) bd.style.display = 'none';
 }
 
 document.addEventListener('click', function(e) {

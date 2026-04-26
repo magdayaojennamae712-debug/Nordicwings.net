@@ -5,6 +5,18 @@
 /* ── Reset & Base ──────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Mobile: remove 300ms tap delay & tap flash on all clickable elements ── */
+a, button, input, select, textarea, label, [onclick], [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Mobile: smoother scrolling ── */
+html {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
 :root {
   --navy:       #1a2b4a;
   --blue:       #2563eb;
