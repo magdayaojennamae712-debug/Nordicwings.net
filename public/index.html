@@ -1116,6 +1116,32 @@
             <p class="payment-note">🔒 Your payment is secured by Stripe · PCI DSS compliant</p>
           </div>
           <p class="form-error" id="booking-error"></p>
+
+          <!-- Travel Insurance Add-on -->
+          <div style="background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:1.5px solid #86efac;
+            border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <input type="checkbox" id="insurance-checkbox" style="margin-top:3px;width:16px;height:16px;accent-color:#16a34a;cursor:pointer;"
+                onchange="document.getElementById('insurance-link').style.display=this.checked?'block':'none'">
+              <div style="flex:1;">
+                <label for="insurance-checkbox" style="font-weight:700;color:#166534;font-size:.88rem;cursor:pointer;">
+                  🛡️ Add Travel Insurance — from €8/person
+                </label>
+                <div style="font-size:.76rem;color:#4b5563;margin-top:3px;">
+                  Medical cover, trip cancellation, lost luggage &amp; flight delay compensation included.
+                </div>
+                <div id="insurance-link" style="display:none;margin-top:8px;">
+                  <a href="https://tp.media/r?marker=719573&p=compensair&u=https%3A%2F%2Fcompensair.com%2F"
+                    target="_blank" rel="noopener"
+                    style="background:#16a34a;color:#fff;padding:7px 16px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;display:inline-block;">
+                    Get insured before your flight →
+                  </a>
+                  <div style="font-size:.72rem;color:#6b7280;margin-top:5px;">Opens in new tab · You can return here to complete your booking</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button class="btn-book" id="pay-btn" onclick="submitBooking()">
             <span id="pay-btn-text">Confirm & Pay</span>
             <span id="pay-btn-spinner" class="spinner" style="display:none;"></span>
@@ -2324,3 +2350,19 @@
       var sel = document.querySelector('.goog-te-combo');
       if (sel) {
         sel.value = code;
+        sel.dispatchEvent(new Event('change'));
+      } else {
+        // Retry after translate loads
+        setTimeout(function(){
+          var sel2 = document.querySelector('.goog-te-combo');
+          if (sel2) { sel2.value = code; sel2.dispatchEvent(new Event('change')); }
+        }, 1500);
+      }
+    };
+
+    // Hide Google Translate top bar (we use our own UI)
+    var style = document.createElement('style');
+    style.textContent = '.goog-te-banner-frame{display:none!important}' +
+      'body{top:0!important}' +
+      '.skiptranslate{display:none!important}' +
+    

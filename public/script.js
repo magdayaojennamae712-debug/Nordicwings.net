@@ -913,7 +913,24 @@ function renderFlightCards(flights) {
     </div>
   `;
 
-  list.innerHTML = sortBarHtml + '<div id="flights-container"></div>';
+  const kiwiOrigin = searchParams.origin || '';
+  const kiwiDest = searchParams.dest || '';
+  const kiwiDate = searchParams.departDate || '';
+  const kiwiUrl = `https://tp.media/r?marker=719573&p=4114&u=https%3A%2F%2Fwww.kiwi.com%2Fsearch%2Fresults%3Forigins%3D${kiwiOrigin}%26destinations%3D${kiwiDest}%26depart%3D${kiwiDate}%26adults%3D${searchParams.numAdults||1}`;
+  const kiwiBanner = `
+    <div style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4);border:1.5px solid #bae6fd;border-radius:12px;
+      padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;">💡 Looking for cheaper flights?</div>
+        <div style="font-size:.78rem;color:#0369a1;margin-top:2px;">Kiwi.com searches budget airlines like Ryanair & Wizz Air too</div>
+      </div>
+      <a href="${kiwiUrl}" target="_blank" rel="noopener"
+        style="background:#0284c7;color:#fff;padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Compare on Kiwi.com →
+      </a>
+    </div>`;
+
+  list.innerHTML = kiwiBanner + sortBarHtml + '<div id="flights-container"></div>';
   renderFlightList(flights);
 }
 
@@ -1004,6 +1021,14 @@ function renderFlightList(flights) {
           <div class="fc-cabin">${cabin === 'BUSINESS' ? '💼 Business' : '✈ Economy'}</div>
           <div class="fc-baggage">${baggage}</div>
           <div class="fc-meal">${meal}</div>
+          <div class="fc-conditions" style="margin-top:6px;font-size:.72rem;display:flex;gap:6px;flex-wrap:wrap;">
+            ${flight.conditions?.refundable
+              ? '<span style="background:#dcfce7;color:#166534;padding:2px 7px;border-radius:20px;">✓ Refundable</span>'
+              : '<span style="background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:20px;">✗ Non-refundable</span>'}
+            ${flight.conditions?.changeable
+              ? '<span style="background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:20px;">✓ Changes allowed</span>'
+              : '<span style="background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:20px;">✗ No changes</span>'}
+          </div>
         </div>
 
         <div class="fc-right">
@@ -1970,6 +1995,30 @@ function showConfirmationPage(booking) {
     </div>
     <div style="margin-top:14px;padding:12px;background:#fffbeb;border-radius:8px;font-size:.82rem;color:#92400e;text-align:center;">
       📧 Confirmation and ticket details sent to <strong>${booking.contact.email}</strong>
+    </div>
+
+    <!-- AirHelp affiliate banner -->
+    <div style="margin-top:16px;background:linear-gradient(135deg,#fef3c7,#fff7ed);border:1.5px solid #fbbf24;
+      border-radius:12px;padding:14px 16px;">
+      <div style="font-weight:700;color:#92400e;font-size:.9rem;margin-bottom:4px;">✈️ Flight delayed or cancelled?</div>
+      <div style="font-size:.8rem;color:#b45309;margin-bottom:10px;">You could be entitled to up to €600 compensation per person. AirHelp handles your claim for free.</div>
+      <a href="https://tp.media/r?marker=719573&p=airhelp&u=https%3A%2F%2Fwww.airhelp.com%2Fen%2F" target="_blank" rel="noopener"
+        style="display:inline-block;background:#f59e0b;color:#fff;padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;">
+        Check my compensation →
+      </a>
+    </div>
+
+    <!-- Compensair affiliate banner -->
+    <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid #bfdbfe;
+      border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;color:#1e40af;font-size:.85rem;">🛡️ Protect future trips</div>
+        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Travel insurance from €8 — cancel for any reason, medical cover, luggage</div>
+      </div>
+      <a href="https://tp.media/r?marker=719573&p=compensair&u=https%3A%2F%2Fcompensair.com%2F" target="_blank" rel="noopener"
+        style="background:#1d4ed8;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Get insured →
+      </a>
     </div>
   `;
   showPage('confirmation');

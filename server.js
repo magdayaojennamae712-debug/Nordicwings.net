@@ -256,16 +256,24 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
           ? (parseInt(slice.duration.match(/(\d+)H/)?.[1] || 0) * 60 + parseInt(slice.duration.match(/(\d+)M/)?.[1] || 0))
           : 120;
 
+        // Fare conditions from Duffel
+        const conds = offer.conditions || {};
+        const refundable = conds.refund_before_departure?.allowed === true;
+        const changeable = conds.change_before_departure?.allowed === true;
+        const refundPenalty = conds.refund_before_departure?.penalty_amount || null;
+        const changePenalty = conds.change_before_departure?.penalty_amount || null;
+
         flights.push({
           id: `duffel-${offer.id}`,
-          duffelOfferId: offer.id,         // store for booking
-          duffelBasePrice: basePrice,      // what Duffel charges us (before our fee)
-          nordicwingsFee: feeAmount,       // our service fee (min €12, or 5%)
+          duffelOfferId: offer.id,
+          duffelBasePrice: basePrice,
+          nordicwingsFee: feeAmount,
           price: {
-            grandTotal: markedPrice.toFixed(2),  // what customer pays (base + NordicWings fee)
+            grandTotal: markedPrice.toFixed(2),
             currency:   offer.total_currency || 'EUR',
-            fees:       [{ amount: feeAmount.toFixed(2) }]  // actual NordicWings fee shown
+            fees:       [{ amount: feeAmount.toFixed(2) }]
           },
+          conditions: { refundable, changeable, refundPenalty, changePenalty },
           numberOfBookableSeats: offer.available_services?.length || 9,
           itineraries: [{
             duration: slice.duration || `PT${Math.floor(durationMins/60)}H${durationMins%60}M`,
