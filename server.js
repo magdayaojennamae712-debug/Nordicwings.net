@@ -219,28 +219,28 @@ async function searchDuffelFlights(orig, dest, date, adults, children = 0, infan
           }
           if (!offerIsValid) break;
 
-          // 2) More than 1 stop (3+ segments) = suspicious routing, block it
-          if (checkSegs.length > 2) {
-            console.warn(`Skipping offer ${offer.id} — ${checkSegs.length} legs (more than 1 stop)`);
+          // 2) More than 3 segments = suspicious routing, block it
+          if (checkSegs.length > 3) {
+            console.warn(`Skipping offer ${offer.id} — ${checkSegs.length} legs (more than 3 segments)`);
             offerIsValid = false; break;
           }
 
-          // 3) Any layover over 5 hours = too long
+          // 3) Any layover over 12 hours = too long
           for (let s = 0; s < checkSegs.length - 1; s++) {
             const layoverMins = (new Date(checkSegs[s+1].depAt) - new Date(checkSegs[s].arrAt)) / 60000;
-            if (layoverMins > 300) {
-              console.warn(`Skipping offer ${offer.id} — layover ${Math.round(layoverMins)}min (over 5h)`);
+            if (layoverMins > 720) {
+              console.warn(`Skipping offer ${offer.id} — layover ${Math.round(layoverMins)}min (over 12h)`);
               offerIsValid = false; break;
             }
           }
           if (!offerIsValid) break;
 
-          // 3) Total journey over 15 hours is unrealistic for any normal route
+          // 3) Total journey over 36 hours is likely corrupt data
           const firstDep = new Date(checkSegs[0].depAt);
           const lastArr  = new Date(checkSegs[checkSegs.length - 1].arrAt);
           const totalMins = (lastArr - firstDep) / 60000;
-          if (totalMins > 900) {
-            console.warn(`Skipping offer ${offer.id} — total journey ${Math.round(totalMins/60)}h (over 15h)`);
+          if (totalMins > 2160) {
+            console.warn(`Skipping offer ${offer.id} — total journey ${Math.round(totalMins/60)}h (over 36h, corrupt data)`);
             offerIsValid = false; break;
           }
         }
