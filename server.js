@@ -125,6 +125,11 @@ const RAPIDAPI_KEY  = process.env.RAPIDAPI_KEY;
 const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 
 // ── Duffel API config ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// ✅ DUFFEL LIVE API — NordicWings uses Duffel for ALL real flights
+// Key is stored ONLY in Railway environment variables as DUFFEL_API_KEY
+// ⛔ NEVER show demo/fake flights. If Duffel returns nothing → show empty results.
+// ══════════════════════════════════════════════════════════════
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
 // NordicWings service fee: 5% of base fare, minimum €12 per ticket
@@ -795,11 +800,10 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     console.log('Duffel returned no results — trying Sky Scrapper...');
   }
 
-  // If no RapidAPI key configured, fall back to demo flights
+  // ⛔ No demo flights — only real Duffel results shown to customers
   if (!RAPIDAPI_KEY) {
-    console.log('No RAPIDAPI_KEY set — using demo flights');
-    const demo = generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults);
-    return res.json(demo);
+    console.log('No RAPIDAPI_KEY — Duffel is the only flight source. Returning empty.');
+    return res.json([]);
   }
 
   try {
@@ -821,8 +825,8 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
 
     const itineraries = data?.data?.itineraries || [];
     if (!itineraries.length) {
-      console.log('API returned 0 flights — using demo flights');
-      return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
+      console.log('API returned 0 flights — showing empty results (no fake flights)');
+      return res.json([]);
     }
 
     const flights = [];
@@ -860,14 +864,14 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     }
 
     if (!flights.length) {
-      console.log('All flights failed to map — using demo flights');
-      return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
+      console.log('All flights failed to map — showing empty results (no fake flights)');
+      return res.json([]);
     }
 
     return res.json(flights);
   } catch (err) {
     console.error('Flight search error:', err.message);
-    return res.json(generateDemoFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults));
+    return res.json([]);  // ⛔ Never show fake flights on error
   }
 });
 
