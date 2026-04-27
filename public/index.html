@@ -1223,69 +1223,133 @@
     <div class="page-inner">
       <div class="results-header">
         <button class="back-btn" onclick="showPage('home')">← Home</button>
-        <h2>📊 Business Dashboard</h2>
+        <h2>📊 NordicWings CRM</h2>
+        <button class="btn-primary" onclick="loadAdminDashboard()" style="margin-left:auto;font-size:.82rem;padding:7px 14px;">🔄 Refresh</button>
       </div>
 
-      <!-- Stats Row -->
-      <div class="admin-stats-row">
-        <div class="admin-stat-card">
-          <div class="admin-stat-icon">✈️</div>
-          <div class="admin-stat-value" id="stat-total-bookings">—</div>
-          <div class="admin-stat-label">Total Bookings</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="admin-stat-icon">💰</div>
-          <div class="admin-stat-value" id="stat-total-revenue">—</div>
-          <div class="admin-stat-label">Total Revenue</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="admin-stat-icon">👥</div>
-          <div class="admin-stat-value" id="stat-total-customers">—</div>
-          <div class="admin-stat-label">Customers</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="admin-stat-icon">✅</div>
-          <div class="admin-stat-value" id="stat-confirmed">—</div>
-          <div class="admin-stat-label">Confirmed</div>
-        </div>
+      <!-- Loading state -->
+      <div id="crm-loading" class="loading-state" style="display:flex;">
+        <div class="spinner large"></div><p>Loading your business data...</p>
       </div>
 
-      <!-- Filter + Search -->
-      <div class="admin-toolbar">
-        <input type="text" id="admin-search" placeholder="🔍 Search by name, route, or booking ref..." class="admin-search-input" oninput="filterAdminBookings()" />
-        <select id="admin-filter" class="admin-filter-select" onchange="filterAdminBookings()">
-          <option value="all">All Bookings</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <button class="btn-primary" onclick="exportBookingsCSV()" style="white-space:nowrap;">⬇ Export CSV</button>
-      </div>
+      <div id="crm-content" style="display:none;">
 
-      <!-- Bookings Table -->
-      <div class="admin-table-wrap">
-        <div id="admin-loading" class="loading-state">
-          <div class="spinner large"></div><p>Loading all bookings...</p>
+        <!-- KPI Stats Row -->
+        <div class="admin-stats-row" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));">
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">✈️</div>
+            <div class="admin-stat-value" id="stat-total-bookings">—</div>
+            <div class="admin-stat-label">Total Bookings</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">💳</div>
+            <div class="admin-stat-value" id="stat-total-revenue">—</div>
+            <div class="admin-stat-label">Total Revenue</div>
+          </div>
+          <div class="admin-stat-card" style="border-color:#86efac;background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
+            <div class="admin-stat-icon">💰</div>
+            <div class="admin-stat-value" id="stat-profit" style="color:#15803d;">—</div>
+            <div class="admin-stat-label">Your Profit</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">👥</div>
+            <div class="admin-stat-value" id="stat-total-customers">—</div>
+            <div class="admin-stat-label">Customers</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">✅</div>
+            <div class="admin-stat-value" id="stat-confirmed">—</div>
+            <div class="admin-stat-label">Confirmed</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">📅</div>
+            <div class="admin-stat-value" id="stat-month-revenue">—</div>
+            <div class="admin-stat-label">This Month Revenue</div>
+          </div>
+          <div class="admin-stat-card" style="border-color:#86efac;background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
+            <div class="admin-stat-icon">🌱</div>
+            <div class="admin-stat-value" id="stat-month-profit" style="color:#15803d;">—</div>
+            <div class="admin-stat-label">This Month Profit</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon">📊</div>
+            <div class="admin-stat-value" id="stat-avg-order">—</div>
+            <div class="admin-stat-label">Avg Order Value</div>
+          </div>
         </div>
-        <div id="admin-empty" class="empty-state" style="display:none;">
-          <div class="empty-icon">📋</div>
-          <h3>No bookings yet</h3>
-          <p>Customer bookings will appear here</p>
+
+        <!-- CRM Tabs -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:20px 0 0;border-bottom:2px solid #e2e8f0;padding-bottom:0;">
+          <button class="crm-tab-btn active" data-tab="overview"   onclick="crmSwitchTab('overview')"   style="padding:10px 18px;border:none;background:none;font-weight:700;color:#1e3a8a;cursor:pointer;border-bottom:3px solid #1e3a8a;font-size:.88rem;">📊 Overview</button>
+          <button class="crm-tab-btn"        data-tab="customers"  onclick="crmSwitchTab('customers')"  style="padding:10px 18px;border:none;background:none;font-weight:600;color:#64748b;cursor:pointer;border-bottom:3px solid transparent;font-size:.88rem;">👥 Customers</button>
+          <button class="crm-tab-btn"        data-tab="bookings"   onclick="crmSwitchTab('bookings')"   style="padding:10px 18px;border:none;background:none;font-weight:600;color:#64748b;cursor:pointer;border-bottom:3px solid transparent;font-size:.88rem;">✈️ All Bookings</button>
+          <button class="crm-tab-btn"        data-tab="affiliate"  onclick="crmSwitchTab('affiliate')"  style="padding:10px 18px;border:none;background:none;font-weight:600;color:#64748b;cursor:pointer;border-bottom:3px solid transparent;font-size:.88rem;">💰 Affiliate Earnings</button>
         </div>
-        <table class="admin-table" id="admin-table" style="display:none;">
-          <thead>
-            <tr>
-              <th>Booking Ref</th>
-              <th>Customer</th>
-              <th>Route</th>
-              <th>Date</th>
-              <th>Passengers</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="admin-table-body"></tbody>
-        </table>
-      </div>
+
+        <!-- TAB: OVERVIEW -->
+        <div id="crm-overview" class="crm-tab-pane" style="display:block;padding-top:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <!-- Revenue Chart -->
+            <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;">
+              <div style="font-weight:800;color:#1e293b;margin-bottom:4px;">📈 Revenue last 6 months</div>
+              <div style="font-size:.73rem;color:#64748b;margin-bottom:12px;">Blue = total revenue · Green = your profit</div>
+              <div id="crm-revenue-chart" style="display:flex;align-items:flex-end;gap:6px;height:110px;border-bottom:2px solid #e2e8f0;padding-bottom:4px;"></div>
+            </div>
+            <!-- Top Routes -->
+            <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;">
+              <div style="font-weight:800;color:#1e293b;margin-bottom:12px;">🗺️ Top Routes</div>
+              <div id="crm-top-routes"></div>
+            </div>
+          </div>
+          <!-- Recent Bookings -->
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;">
+            <div style="font-weight:800;color:#1e293b;margin-bottom:12px;">🕐 Recent Bookings</div>
+            <div id="crm-recent-bookings"></div>
+          </div>
+        </div>
+
+        <!-- TAB: CUSTOMERS -->
+        <div id="crm-customers" class="crm-tab-pane" style="display:none;padding-top:20px;">
+          <div style="margin-bottom:12px;">
+            <input type="text" placeholder="🔍 Search customers..." oninput="renderCRMCustomers(_allAdminBookings.filter(b=>JSON.stringify(b).toLowerCase().includes(this.value.toLowerCase())))"
+              style="width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid #e2e8f0;font-size:.88rem;box-sizing:border-box;">
+          </div>
+          <div id="crm-customers-list"></div>
+        </div>
+
+        <!-- TAB: ALL BOOKINGS -->
+        <div id="crm-bookings" class="crm-tab-pane" style="display:none;padding-top:20px;">
+          <div class="admin-toolbar">
+            <input type="text" id="admin-search" placeholder="🔍 Search name, route, ref..." class="admin-search-input" oninput="renderAdminTable(_allAdminBookings)" />
+            <select id="admin-filter" class="admin-filter-select" onchange="renderAdminTable(_allAdminBookings)">
+              <option value="all">All Bookings</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn-primary" onclick="exportBookingsCSV()" style="white-space:nowrap;">⬇ Export CSV</button>
+          </div>
+          <div class="admin-table-wrap">
+            <div id="admin-empty" class="empty-state" style="display:none;">
+              <div class="empty-icon">📋</div><h3>No bookings found</h3>
+            </div>
+            <table class="admin-table" id="admin-table" style="display:none;">
+              <thead>
+                <tr>
+                  <th>Ref</th><th>Customer</th><th>Route</th><th>Flight Date</th>
+                  <th>Pax</th><th>Revenue / Profit</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: AFFILIATE EARNINGS -->
+        <div id="crm-affiliate" class="crm-tab-pane" style="display:none;padding-top:20px;">
+          <div id="crm-affiliate-content"></div>
+        </div>
+
+      </div><!-- /crm-content -->
     </div>
   </main>
 
@@ -2303,116 +2367,4 @@
       {code:'ms',    label:'Melayu',     flag:'🇲🇾'},
       {code:'hi',    label:'हिन्दी',      flag:'🇮🇳'},
       {code:'pl',    label:'Polski',     flag:'🇵🇱'},
-      {code:'nl',    label:'Nederlands', flag:'🇳🇱'},
-    ];
-
-    // ── Build desktop dropdown list ───────────────────────────
-    var list = document.getElementById('nw-lang-list');
-    if (list) {
-      LANGS.forEach(function(l){
-        var item = document.createElement('button');
-        item.style.cssText = 'width:100%;background:transparent;border:none;padding:10px 14px;' +
-          'text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;' +
-          'font-size:.85rem;color:#1e293b;transition:background .12s;font-family:inherit;border-bottom:1px solid #f1f5f9;';
-        item.innerHTML = '<span style="font-size:1.2rem;line-height:1;">' + l.flag + '</span>' +
-          '<span style="font-weight:500;">' + l.label + '</span>';
-        item.onmouseover = function(){ this.style.background='#f0f7ff'; };
-        item.onmouseout  = function(){ this.style.background='transparent'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          document.getElementById('nw-lang-dropdown').style.display = 'none';
-        };
-        list.appendChild(item);
-      });
-    }
-
-    // ── Build mobile language grid ────────────────────────────
-    var mlist = document.getElementById('nw-lang-list-mobile');
-    if (mlist) {
-      LANGS.forEach(function(l){
-        var item = document.createElement('button');
-        item.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;' +
-          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:6px;' +
-          'font-size:.78rem;color:#1e293b;font-family:inherit;font-weight:500;width:100%;' +
-          'transition:background .12s;';
-        item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
-          '<span>' + l.label + '</span>';
-        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
-        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          // Close mobile menu after selecting language
-          var mm = document.getElementById('mobile-menu');
-          if (mm) mm.classList.remove('open');
-        };
-        mlist.appendChild(item);
-      });
-    }
-
-    // ── Toggle desktop dropdown ───────────────────────────────
-    window.nwToggleLang = function(e) {
-      e.stopPropagation();
-      var dd = document.getElementById('nw-lang-dropdown');
-      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-    };
-    document.addEventListener('click', function(){
-      var dd = document.getElementById('nw-lang-dropdown');
-      if (dd) dd.style.display = 'none';
-    });
-
-    // ── Set language via Google Translate ─────────────────────
-    window.nwSetLang = function(code, label) {
-      // Update desktop button label
-      var lbl = document.getElementById('nw-lang-label');
-      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
-
-      if (code === 'en') {
-        // Restore English — clear cookies and reload
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-        location.reload();
-        return;
-      }
-
-      // Set Google Translate language cookie
-      document.cookie = 'googtrans=/en/' + code + '; path=/';
-      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
-
-      // Trigger translation via hidden combo — retry if not loaded yet
-      function doTranslate() {
-        var sel = document.querySelector('.goog-te-combo');
-        if (sel) {
-          sel.value = code;
-          sel.dispatchEvent(new Event('change'));
-        } else {
-          setTimeout(doTranslate, 800);
-        }
-      }
-      doTranslate();
-    };
-
-    // ── Aggressively hide Google Translate bar ────────────────
-    // Prevents the dark bar / layout shift on mobile
-    var s = document.createElement('style');
-    s.textContent =
-      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
-      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
-      'body { top:0!important; }' +
-      '.skiptranslate { display:none!important; }' +
-      'iframe.goog-te-banner-frame { display:none!important; }' +
-      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
-    document.head.appendChild(s);
-
-    // Also remove the bar if it appears after translate loads
-    var observer = new MutationObserver(function() {
-      var bar = document.querySelector('.goog-te-banner-frame');
-      if (bar) bar.style.display = 'none';
-      document.body.style.top = '0';
-      document.body.style.marginTop = '0';
-    });
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-  })();
-  </script>
-
-</body>
-</html>
+      {code:'nl',    label:'Nederlands', flag:'🇳�
