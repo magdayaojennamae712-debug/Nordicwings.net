@@ -1050,7 +1050,7 @@ function renderFlightList(flights) {
     const dealBadge = parseFloat(flight.price.grandTotal) <= minPrice * 1.05
       ? '<div class="badge-best">Best price</div>' : '';
 
-    // Baggage & meal info based on airline type and cabin
+    // Baggage & meal info based on airline type, cabin and flight duration
     const budgetAirlines = ['FR','U2','W6','DY','PC','XW','VY','FD','AK','QZ','JT','ID','SJ'];
     const isBudget = budgetAirlines.includes(code);
     const isBiz = cabin === 'BUSINESS';
@@ -1059,11 +1059,17 @@ function renderFlightList(flights) {
       : isBudget
         ? '🎒 Cabin bag only (10kg) · Checked bag: add-on'
         : '🧳 23kg checked · 8kg cabin included';
+    // Meal: only for long-haul (≥4h) or business class — not on short European routes
+    const _durStr = flight.itineraries[0].duration || 'PT0H';
+    const _durH = (parseInt(_durStr.match(/(\d+)H/)?.[1] || 0)) + (parseInt(_durStr.match(/(\d+)M/)?.[1] || 0) / 60);
+    const isLongHaul = _durH >= 4;
     const meal = isBiz
       ? '🍽️ Full meal · Drinks · Lounge access'
       : isBudget
         ? '🥤 Buy on board'
-        : '🍱 Meal included';
+        : isLongHaul
+          ? '🍱 Meal included'
+          : '☕ Snack/drink service';
 
     return `
       <div class="fc" onclick="selectFlight(${i})" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
@@ -1585,6 +1591,9 @@ async function setupBookingPage() {
     '77W':'Boeing 777-300ER','788':'Boeing 787-8','789':'Boeing 787-9','78X':'Boeing 787-10',
     'E90':'Embraer E190','E95':'Embraer E195','E75':'Embraer E175',
     'AT7':'ATR 72','CR9':'Bombardier CRJ-900',
+    // Airbus A220 family
+    '220':'Airbus A220-100','221':'Airbus A220-100',
+    '223':'Airbus A220-300','BCS1':'Airbus A220-100','BCS3':'Airbus A220-300',
   };
   // Fallback per airline if Duffel gives no aircraft code
   const airlineAircraftMap = {
@@ -1592,6 +1601,7 @@ async function setupBookingPage() {
     'LH':'Airbus A320','TK':'Boeing 777-300ER','AY':'Airbus A321neo',
     'AF':'Airbus A350-900','KL':'Boeing 777-200','SK':'Airbus A320neo',
     'FI':'Boeing 757-200','FR':'Boeing 737-800','W6':'Airbus A320',
+    'BT':'Airbus A220-300',
   };
   const aircraft = iataAircraftMap[seg.aircraft] || airlineAircraftMap[seg.carrierCode] || 'Airbus A320';
   const cabin    = selectedFlight.travelerPricings[0]?.fareDetailsBySegment[0]?.cabin || 'ECONOMY';
@@ -1680,7 +1690,7 @@ async function setupBookingPage() {
             </div>
           </div>
           <div style="font-size:.75rem;color:#6b7280;margin-top:3px;padding-left:26px;">
-            Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${s.aircraft?.code || aircraftMap[s.carrierCode] || aircraft}
+            Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${iataAircraftMap[s.aircraft?.code] || airlineAircraftMap[s.carrierCode] || aircraft}
           </div>
         </div>
         ${nextSeg ? (
@@ -1719,7 +1729,7 @@ async function setupBookingPage() {
     const rStopLabel = rStops === 0
       ? '<span style="color:#16a34a;font-size:.8rem;font-weight:600;">✅ Nonstop</span>'
       : `<span style="color:#d97706;font-size:.8rem;font-weight:600;">🔄 ${rStops} stop via ${rSegs.slice(0,-1).map(s=>s.arrival.iataCode).join(', ')}</span>`;
-    const rAircraft = aircraftMap[rSeg.carrierCode] || 'Boeing 737-800';
+    const rAircraft = iataAircraftMap[rSeg.aircraft?.code] || airlineAircraftMap[rSeg.carrierCode] || 'Airbus A320neo';
 
     const returnHtml = `
     <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #e5e7eb;">
@@ -1796,8 +1806,8 @@ async function setupBookingPage() {
     ${nAdults2   > 0 ? `<div class="price-row"><span>👤 Adults × ${nAdults2}</span><span>€${adultTotal.toFixed(2)}</span></div>` : ''}
     ${nChildren2 > 0 ? `<div class="price-row" style="color:#92400e;"><span>🧒 Children × ${nChildren2} <span style="font-size:.75rem;">(−25%)</span></span><span>€${(baseFlightPrice * 0.75 * nChildren2).toFixed(2)}</span></div>` : ''}
     ${nInfants2  > 0 ? `<div class="price-row" style="color:#166534;"><span>👶 Infants × ${nInfants2} <span style="font-size:.75rem;">(−90%)</span></span><span>€${(baseFlightPrice * 0.10 * nInfants2).toFixed(2)}</span></div>` : ''}
-    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Checked baggage included</span><span>€0.00</span></div>
-    <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Meals included</span><span>€0.00</span></div>
+    ${(selectedFlight.baggage?.checkedQty > 0) ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Checked baggage included</span><span>€0.00</span></div>' : ''}
+    ${(() => { const _d = selectedFlight.itineraries[0].duration || 'PT0H'; const _h = (parseInt(_d.match(/(\d+)H/)?.[1]||0)) + (parseInt(_d.match(/(\d+)M/)?.[1]||0)/60); return _h >= 4 || isBiz ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Meals included</span><span>€0.00</span></div>' : ''; })()}
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ 24/7 booking support</span><span>€0.00</span></div>
     <div class="price-row total"><span>Total</span><span>€${grandTotal.toFixed(2)}</span></div>
     <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Price guaranteed · No hidden fees</div>
@@ -2485,4 +2495,23 @@ function renderAdminTable(bookings) {
       </td>
       <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
       <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td>${b.passe
+      <td>${b.passengers?.length || 1} pax</td>
+      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// FAQ accordion toggle
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  if (!answer) return;
+  var isOpen = answer.style.display === 'block';
+  if (isOpen) {
+    answer.style.display = 'none';
+    btn.classList.remove('open');
+  } else {
+    answer.style.display = 'block';
+    btn.classList.add('open');
+  }
+}
