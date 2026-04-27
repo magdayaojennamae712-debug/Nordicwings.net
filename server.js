@@ -1126,6 +1126,313 @@ function saveReminders(list) {
   catch (e) { console.error('Error saving reminders:', e.message); }
 }
 
+// ── Booking Confirmation Email Template ──────────────────────
+function buildConfirmationEmail(data) {
+  const {
+    passengerName, route, flightDate, departureTime,
+    arrivalTime, airline, bookingRef, flightNumber
+  } = data;
+
+  const firstName   = (passengerName || 'Traveller').split(' ')[0];
+  const flightDt    = new Date(flightDate);
+  const dateDisplay = flightDt.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const [orig, dest] = (route || 'HEL → DXB').split('→').map(s => s.trim());
+
+  const cityMap = {
+    HEL:'Helsinki',MNL:'Manila',DVO:'Davao',CEB:'Cebu',DXB:'Dubai',
+    BKK:'Bangkok',SIN:'Singapore',LHR:'London',CDG:'Paris',AMS:'Amsterdam',
+    FRA:'Frankfurt',BCN:'Barcelona',MAD:'Madrid',FCO:'Rome',IST:'Istanbul',
+    NRT:'Tokyo',JFK:'New York',LAX:'Los Angeles',SYD:'Sydney',AUH:'Abu Dhabi',
+    KUL:'Kuala Lumpur',ICN:'Seoul',PEK:'Beijing',ARN:'Stockholm',CPH:'Copenhagen',
+    OSL:'Oslo',WAW:'Warsaw',BUD:'Budapest',PRG:'Prague',VIE:'Vienna',
+    ZRH:'Zurich',ATH:'Athens',DUB:'Dublin',MXP:'Milan',MUC:'Munich',
+  };
+  const origCity = cityMap[orig] || orig;
+  const destCity = cityMap[dest] || dest;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Booking Confirmed! NordicWings</title>
+<style>
+  body { margin:0; padding:0; background:#f0f4ff; font-family:'Segoe UI',Arial,sans-serif; }
+  .wrapper { max-width:600px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.12); }
+  .header { background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%); padding:36px 32px 28px; text-align:center; }
+  .header .logo-text { color:#fff; font-size:22px; font-weight:800; letter-spacing:-.5px; }
+  .header .logo-sub  { color:#93c5fd; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+  .hero { background:linear-gradient(135deg,#16a34a,#15803d); padding:32px; text-align:center; }
+  .hero .emoji { font-size:56px; line-height:1; margin-bottom:12px; }
+  .hero h1 { color:#fff; font-size:28px; font-weight:900; margin:0 0 8px; }
+  .hero p  { color:#bbf7d0; font-size:15px; margin:0; }
+  .body { padding:32px; }
+  .greeting { font-size:16px; color:#1e293b; margin-bottom:20px; line-height:1.6; }
+  .ref-box { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:2px solid #86efac; border-radius:14px; padding:20px; text-align:center; margin-bottom:24px; }
+  .ref-box .ref-label { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#15803d; font-weight:700; margin-bottom:8px; }
+  .ref-box .ref-code  { font-size:32px; font-weight:900; color:#14532d; letter-spacing:5px; font-family:monospace; }
+  .ref-box .ref-note  { font-size:12px; color:#4ade80; margin-top:6px; }
+  .flight-card { background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1.5px solid #93c5fd; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .route-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; }
+  .airport { text-align:center; }
+  .airport .code { font-size:30px; font-weight:900; color:#1e3a8a; letter-spacing:-1px; }
+  .airport .city { font-size:12px; color:#64748b; font-weight:500; margin-top:2px; }
+  .route-arrow { font-size:22px; color:#3b82f6; flex-shrink:0; }
+  .flight-meta { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .meta-item { background:#fff; border-radius:10px; padding:12px 14px; border:1px solid #e0e7ff; }
+  .meta-item .label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; font-weight:700; margin-bottom:4px; }
+  .meta-item .value { font-size:14px; font-weight:700; color:#1e3a8a; }
+  .next-steps { margin-bottom:24px; }
+  .next-steps h3 { font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+  .step-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-radius:10px; margin-bottom:8px; background:#f8faff; border:1px solid #e0e7ff; }
+  .step-icon { font-size:18px; flex-shrink:0; line-height:1.3; }
+  .step-text { font-size:14px; color:#374151; line-height:1.4; }
+  .step-text strong { color:#1e3a8a; }
+  .cta-section { text-align:center; background:#f0f4ff; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .cta-section p { font-size:14px; color:#475569; margin:0 0 16px; }
+  .cta-btn { display:inline-block; background:linear-gradient(135deg,#1e3a8a,#1d4ed8); color:#fff; text-decoration:none; padding:14px 36px; border-radius:50px; font-size:15px; font-weight:700; }
+  .support { font-size:13px; color:#64748b; text-align:center; margin-bottom:8px; }
+  .support a { color:#1d4ed8; text-decoration:none; }
+  .footer { background:#1e3a8a; padding:24px 32px; text-align:center; }
+  .footer p { color:#93c5fd; font-size:12px; margin:4px 0; }
+  .footer .brand { color:#fff; font-weight:800; font-size:14px; margin-bottom:4px; }
+  @media(max-width:480px){
+    .body{padding:20px;}
+    .hero h1{font-size:22px;}
+    .flight-meta{grid-template-columns:1fr;}
+    .ref-box .ref-code{font-size:24px;letter-spacing:3px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="logo-text">✈ NordicWings</div>
+    <div class="logo-sub">nordicwings.net</div>
+  </div>
+
+  <div class="hero">
+    <div class="emoji">✅</div>
+    <h1>Booking confirmed!</h1>
+    <p>Your real ticket has been issued. Have a great trip, ${firstName}!</p>
+  </div>
+
+  <div class="body">
+    <p class="greeting">Hi <strong>${firstName}</strong>,<br>
+    Great news — your flight from <strong>${origCity}</strong> to <strong>${destCity}</strong> is fully confirmed and your ticket has been issued by the airline. Please keep your booking reference safe:</p>
+
+    <div class="ref-box">
+      <div class="ref-label">Your Booking Reference</div>
+      <div class="ref-code">${bookingRef || 'SEE TICKET'}</div>
+      <div class="ref-note">📌 Screenshot or write this down — you'll need it at check-in</div>
+    </div>
+
+    <div class="flight-card">
+      <div class="route-row">
+        <div class="airport">
+          <div class="code">${orig}</div>
+          <div class="city">${origCity}</div>
+        </div>
+        <div class="route-arrow">✈ ──────</div>
+        <div class="airport">
+          <div class="code">${dest}</div>
+          <div class="city">${destCity}</div>
+        </div>
+      </div>
+      <div class="flight-meta">
+        <div class="meta-item">
+          <div class="label">📅 Date</div>
+          <div class="value">${dateDisplay}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">🕐 Departure</div>
+          <div class="value">${departureTime || 'Check ticket'}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">✈️ Flight</div>
+          <div class="value">${flightNumber || airline || 'See ticket'}</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">🛬 Arrival</div>
+          <div class="value">${arrivalTime || 'See ticket'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>📋 What to do next</h3>
+      <div class="step-item">
+        <div class="step-icon">📧</div>
+        <div class="step-text"><strong>Check for airline email</strong> — The airline may send you a separate email with your e-ticket. Check your inbox (and spam folder).</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon">📲</div>
+        <div class="step-text"><strong>Online check-in</strong> — Most airlines open online check-in 24–48 hours before departure. Check in early to choose your seat.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon">🛂</div>
+        <div class="step-text"><strong>Prepare your passport</strong> — Make sure it's valid for at least 6 months beyond your travel date.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon">⏰</div>
+        <div class="step-text"><strong>Arrive early</strong> — For international flights, arrive at least 3 hours before departure. For European routes, 2 hours is recommended.</div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <p>Need help or have questions about your booking?</p>
+      <a href="https://nordicwings.net" class="cta-btn">Visit NordicWings ✈</a>
+    </div>
+
+    <p class="support">
+      Need help? Email us at <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a><br>
+      or visit <a href="https://nordicwings.net">nordicwings.net</a>
+    </p>
+  </div>
+
+  <div class="footer">
+    <div class="brand">NordicWings</div>
+    <p>Making affordable flights easy for everyone.</p>
+    <p>nordicwings.net | hello@nordicwings.net</p>
+    <p style="margin-top:14px;font-size:11px;color:#475a8a;">
+      You're receiving this because you booked a flight with NordicWings.<br>
+      © 2026 NordicWings — nordicwings.net
+    </p>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+// ── Post-flight Thank You Email Template ─────────────────────
+function buildThankYouEmail(data) {
+  const {
+    passengerName, route, bookingRef
+  } = data;
+
+  const firstName   = (passengerName || 'Traveller').split(' ')[0];
+  const [orig, dest] = (route || 'HEL → DXB').split('→').map(s => s.trim());
+
+  const cityMap = {
+    HEL:'Helsinki',MNL:'Manila',DVO:'Davao',CEB:'Cebu',DXB:'Dubai',
+    BKK:'Bangkok',SIN:'Singapore',LHR:'London',CDG:'Paris',AMS:'Amsterdam',
+    FRA:'Frankfurt',BCN:'Barcelona',MAD:'Madrid',FCO:'Rome',IST:'Istanbul',
+    NRT:'Tokyo',JFK:'New York',LAX:'Los Angeles',SYD:'Sydney',AUH:'Abu Dhabi',
+    KUL:'Kuala Lumpur',ICN:'Seoul',PEK:'Beijing',ARN:'Stockholm',CPH:'Copenhagen',
+    OSL:'Oslo',WAW:'Warsaw',BUD:'Budapest',PRG:'Prague',VIE:'Vienna',
+    ZRH:'Zurich',ATH:'Athens',DUB:'Dublin',MXP:'Milan',MUC:'Munich',
+  };
+  const origCity = cityMap[orig] || orig;
+  const destCity = cityMap[dest] || dest;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thank you for flying with NordicWings!</title>
+<style>
+  body { margin:0; padding:0; background:#f0f4ff; font-family:'Segoe UI',Arial,sans-serif; }
+  .wrapper { max-width:600px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.12); }
+  .header { background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%); padding:36px 32px 28px; text-align:center; }
+  .header .logo-text { color:#fff; font-size:22px; font-weight:800; letter-spacing:-.5px; }
+  .header .logo-sub  { color:#93c5fd; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+  .hero { background:linear-gradient(135deg,#7c3aed,#6d28d9); padding:32px; text-align:center; }
+  .hero .emoji { font-size:56px; line-height:1; margin-bottom:12px; }
+  .hero h1 { color:#fff; font-size:28px; font-weight:900; margin:0 0 8px; }
+  .hero p  { color:#ddd6fe; font-size:15px; margin:0; }
+  .body { padding:32px; }
+  .greeting { font-size:16px; color:#1e293b; margin-bottom:20px; line-height:1.6; }
+  .route-badge { display:flex; align-items:center; justify-content:center; gap:16px; background:#f5f3ff; border:1.5px solid #c4b5fd; border-radius:14px; padding:20px; margin-bottom:24px; }
+  .badge-airport { text-align:center; }
+  .badge-airport .code { font-size:28px; font-weight:900; color:#5b21b6; }
+  .badge-airport .city { font-size:12px; color:#7c3aed; margin-top:2px; }
+  .badge-arrow { font-size:20px; color:#8b5cf6; }
+  .stars-section { text-align:center; background:#fdf4ff; border:1.5px solid #e9d5ff; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .stars-section h3 { font-size:16px; font-weight:800; color:#5b21b6; margin:0 0 8px; }
+  .stars-section p { font-size:14px; color:#6d28d9; margin:0 0 16px; }
+  .star-row { font-size:36px; letter-spacing:4px; margin-bottom:16px; }
+  .review-btn { display:inline-block; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; text-decoration:none; padding:14px 36px; border-radius:50px; font-size:15px; font-weight:700; }
+  .book-again { text-align:center; background:#f0f4ff; border-radius:14px; padding:24px; margin-bottom:24px; }
+  .book-again h3 { font-size:16px; font-weight:800; color:#1e3a8a; margin:0 0 8px; }
+  .book-again p { font-size:14px; color:#475569; margin:0 0 16px; }
+  .book-btn { display:inline-block; background:linear-gradient(135deg,#1e3a8a,#1d4ed8); color:#fff; text-decoration:none; padding:14px 36px; border-radius:50px; font-size:15px; font-weight:700; }
+  .support { font-size:13px; color:#64748b; text-align:center; margin-bottom:8px; }
+  .support a { color:#1d4ed8; text-decoration:none; }
+  .footer { background:#1e3a8a; padding:24px 32px; text-align:center; }
+  .footer p { color:#93c5fd; font-size:12px; margin:4px 0; }
+  .footer .brand { color:#fff; font-weight:800; font-size:14px; margin-bottom:4px; }
+  @media(max-width:480px){
+    .body{padding:20px;}
+    .hero h1{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="logo-text">✈ NordicWings</div>
+    <div class="logo-sub">nordicwings.net</div>
+  </div>
+
+  <div class="hero">
+    <div class="emoji">🌟</div>
+    <h1>Hope you had a wonderful trip!</h1>
+    <p>Thank you for flying with NordicWings, ${firstName}.</p>
+  </div>
+
+  <div class="body">
+    <p class="greeting">Hi <strong>${firstName}</strong>,<br>
+    Your flight from <strong>${origCity}</strong> to <strong>${destCity}</strong> has now landed — we hope everything went smoothly and you're enjoying your destination! 🎉</p>
+
+    <div class="route-badge">
+      <div class="badge-airport">
+        <div class="code">${orig}</div>
+        <div class="city">${origCity}</div>
+      </div>
+      <div class="badge-arrow">✈ ──────</div>
+      <div class="badge-airport">
+        <div class="code">${dest}</div>
+        <div class="city">${destCity}</div>
+      </div>
+    </div>
+
+    <div class="stars-section">
+      <h3>How was your experience?</h3>
+      <p>Your review helps other travellers find great flights and helps us improve.</p>
+      <div class="star-row">⭐⭐⭐⭐⭐</div>
+      <a href="https://www.trustpilot.com/review/nordicwings.net" class="review-btn">Leave a Review ✍</a>
+    </div>
+
+    <div class="book-again">
+      <h3>Ready for your next adventure?</h3>
+      <p>Search thousands of real flights and book in minutes — all with NordicWings.</p>
+      <a href="https://nordicwings.net" class="book-btn">Search Flights ✈</a>
+    </div>
+
+    <p class="support">
+      Had an issue? We're here to help — <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a>
+    </p>
+  </div>
+
+  <div class="footer">
+    <div class="brand">NordicWings</div>
+    <p>Making affordable flights easy for everyone.</p>
+    <p>nordicwings.net | hello@nordicwings.net</p>
+    <p style="margin-top:14px;font-size:11px;color:#475a8a;">
+      Booking reference: ${bookingRef || 'N/A'}<br>
+      © 2026 NordicWings — nordicwings.net
+    </p>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
 // ── HTML Email Template ───────────────────────────────────────
 function buildReminderEmail(data) {
   const {
@@ -1333,7 +1640,7 @@ function buildReminderEmail(data) {
 // Saves the booking details so we can send a reminder email
 // the day before the flight.
 // Body: { email, passengerName, route, flightDate, departureTime, arrivalTime, airline, bookingRef, flightNumber }
-app.post('/api/bookings/reminder-register', (req, res) => {
+app.post('/api/bookings/reminder-register', async (req, res) => {
   const {
     email, passengerName, route, flightDate, departureTime,
     arrivalTime, airline, bookingRef, flightNumber
@@ -1361,11 +1668,31 @@ app.post('/api/bookings/reminder-register', (req, res) => {
     bookingRef:    sanitize(bookingRef || ''),
     flightNumber:  sanitize(flightNumber || ''),
     reminderSent:  false,
+    thankSent:     false,
     registeredAt:  new Date().toISOString()
   };
 
   reminders.push(entry);
   saveReminders(reminders);
+
+  // ── Send booking confirmation email immediately ────────────
+  if (emailTransporter) {
+    try {
+      const confirmHtml = buildConfirmationEmail(entry);
+      await emailTransporter.sendMail({
+        from:    `"NordicWings ✈" <${process.env.GMAIL_USER}>`,
+        to:      entry.email,
+        subject: `✅ Booking confirmed! ${entry.route || ''} — Ref: ${entry.bookingRef || ''}`,
+        html:    confirmHtml
+      });
+      console.log(`✅ Confirmation email sent to ${entry.email}`);
+    } catch (err) {
+      console.error(`❌ Failed to send confirmation email to ${entry.email}:`, err.message);
+      // Non-critical — don't fail the request
+    }
+  } else {
+    console.warn('⚠️  Email not configured — confirmation email skipped. Set GMAIL_USER + GMAIL_PASS in Railway.');
+  }
 
   console.log(`Reminder registered for ${email} — flight on ${flightDate}`);
   res.json({ success: true, message: 'Reminder registered. You will receive an email the day before your flight.' });
@@ -1423,6 +1750,60 @@ cron.schedule('0 5 * * *', async () => {
 // Railway servers run on UTC — cron '0 5 * * *' = 05:00 UTC = 08:00 Helsinki time (EEST)
 
 console.log('📅 Flight reminder cron job scheduled (runs daily at 08:00 Helsinki time).');
+
+// ── Daily cron: send post-flight thank you email ──────────────
+// Runs every day at 10:00 Helsinki time (07:00 UTC) — the morning after the flight
+cron.schedule('0 7 * * *', async () => {
+  console.log('🌟 Running post-flight thank-you cron job...');
+
+  if (!emailTransporter) {
+    console.warn('Email transporter not configured — skipping thank-you emails.');
+    return;
+  }
+
+  const today    = new Date();
+  const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  const reminders = loadReminders();
+  // Send thank-you to customers whose flight was YESTERDAY (flightDate = yesterday)
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  const toThank = reminders.filter(r => !r.thankSent && r.flightDate === yesterdayStr);
+
+  console.log(`Found ${toThank.length} thank-you emails to send for flights on ${yesterdayStr}`);
+
+  let anySent = false;
+  for (const reminder of toThank) {
+    try {
+      const html = buildThankYouEmail(reminder);
+      await emailTransporter.sendMail({
+        from:    `"NordicWings ✈" <${process.env.GMAIL_USER}>`,
+        to:      reminder.email,
+        subject: `🌟 Hope you had a great flight, ${(reminder.passengerName || 'Traveller').split(' ')[0]}! — NordicWings`,
+        html
+      });
+      reminder.thankSent = true;
+      reminder.thankSentAt = new Date().toISOString();
+      console.log(`✅ Thank-you email sent to ${reminder.email} (flight was ${reminder.flightDate})`);
+      anySent = true;
+    } catch (err) {
+      console.error(`❌ Failed to send thank-you to ${reminder.email}:`, err.message);
+    }
+  }
+
+  if (anySent) {
+    // Clean up old reminders (flights more than 14 days ago)
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 14);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const cleaned = reminders.filter(r => r.flightDate >= cutoffStr);
+    saveReminders(cleaned);
+  }
+});
+
+console.log('🌟 Post-flight thank-you cron job scheduled (runs daily at 10:00 Helsinki time).');
 
 // ============================================================
 // Global error handler
