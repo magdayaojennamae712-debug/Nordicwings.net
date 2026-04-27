@@ -15,11 +15,18 @@ a, button, input, select, textarea, label, [onclick], [role="button"] {
 html {
   scroll-behavior: smooth;
 }
-/* ── Hide Google Translate bar that causes dark line on mobile ── */
-.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt { display: none !important; }
-body { top: 0 !important; }
-.skiptranslate { display: none !important; }
+/* ── Hide Google Translate bar — prevents dark line / layout shift on mobile ── */
+.goog-te-banner-frame,
+.goog-te-gadget,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip-content,
 iframe.goog-te-banner-frame { display: none !important; }
+body, body.translated-ltr, body.translated-rtl {
+  top: 0 !important;
+  margin-top: 0 !important;
+}
+.skiptranslate { display: none !important; }
 
 body {
   -webkit-font-smoothing: antialiased;
