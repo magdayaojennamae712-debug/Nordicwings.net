@@ -1289,7 +1289,6 @@ function showAgencyPage() {
   // Agencies list — NordicWings Direct always shown first, then partners
   const agencies = [
     { name: 'NordicWings', rating: 5.0, reviews: 0, price: price, perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true, stars: 5, highlight: true },
-    { name: 'Skyscanner',     rating: 4.8, reviews: 52400, price: price,    perks: '✓ Real flights · Best price guarantee · Trusted worldwide', direct: false, stars: 5, highlight: true },
     { name: 'Jetradar',       rating: 4.7, reviews: 41800, price: price+1,  perks: '✓ Compare 728 airlines · Earn cashback · Best deals',      direct: false, stars: 5, highlight: true },
     { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
     { name: 'Kayak',          rating: 4.6, reviews: 31200, price: price+4,  perks: '✓ Compare 100s of airlines · Price alerts',                 direct: false, stars: 5, highlight: false },
@@ -1384,7 +1383,6 @@ function openPartnerLink(agencyName) {
   // Affiliate deep links — earn commission when users book!
   const links = {
     // ── Real booking search engines (top partners) ──
-    'Skyscanner':     `https://www.skyscanner.net/transport/flights/${orig}/${dest}/${date.replace(/-/g,'')}/?adults=${pass}&cabinclass=economy&ref=home`,
     'Jetradar':       `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=719573`,
     'Google Flights': `https://www.google.com/flights#flt=${orig}.${dest}.${date};c:EUR;e:1;sd:1;t:f`,
     'Kayak':          `https://www.kayak.com/flights/${orig}-${dest}/${date}/${pass}adults`,
@@ -1399,8 +1397,8 @@ function openPartnerLink(agencyName) {
     'lastminute.com':`https://www.lastminute.com/flights/${orig}-${dest}/?departureDate=${date}&adults=${pass}&marker=${TP}`,
   };
 
-  // Fallback
-  const fallback = `https://www.skyscanner.net/transport/flights/${orig}/${dest}/${date.replace(/-/g,'')}/?adults=${pass}`;
+  // Fallback to Kiwi.com (affiliate)
+  const fallback = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
   const url = links[agencyName] || fallback;
 
   window.open(url, '_blank');
@@ -2485,4 +2483,410 @@ function friendlyAuthError(code) {
   const map = {
     'auth/user-not-found':      'No account found with this email.',
     'auth/wrong-password':      'Incorrect password. Please try again.',
-    'auth/email-already-in-use':'An account with this email already 
+    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/invalid-email':       'Please enter a valid email address.',
+    'auth/weak-password':       'Password is too weak. Use at least 6 characters.',
+    'auth/too-many-requests':   'Too many attempts. Please try again later.'
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ─────────────────────────────────────────────────────────────
+// ADMIN BUSINESS DASHBOARD
+// Only visible to owner (magdayaojennamae712@gmail.com)
+// ─────────────────────────────────────────────────────────────
+let _allAdminBookings = [];
+
+// ─────────────────────────────────────────────────────────────
+// CRM — ADMIN / BUSINESS DASHBOARD
+// ─────────────────────────────────────────────────────────────
+let _crmTab = 'overview';
+
+function crmSwitchTab(tab) {
+  _crmTab = tab;
+  document.querySelectorAll('.crm-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.crm-tab-pane').forEach(p => p.style.display = p.id === 'crm-' + tab ? 'block' : 'none');
+  if (tab === 'customers')  renderCRMCustomers(_allAdminBookings);
+  if (tab === 'bookings')   renderAdminTable(_allAdminBookings);
+  if (tab === 'affiliate')  renderAffiliateTab();
+}
+
+async function loadAdminDashboard() {
+  if (!currentUser || currentUser.email !== OWNER_EMAIL) {
+    showPage('home'); return;
+  }
+  document.getElementById('crm-loading').style.display = 'flex';
+  document.getElementById('crm-content').style.display = 'none';
+
+  try {
+    const snapshot = await db.collection('bookings').orderBy('createdAt','desc').get();
+    _allAdminBookings = [];
+    snapshot.forEach(doc => _allAdminBookings.push({ id: doc.id, ...doc.data() }));
+    document.getElementById('crm-loading').style.display = 'none';
+    document.getElementById('crm-content').style.display = 'block';
+    renderAdminStats(_allAdminBookings);
+    renderCRMOverview(_allAdminBookings);
+    renderAdminTable(_allAdminBookings);
+  } catch (err) {
+    console.error('CRM load error:', err);
+    document.getElementById('crm-loading').innerHTML = '<p style="color:#ef4444">Failed to load. Refresh to retry.</p>';
+  }
+}
+
+function renderAdminStats(bookings) {
+  const confirmed  = bookings.filter(b => b.status === 'confirmed');
+  const revenue    = confirmed.reduce((s, b) => s + parseFloat(b.totalPrice || 0), 0);
+  const profit     = confirmed.reduce((s, b) => s + parseFloat(b.nordicwingsFee || 0), 0);
+  const customers  = new Set(bookings.map(b => b.userEmail)).size;
+  const avgOrder   = confirmed.length ? revenue / confirmed.length : 0;
+
+  // This month
+  const now = new Date();
+  const thisMonth = confirmed.filter(b => {
+    const d = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const monthRevenue = thisMonth.reduce((s,b) => s + parseFloat(b.totalPrice||0), 0);
+  const monthProfit  = thisMonth.reduce((s,b) => s + parseFloat(b.nordicwingsFee||0), 0);
+
+  document.getElementById('stat-total-bookings').textContent  = bookings.length;
+  document.getElementById('stat-total-revenue').textContent   = '€' + revenue.toFixed(2);
+  document.getElementById('stat-total-customers').textContent = customers;
+  document.getElementById('stat-confirmed').textContent       = confirmed.length;
+  const ps = document.getElementById('stat-profit');
+  if (ps) ps.textContent = '€' + profit.toFixed(2);
+  const av = document.getElementById('stat-avg-order');
+  if (av) av.textContent = '€' + avgOrder.toFixed(2);
+  const mr = document.getElementById('stat-month-revenue');
+  if (mr) mr.textContent = '€' + monthRevenue.toFixed(2);
+  const mp = document.getElementById('stat-month-profit');
+  if (mp) mp.textContent = '€' + monthProfit.toFixed(2);
+}
+
+function renderCRMOverview(bookings) {
+  // Monthly revenue chart (last 6 months)
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(); d.setMonth(d.getMonth() - i);
+    months.push({ label: d.toLocaleString('en', {month:'short'}), year: d.getFullYear(), month: d.getMonth(), rev: 0, profit: 0 });
+  }
+  bookings.filter(b => b.status === 'confirmed').forEach(b => {
+    const d = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+    const m = months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
+    if (m) { m.rev += parseFloat(b.totalPrice||0); m.profit += parseFloat(b.nordicwingsFee||0); }
+  });
+  const maxRev = Math.max(...months.map(m => m.rev), 1);
+  const chartEl = document.getElementById('crm-revenue-chart');
+  if (chartEl) {
+    chartEl.innerHTML = months.map(m => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="font-size:.72rem;color:#16a34a;font-weight:700;">€${m.profit.toFixed(0)}</div>
+        <div style="width:100%;background:#e0f2fe;border-radius:6px 6px 0 0;position:relative;height:${Math.max(8, Math.round((m.rev/maxRev)*100))}px;">
+          <div style="position:absolute;bottom:0;left:0;right:0;background:#16a34a;border-radius:4px 4px 0 0;height:${Math.max(4,Math.round((m.profit/maxRev)*100))}px;"></div>
+        </div>
+        <div style="font-size:.72rem;color:#64748b;font-weight:600;">${m.label}</div>
+        <div style="font-size:.7rem;color:#1d4ed8;">€${m.rev.toFixed(0)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Top routes
+  const routeCounts = {};
+  bookings.filter(b=>b.status==='confirmed').forEach(b => {
+    const r = (b.flight?.from||'?') + '→' + (b.flight?.to||'?');
+    routeCounts[r] = (routeCounts[r]||0) + 1;
+  });
+  const topRoutes = Object.entries(routeCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const trEl = document.getElementById('crm-top-routes');
+  if (trEl) {
+    trEl.innerHTML = topRoutes.length ? topRoutes.map(([r,c]) =>
+      `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem;">
+        <span style="font-weight:600;color:#1e293b;">✈ ${r.replace('→',' → ')}</span>
+        <span style="background:#dbeafe;color:#1e40af;padding:2px 10px;border-radius:20px;font-weight:700;">${c} booking${c>1?'s':''}</span>
+      </div>`).join('')
+    : '<div style="color:#94a3b8;font-size:.85rem;padding:8px 0;">No bookings yet</div>';
+  }
+
+  // Recent 5 bookings
+  const recent = bookings.slice(0,5);
+  const recentEl = document.getElementById('crm-recent-bookings');
+  if (recentEl) {
+    recentEl.innerHTML = recent.map(b => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9;gap:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:.85rem;color:#1e293b;">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
+          <div style="font-size:.75rem;color:#64748b;">${b.flight?.from||'?'} → ${b.flight?.to||'?'} · ${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:800;color:#1e3a8a;">€${parseFloat(b.totalPrice||0).toFixed(2)}</div>
+          <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+        </div>
+        <span style="padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;
+          background:${b.status==='confirmed'?'#dcfce7':'#fee2e2'};
+          color:${b.status==='confirmed'?'#16a34a':'#dc2626'};">${b.status||'unknown'}</span>
+      </div>
+    `).join('') || '<div style="color:#94a3b8;font-size:.85rem;padding:8px;">No bookings yet</div>';
+  }
+}
+
+function renderCRMCustomers(bookings) {
+  // Group by email
+  const map = {};
+  bookings.forEach(b => {
+    const email = b.contact?.email || b.userEmail || 'unknown';
+    if (!map[email]) map[email] = { email, name: `${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}`.trim(), phone: b.contact?.phone||'', bookings:[] };
+    map[email].bookings.push(b);
+  });
+  const customers = Object.values(map).sort((a,b) => b.bookings.length - a.bookings.length);
+  const el = document.getElementById('crm-customers-list');
+  if (!el) return;
+  if (!customers.length) { el.innerHTML = '<div style="color:#94a3b8;padding:20px;text-align:center;">No customers yet</div>'; return; }
+  el.innerHTML = customers.map((c, ci) => {
+    const totalSpent  = c.bookings.reduce((s,b) => s + parseFloat(b.totalPrice||0), 0);
+    const totalProfit = c.bookings.reduce((s,b) => s + parseFloat(b.nordicwingsFee||0), 0);
+    const confirmed   = c.bookings.filter(b => b.status==='confirmed').length;
+    const lastBooking = c.bookings[0];
+    return `
+    <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:12px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;gap:10px;flex-wrap:wrap;"
+           onclick="document.getElementById('crm-cust-detail-${ci}').style.display=document.getElementById('crm-cust-detail-${ci}').style.display==='none'?'block':'none'">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+               display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;flex-shrink:0;">
+            ${(c.name||c.email)[0].toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:700;color:#1e293b;">${c.name || 'Unknown'}</div>
+            <div style="font-size:.78rem;color:#64748b;">${c.email}</div>
+            ${c.phone ? `<div style="font-size:.75rem;color:#64748b;">${c.phone}</div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-weight:800;color:#1e3a8a;font-size:1.1rem;">${c.bookings.length}</div>
+            <div style="font-size:.7rem;color:#64748b;">Bookings</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-weight:800;color:#1e3a8a;font-size:1.1rem;">€${totalSpent.toFixed(0)}</div>
+            <div style="font-size:.7rem;color:#64748b;">Spent</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-weight:800;color:#16a34a;font-size:1.1rem;">€${totalProfit.toFixed(0)}</div>
+            <div style="font-size:.7rem;color:#64748b;">Your Profit</div>
+          </div>
+          <a href="mailto:${c.email}?subject=Your NordicWings booking"
+             style="background:#1e3a8a;color:#fff;padding:6px 14px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none;align-self:center;"
+             onclick="event.stopPropagation()">✉ Email</a>
+        </div>
+      </div>
+      <div id="crm-cust-detail-${ci}" style="display:none;border-top:1px solid #f1f5f9;padding:12px 16px;background:#f8fafc;">
+        <div style="font-size:.78rem;font-weight:700;color:#475569;margin-bottom:8px;text-transform:uppercase;">Booking History</div>
+        ${c.bookings.map(b => `
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:.82rem;flex-wrap:wrap;gap:4px;">
+            <div>
+              <span style="font-family:monospace;background:#eff6ff;color:#1d4ed8;padding:1px 6px;border-radius:4px;font-size:.75rem;">${b.bookingRef||'—'}</span>
+              <strong style="margin-left:8px;">${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong>
+              <span style="color:#64748b;margin-left:6px;">${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</span>
+              <span style="color:#64748b;margin-left:6px;">${b.passengers?.length||1} pax</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+              <span style="color:#16a34a;font-size:.75rem;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)}</span>
+              <span style="padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:700;
+                background:${b.status==='confirmed'?'#dcfce7':'#fee2e2'};
+                color:${b.status==='confirmed'?'#16a34a':'#dc2626'};">${b.status}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAffiliateTab() {
+  const el = document.getElementById('crm-affiliate-content');
+  if (!el || el.dataset.loaded) return;
+  el.dataset.loaded = '1';
+
+  // Estimate Trip.com clicks (we can't get real data without their API — direct to portal)
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px;">
+
+      <!-- Trip.com -->
+      <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:1.8rem;">✈️</div>
+          <div>
+            <div style="font-weight:800;color:#1e3a8a;font-size:1rem;">Trip.com</div>
+            <div style="font-size:.75rem;color:#3b82f6;">Alliance ID: 8098413</div>
+          </div>
+        </div>
+        <div style="font-size:.82rem;color:#1e40af;line-height:1.6;margin-bottom:12px;">
+          <strong>Commission rates:</strong><br>
+          ✈ Flights: ~1.1–2% of booking value<br>
+          🏨 Hotels: ~4–6% of booking value<br>
+          🎭 Tours/activities: ~6–8%<br>
+          💳 Paid monthly (net-30 after booking)
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;font-size:.78rem;color:#475569;margin-bottom:12px;">
+          💡 Example: Customer books HEL→MNL €800 hotel package on Trip.com via your link → you earn ~€32–48
+        </div>
+        <a href="https://www.trip.com/pages/affiliate/" target="_blank" rel="noopener"
+           style="display:block;text-align:center;background:#1e3a8a;color:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;">
+          Open Trip.com Affiliate Portal →
+        </a>
+      </div>
+
+      <!-- Kiwi.com -->
+      <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:1.8rem;">🌍</div>
+          <div>
+            <div style="font-weight:800;color:#15803d;font-size:1rem;">Kiwi.com</div>
+            <div style="font-size:.75rem;color:#16a34a;">Via Travelpayouts</div>
+          </div>
+        </div>
+        <div style="font-size:.82rem;color:#166534;line-height:1.6;margin-bottom:12px;">
+          <strong>Commission rates:</strong><br>
+          ✈ Flights: ~1.5–2% of booking value<br>
+          💳 Paid monthly via Travelpayouts<br>
+          🔗 Deep links now pre-filled with route + date
+        </div>
+        <a href="https://travelpayouts.com/dashboard" target="_blank" rel="noopener"
+           style="display:block;text-align:center;background:#16a34a;color:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;">
+          Open Travelpayouts Dashboard →
+        </a>
+      </div>
+
+      <!-- Booking.com + Hotels.com -->
+      <div style="background:linear-gradient(135deg,#fdf4ff,#f3e8ff);border:1.5px solid #d8b4fe;border-radius:14px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:1.8rem;">🏨</div>
+          <div>
+            <div style="font-weight:800;color:#7e22ce;font-size:1rem;">Booking.com / Hotels.com</div>
+            <div style="font-size:.75rem;color:#9333ea;">Affiliate Marker: 719573</div>
+          </div>
+        </div>
+        <div style="font-size:.82rem;color:#6b21a8;line-height:1.6;margin-bottom:12px;">
+          <strong>Commission rates:</strong><br>
+          🏨 Hotels: ~4% of booking value<br>
+          💳 Paid monthly by Booking.com<br>
+          🔗 Shown on homepage hotel cards
+        </div>
+        <a href="https://www.booking.com/affiliates.html" target="_blank" rel="noopener"
+           style="display:block;text-align:center;background:#7e22ce;color:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;">
+          Open Booking.com Affiliate Portal →
+        </a>
+      </div>
+    </div>
+
+    <!-- Commission Calculator -->
+    <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px;">
+      <div style="font-weight:800;color:#1e293b;font-size:1rem;margin-bottom:16px;">🧮 Affiliate Commission Calculator</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Platform</label>
+          <select id="calc-platform" onchange="calcAffiliate()" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;">
+            <option value="trip-flight">Trip.com — Flight (1.5%)</option>
+            <option value="trip-hotel">Trip.com — Hotel (5%)</option>
+            <option value="kiwi">Kiwi.com — Flight (1.8%)</option>
+            <option value="booking">Booking.com — Hotel (4%)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Booking Value (€)</label>
+          <input type="number" id="calc-value" value="500" oninput="calcAffiliate()" min="1"
+            style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Number of Bookings / Month</label>
+          <input type="number" id="calc-count" value="10" oninput="calcAffiliate()" min="1"
+            style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;box-sizing:border-box;">
+        </div>
+      </div>
+      <div id="calc-result" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.4rem;font-weight:900;color:#15803d;" id="calc-monthly">—</div>
+        <div style="font-size:.82rem;color:#16a34a;">estimated monthly affiliate income</div>
+        <div style="font-size:.78rem;color:#6b7280;margin-top:4px;" id="calc-annual">—</div>
+      </div>
+    </div>
+  `;
+  calcAffiliate();
+}
+
+function calcAffiliate() {
+  const platform = document.getElementById('calc-platform')?.value;
+  const val      = parseFloat(document.getElementById('calc-value')?.value) || 0;
+  const count    = parseInt(document.getElementById('calc-count')?.value) || 0;
+  const rates    = { 'trip-flight':0.015, 'trip-hotel':0.05, 'kiwi':0.018, 'booking':0.04 };
+  const rate     = rates[platform] || 0.015;
+  const monthly  = val * rate * count;
+  const annual   = monthly * 12;
+  const mr = document.getElementById('calc-monthly');
+  const ar = document.getElementById('calc-annual');
+  if (mr) mr.textContent = '€' + monthly.toFixed(2) + ' / month';
+  if (ar) ar.textContent = 'That\'s approximately €' + annual.toFixed(0) + ' per year';
+}
+
+function renderAdminTable(bookings) {
+  const filtered = _adminFilter(bookings);
+  const tableEl  = document.getElementById('admin-table');
+  const emptyEl  = document.getElementById('admin-empty');
+  if (!tableEl) return;
+  if (!filtered.length) {
+    tableEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'flex';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  tableEl.style.display = 'table';
+
+  document.getElementById('admin-table-body').innerHTML = filtered.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passengers?.length||1}</td>
+      <td>
+        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+      </td>
+      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
+      <td>
+        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">✉ Email</a>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function _adminFilter(bookings) {
+  const q      = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  const status = document.getElementById('admin-filter')?.value || 'all';
+  return bookings.filter(b => {
+    const name  = `${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}`.toLowerCase();
+    const email = (b.contact?.email || b.userEmail || '').toLowerCase();
+    const route = `${b.flight?.from||''} ${b.flight?.to||''}`.toLowerCase();
+    const ref   = (b.bookingRef||'').toLowerCase();
+    const matchQ = !q || name.includes(q) || email.includes(q) || route.includes(q) || ref.includes(q);
+    const matchS = status === 'all' || b.status === status;
+    return matchQ && matchS;
+  });
+}
+
+// FAQ accordion toggle
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  if (!answer) return;
+  var isOpen = answer.style.display === 'block';
+  if (isOpen) {
+    answer.style.display = 'none';
+    btn.classList.remove('open');
+  } else {
+    answer.style.display = 'block';
+    btn.classList.add('open');
+  }
+}

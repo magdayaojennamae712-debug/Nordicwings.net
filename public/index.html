@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-title" content="NordicWings" />
   <link rel="apple-touch-icon" href="/icon-192.svg" />
   <!-- ===== SEO: Core Meta Tags ===== -->
-  <meta name="description" content="NordicWings – Search cheap flights from Finland to Philippines, Asia, Europe & worldwide. Compare Finnair, Emirates, Qatar Airways. Book via Skyscanner, Google Flights & Jetradar. Best prices Helsinki to Manila, Davao, Cebu." />
+  <meta name="description" content="NordicWings – Search cheap flights from Finland to Philippines, Asia, Europe & worldwide. Compare Finnair, Emirates, Qatar Airways. Book via Trip.com, Kiwi.com & Jetradar. Best prices Helsinki to Manila, Davao, Cebu." />
   <meta name="keywords" content="cheap flights Finland to Philippines, Helsinki to Manila flights, Helsinki to Davao flights, flights from Finland to Philippines, halpa lento Helsinki Manila, lento Helsinki Davao, cheap flights HEL MNL, Finland Philippines lento, NordicWings, flights from Oulu to Manila, flights from Tampere to Philippines, Finnair Philippines, Helsinki to Cebu, compare flights Finland, book flights online Finland, halpalennot Suomi, lentoja Suomesta Filippiineille, cheap international flights Helsinki" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="google-site-verification" content="uSenGe-ZEE8fio43miDCTObGcB2uoOmY3w5SMNFMPHw" />
@@ -31,7 +31,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nordicwings.net/" />
   <meta property="og:title" content="NordicWings – Cheap Flights Finland to Philippines & Worldwide" />
-  <meta property="og:description" content="Find cheap flights from Finland to Philippines, Asia, Europe and worldwide. Compare Finnair, Emirates, Qatar Airways prices. Book via Skyscanner & Jetradar." />
+  <meta property="og:description" content="Find cheap flights from Finland to Philippines, Asia, Europe and worldwide. Compare Finnair, Emirates, Qatar Airways prices. Book via Trip.com, Kiwi.com & Jetradar." />
   <meta property="og:image" content="https://nordicwings.net/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -49,7 +49,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://nordicwings.net/" />
   <meta name="twitter:title" content="NordicWings – Cheap Flights Finland to Philippines" />
-  <meta name="twitter:description" content="Search cheap flights from Finland to Philippines, Manila, Davao, Cebu. Compare airlines & book via Skyscanner, Jetradar, Google Flights." />
+  <meta name="twitter:description" content="Search cheap flights from Finland to Philippines, Manila, Davao, Cebu. Compare airlines & book via Trip.com, Kiwi.com, Jetradar, Google Flights." />
   <meta name="twitter:image" content="https://nordicwings.net/og-image.png" />
 
   <!-- ===== SEO: Social Profile Links ===== -->
@@ -1023,7 +1023,7 @@
       <div id="results-empty" class="empty-state" style="display:none;">
         <div class="empty-icon">✈️</div>
         <h3>No flights found</h3>
-        <p>No available flights for this route or date. Try different dates, nearby airports, or search via <a href="https://www.skyscanner.net" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;">Skyscanner</a> for more options.</p>
+        <p>No available flights for this route or date. Try different dates, nearby airports, or search via <a href="https://www.kiwi.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;">Kiwi.com</a> or <a href="https://www.trip.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;">Trip.com</a> for more options.</p>
         <button class="btn-primary" onclick="showPage('home')">Search Again</button>
       </div>
       <div id="results-list" class="results-list" style="display:none;"></div>
@@ -2367,4 +2367,116 @@
       {code:'ms',    label:'Melayu',     flag:'🇲🇾'},
       {code:'hi',    label:'हिन्दी',      flag:'🇮🇳'},
       {code:'pl',    label:'Polski',     flag:'🇵🇱'},
-      {code:'nl',    label:'Nederlands', flag:'🇳�
+      {code:'nl',    label:'Nederlands', flag:'🇳🇱'},
+    ];
+
+    // ── Build desktop dropdown list ───────────────────────────
+    var list = document.getElementById('nw-lang-list');
+    if (list) {
+      LANGS.forEach(function(l){
+        var item = document.createElement('button');
+        item.style.cssText = 'width:100%;background:transparent;border:none;padding:10px 14px;' +
+          'text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;' +
+          'font-size:.85rem;color:#1e293b;transition:background .12s;font-family:inherit;border-bottom:1px solid #f1f5f9;';
+        item.innerHTML = '<span style="font-size:1.2rem;line-height:1;">' + l.flag + '</span>' +
+          '<span style="font-weight:500;">' + l.label + '</span>';
+        item.onmouseover = function(){ this.style.background='#f0f7ff'; };
+        item.onmouseout  = function(){ this.style.background='transparent'; };
+        item.onclick = function(){
+          nwSetLang(l.code, l.label);
+          document.getElementById('nw-lang-dropdown').style.display = 'none';
+        };
+        list.appendChild(item);
+      });
+    }
+
+    // ── Build mobile language grid ────────────────────────────
+    var mlist = document.getElementById('nw-lang-list-mobile');
+    if (mlist) {
+      LANGS.forEach(function(l){
+        var item = document.createElement('button');
+        item.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;' +
+          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:6px;' +
+          'font-size:.78rem;color:#1e293b;font-family:inherit;font-weight:500;width:100%;' +
+          'transition:background .12s;';
+        item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
+          '<span>' + l.label + '</span>';
+        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
+        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
+        item.onclick = function(){
+          nwSetLang(l.code, l.label);
+          // Close mobile menu after selecting language
+          var mm = document.getElementById('mobile-menu');
+          if (mm) mm.classList.remove('open');
+        };
+        mlist.appendChild(item);
+      });
+    }
+
+    // ── Toggle desktop dropdown ───────────────────────────────
+    window.nwToggleLang = function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('nw-lang-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    };
+    document.addEventListener('click', function(){
+      var dd = document.getElementById('nw-lang-dropdown');
+      if (dd) dd.style.display = 'none';
+    });
+
+    // ── Set language via Google Translate ─────────────────────
+    window.nwSetLang = function(code, label) {
+      // Update desktop button label
+      var lbl = document.getElementById('nw-lang-label');
+      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
+
+      if (code === 'en') {
+        // Restore English — clear cookies and reload
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+        location.reload();
+        return;
+      }
+
+      // Set Google Translate language cookie
+      document.cookie = 'googtrans=/en/' + code + '; path=/';
+      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
+
+      // Trigger translation via hidden combo — retry if not loaded yet
+      function doTranslate() {
+        var sel = document.querySelector('.goog-te-combo');
+        if (sel) {
+          sel.value = code;
+          sel.dispatchEvent(new Event('change'));
+        } else {
+          setTimeout(doTranslate, 800);
+        }
+      }
+      doTranslate();
+    };
+
+    // ── Aggressively hide Google Translate bar ────────────────
+    // Prevents the dark bar / layout shift on mobile
+    var s = document.createElement('style');
+    s.textContent =
+      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
+      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
+      'body { top:0!important; }' +
+      '.skiptranslate { display:none!important; }' +
+      'iframe.goog-te-banner-frame { display:none!important; }' +
+      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
+    document.head.appendChild(s);
+
+    // Also remove the bar if it appears after translate loads
+    var observer = new MutationObserver(function() {
+      var bar = document.querySelector('.goog-te-banner-frame');
+      if (bar) bar.style.display = 'none';
+      document.body.style.top = '0';
+      document.body.style.marginTop = '0';
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  })();
+  </script>
+
+</body>
+</html>
