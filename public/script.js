@@ -111,9 +111,15 @@ function togglePaxPanel() {
   var btn   = document.getElementById('pax-btn');
   if (!panel || !btn) return;
   if (panel.style.display === 'none' || panel.style.display === '') {
-    var rect    = btn.getBoundingClientRect();
-    var screenW = window.innerWidth;
+    var rect     = btn.getBoundingClientRect();
+    var screenW  = window.innerWidth;
     var isMobile = screenW < 700;
+
+    // ── CRITICAL: move panel to <body> so it escapes any stacking context
+    // caused by parent elements with position+z-index (e.g. search form z-index:2)
+    if (panel.parentNode !== document.body) {
+      document.body.appendChild(panel);
+    }
 
     // Ensure backdrop exists
     var bd = document.getElementById('pax-backdrop');
@@ -128,35 +134,33 @@ function togglePaxPanel() {
 
     if (isMobile) {
       // ── Bottom sheet on mobile ──────────────────────────────
-      // Slides up from bottom, full width, easy to tap
-      panel.style.position   = 'fixed';
-      panel.style.bottom     = '0';
-      panel.style.left       = '0';
-      panel.style.right      = '0';
-      panel.style.top        = 'auto';
-      panel.style.width      = '100%';
-      panel.style.borderRadius = '20px 20px 0 0';
-      panel.style.maxHeight  = '85vh';
-      panel.style.overflowY  = 'auto';
-      // Safe area for iPhone home bar
+      panel.style.position      = 'fixed';
+      panel.style.bottom        = '0';
+      panel.style.left          = '0';
+      panel.style.right         = '0';
+      panel.style.top           = 'auto';
+      panel.style.width         = '100%';
+      panel.style.borderRadius  = '20px 20px 0 0';
+      panel.style.maxHeight     = '85vh';
+      panel.style.overflowY     = 'auto';
       panel.style.paddingBottom = 'env(safe-area-inset-bottom, 16px)';
     } else {
       // ── Dropdown on desktop ─────────────────────────────────
-      var panelW = 320;
+      var panelW  = 320;
       var leftPos = rect.left;
       if (leftPos + panelW > screenW - 8) leftPos = screenW - panelW - 8;
       if (leftPos < 8) leftPos = 8;
-      panel.style.position    = 'fixed';
-      panel.style.top         = (rect.bottom + 6) + 'px';
-      panel.style.left        = leftPos + 'px';
-      panel.style.bottom      = 'auto';
-      panel.style.right       = 'auto';
-      panel.style.width       = panelW + 'px';
+      panel.style.position     = 'fixed';
+      panel.style.top          = (rect.bottom + 6) + 'px';
+      panel.style.left         = leftPos + 'px';
+      panel.style.bottom       = 'auto';
+      panel.style.right        = 'auto';
+      panel.style.width        = panelW + 'px';
       panel.style.borderRadius = '14px';
-      panel.style.maxHeight   = 'none';
-      panel.style.overflowY   = 'visible';
+      panel.style.maxHeight    = 'none';
+      panel.style.overflowY    = 'visible';
     }
-    panel.style.zIndex  = '99999';
+    panel.style.zIndex  = '100000';
     panel.style.display = 'block';
   } else {
     closePaxPanel();
@@ -2486,4 +2490,95 @@ function friendlyAuthError(code) {
   return map[code] || 'Something went wrong. Please try again.';
 }
 
-// ────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// ADMIN BUSINESS DASHBOARD
+// Only visible to owner (magdayaojennamae712@gmail.com)
+// ─────────────────────────────────────────────────────────────
+let _allAdminBookings = [];
+
+async function loadAdminDashboard() {
+  if (!currentUser || currentUser.email !== OWNER_EMAIL) {
+    showPage('home'); return;
+  }
+
+  document.getElementById('admin-loading').style.display = 'flex';
+  document.getElementById('admin-table').style.display   = 'none';
+  document.getElementById('admin-empty').style.display   = 'none';
+
+  try {
+    const snapshot = await db.collection('bookings')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    _allAdminBookings = [];
+    snapshot.forEach(doc => _allAdminBookings.push({ id: doc.id, ...doc.data() }));
+
+    document.getElementById('admin-loading').style.display = 'none';
+
+    if (_allAdminBookings.length === 0) {
+      document.getElementById('admin-empty').style.display = 'flex';
+      return;
+    }
+
+    renderAdminStats(_allAdminBookings);
+    renderAdminTable(_allAdminBookings);
+
+  } catch (err) {
+    console.error('Admin load error:', err);
+    document.getElementById('admin-loading').style.display = 'none';
+    document.getElementById('admin-empty').style.display   = 'flex';
+  }
+}
+
+function renderAdminStats(bookings) {
+  const total     = bookings.length;
+  const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+  const revenue   = bookings
+    .filter(b => b.status === 'confirmed')
+    .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0);
+  const customers = new Set(bookings.map(b => b.userEmail)).size;
+
+  document.getElementById('stat-total-bookings').textContent  = total;
+  document.getElementById('stat-total-revenue').textContent   = '€' + revenue.toFixed(2);
+  document.getElementById('stat-total-customers').textContent = customers;
+  document.getElementById('stat-confirmed').textContent       = confirmed;
+}
+
+function renderAdminTable(bookings) {
+  if (!bookings.length) {
+    document.getElementById('admin-table').style.display = 'none';
+    document.getElementById('admin-empty').style.display = 'flex';
+    return;
+  }
+  document.getElementById('admin-empty').style.display = 'none';
+  document.getElementById('admin-table').style.display = 'table';
+
+  document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td>${b.passengers?.length || 1} pax</td>
+      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
+      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// FAQ accordion toggle
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  if (!answer) return;
+  var isOpen = answer.style.display === 'block';
+  if (isOpen) {
+    answer.style.display = 'none';
+    btn.classList.remove('open');
+  } else {
+    answer.style.display = 'block';
+    btn.classList.add('open');
+  }
+}
