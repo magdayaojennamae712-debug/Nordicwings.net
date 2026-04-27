@@ -96,7 +96,7 @@
     "@type": "TravelAgency",
     "name": "NordicWings",
     "url": "https://nordicwings.net",
-    "description": "Compare and book cheap flights from Finland to Philippines, Asia, Europe and worldwide. Best prices guaranteed.",
+    "description": "Search and book real flights from Finland to Philippines, Asia, Europe and worldwide. Live prices from Duffel API. Transparent service fee.",
     "areaServed": ["Finland", "Philippines", "Europe", "Asia"],
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
@@ -1393,7 +1393,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>We add a small service margin (5–10%) on top of the airline's base fare. This covers our operating costs and allows us to offer 24/7 support in Finnish and English. We are transparent — you are always shown the final price before paying.</p>
+              <p>We add a transparent service fee of 5% on top of the airline's base fare (minimum €12 per ticket). This covers our operating costs and allows us to offer support in Finnish and English. You are always shown the exact total price before paying — no hidden charges.</p>
             </div>
           </div>
 
@@ -2332,4 +2332,82 @@
       LANGS.forEach(function(l){
         var item = document.createElement('button');
         item.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;' +
-          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:
+          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:6px;' +
+          'font-size:.78rem;color:#1e293b;font-family:inherit;font-weight:500;width:100%;' +
+          'transition:background .12s;';
+        item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
+          '<span>' + l.label + '</span>';
+        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
+        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
+        item.onclick = function(){
+          nwSetLang(l.code, l.label);
+          // Close mobile menu after selecting language
+          var mm = document.getElementById('mobile-menu');
+          if (mm) mm.classList.remove('open');
+        };
+        mlist.appendChild(item);
+      });
+    }
+
+    // ── Toggle desktop dropdown ───────────────────────────────
+    window.nwToggleLang = function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('nw-lang-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    };
+    document.addEventListener('click', function(){
+      var dd = document.getElementById('nw-lang-dropdown');
+      if (dd) dd.style.display = 'none';
+    });
+
+    // ── Set language via Google Translate ─────────────────────
+    window.nwSetLang = function(code, label) {
+      // Update desktop button label
+      var lbl = document.getElementById('nw-lang-label');
+      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
+
+      if (code === 'en') {
+        // Restore English — clear cookies and reload
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+        location.reload();
+        return;
+      }
+
+      // Set Google Translate language cookie
+      document.cookie = 'googtrans=/en/' + code + '; path=/';
+      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
+
+      // Trigger translation via hidden combo — retry if not loaded yet
+      function doTranslate() {
+        var sel = document.querySelector('.goog-te-combo');
+        if (sel) {
+          sel.value = code;
+          sel.dispatchEvent(new Event('change'));
+        } else {
+          setTimeout(doTranslate, 800);
+        }
+      }
+      doTranslate();
+    };
+
+    // ── Aggressively hide Google Translate bar ────────────────
+    // Prevents the dark bar / layout shift on mobile
+    var s = document.createElement('style');
+    s.textContent =
+      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
+      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
+      'body { top:0!important; }' +
+      '.skiptranslate { display:none!important; }' +
+      'iframe.goog-te-banner-frame { display:none!important; }' +
+      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
+    document.head.appendChild(s);
+
+    // Also remove the bar if it appears after translate loads
+    var observer = new MutationObserver(function() {
+      var bar = document.querySelector('.goog-te-banner-frame');
+      if (bar) bar.style.display = 'none';
+      document.body.style.top = '0';
+      document.body.style.marginTop = '0';
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilte
