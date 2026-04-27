@@ -1286,16 +1286,13 @@ function showAgencyPage() {
   document.getElementById('agency-route-sub').textContent =
     `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
 
-  // Agencies list — NordicWings Direct always shown first, then partners
+  // Agencies list — NordicWings Direct always shown first, then confirmed affiliate partners only
   const agencies = [
-    { name: 'NordicWings', rating: 5.0, reviews: 0, price: price, perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true, stars: 5, highlight: true },
-    { name: 'Jetradar',       rating: 4.7, reviews: 41800, price: price+1,  perks: '✓ Compare 728 airlines · Earn cashback · Best deals',      direct: false, stars: 5, highlight: true },
-    { name: 'Google Flights', rating: 4.9, reviews: 98000, price: price+2,  perks: '✓ Live prices · No booking fees · Direct airline booking',  direct: false, stars: 5, highlight: true },
-    { name: 'Kayak',          rating: 4.6, reviews: 31200, price: price+4,  perks: '✓ Compare 100s of airlines · Price alerts',                 direct: false, stars: 5, highlight: false },
-    { name: 'Trip.com',       rating: 4.7, reviews: 3821,  price: price+5,  perks: '✓ Pay now or pay later · 24/7 support',                    direct: false, stars: 5, highlight: false },
-    { name: 'Mytrip',         rating: 4.3, reviews: 456,   price: price+8,  perks: '✓ Pay now or pay later',                                   direct: false, stars: 4, highlight: false },
-    { name: 'Gotogate',       rating: 3.8, reviews: 124,   price: price+14, perks: '✓ Support in your language',                               direct: false, stars: 4, highlight: false },
-    { name: 'lastminute.com', rating: 3.7, reviews: 118,   price: price+22, perks: '✓ Customer support',                                       direct: false, stars: 4, highlight: false },
+    { name: 'NordicWings', rating: 5.0, reviews: 0,     price: price,   perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true,  stars: 5, highlight: true },
+    { name: 'Kiwi.com',    rating: 4.8, reviews: 62400, price: price+1, perks: '✓ Mix & match airlines · Flexible dates · Best price guarantee',         direct: false, stars: 5, highlight: true },
+    { name: 'Aviasales',   rating: 4.7, reviews: 48200, price: price+2, perks: '✓ Compare 728 airlines · No hidden fees · Trusted worldwide',            direct: false, stars: 5, highlight: true },
+    { name: 'Jetradar',    rating: 4.7, reviews: 41800, price: price+3, perks: '✓ Cashback on flights · Real-time prices · 728 airlines',                direct: false, stars: 5, highlight: true },
+    { name: 'Trip.com',    rating: 4.7, reviews: 3821,  price: price+5, perks: '✓ Pay now or pay later · 24/7 support · Worldwide coverage',            direct: false, stars: 5, highlight: false },
   ];
 
   document.getElementById('agencies-list').innerHTML = `
@@ -1380,21 +1377,12 @@ function openPartnerLink(agencyName) {
   const TP  = '719573';          // Travelpayouts marker
   const TC  = 'Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D15634670'; // Trip.com
 
-  // Affiliate deep links — earn commission when users book!
+  // Affiliate deep links — confirmed partners only (earn real commission)
   const links = {
-    // ── Real booking search engines (top partners) ──
-    'Jetradar':       `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=719573`,
-    'Google Flights': `https://www.google.com/flights#flt=${orig}.${dest}.${date};c:EUR;e:1;sd:1;t:f`,
-    'Kayak':          `https://www.kayak.com/flights/${orig}-${dest}/${date}/${pass}adults`,
-    // ── Affiliate / OTA partners ──
-    'Trip.com':      `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
-    'Mytrip':        `https://www.mytrip.com/flights/${orig.toLowerCase()}-${dest.toLowerCase()}/?marker=${TP}`,
-    'Ticket.fi':     `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
-    'Flightnetwork': `https://www.flightnetwork.com/flights/${orig}-${dest}?departureDate=${date}&adults=${pass}&marker=${TP}`,
-    'Gotogate':      `https://www.gotogate.com/flight/${orig}${dest}/${date}?adults=${pass}&marker=${TP}`,
-    'Travelis':      `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&marker=${TP}`,
-    'Flysmarter.fi': `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&marker=${TP}`,
-    'lastminute.com':`https://www.lastminute.com/flights/${orig}-${dest}/?departureDate=${date}&adults=${pass}&marker=${TP}`,
+    'Kiwi.com':   `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`,
+    'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
+    'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
+    'Trip.com':   `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
   };
 
   // Fallback to Kiwi.com (affiliate)
