@@ -113,37 +113,50 @@ function togglePaxPanel() {
   if (panel.style.display === 'none' || panel.style.display === '') {
     var rect    = btn.getBoundingClientRect();
     var screenW = window.innerWidth;
-    var isMobile = screenW < 600;
+    var isMobile = screenW < 700;
+
+    // Ensure backdrop exists
+    var bd = document.getElementById('pax-backdrop');
+    if (!bd) {
+      bd = document.createElement('div');
+      bd.id = 'pax-backdrop';
+      bd.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.35);';
+      bd.addEventListener('click', closePaxPanel);
+      document.body.appendChild(bd);
+    }
+    bd.style.display = 'block';
+
     if (isMobile) {
-      // On mobile: center panel horizontally, show below button
-      var panelW = Math.min(screenW - 24, 340);
-      var leftPos = (screenW - panelW) / 2;
-      panel.style.position = 'fixed';
-      panel.style.top   = (rect.bottom + 8) + 'px';
-      panel.style.left  = leftPos + 'px';
-      panel.style.width = panelW + 'px';
-      // Add backdrop
-      var bd = document.getElementById('pax-backdrop');
-      if (!bd) {
-        bd = document.createElement('div');
-        bd.id = 'pax-backdrop';
-        bd.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.25);';
-        bd.addEventListener('click', closePaxPanel);
-        document.body.appendChild(bd);
-      }
-      bd.style.display = 'block';
+      // ── Bottom sheet on mobile ──────────────────────────────
+      // Slides up from bottom, full width, easy to tap
+      panel.style.position   = 'fixed';
+      panel.style.bottom     = '0';
+      panel.style.left       = '0';
+      panel.style.right      = '0';
+      panel.style.top        = 'auto';
+      panel.style.width      = '100%';
+      panel.style.borderRadius = '20px 20px 0 0';
+      panel.style.maxHeight  = '85vh';
+      panel.style.overflowY  = 'auto';
+      // Safe area for iPhone home bar
+      panel.style.paddingBottom = 'env(safe-area-inset-bottom, 16px)';
     } else {
-      // On desktop: position below button, keep within screen
-      var panelW = 300;
+      // ── Dropdown on desktop ─────────────────────────────────
+      var panelW = 320;
       var leftPos = rect.left;
       if (leftPos + panelW > screenW - 8) leftPos = screenW - panelW - 8;
       if (leftPos < 8) leftPos = 8;
-      panel.style.position = 'fixed';
-      panel.style.top   = (rect.bottom + 6) + 'px';
-      panel.style.left  = leftPos + 'px';
-      panel.style.width = panelW + 'px';
+      panel.style.position    = 'fixed';
+      panel.style.top         = (rect.bottom + 6) + 'px';
+      panel.style.left        = leftPos + 'px';
+      panel.style.bottom      = 'auto';
+      panel.style.right       = 'auto';
+      panel.style.width       = panelW + 'px';
+      panel.style.borderRadius = '14px';
+      panel.style.maxHeight   = 'none';
+      panel.style.overflowY   = 'visible';
     }
-    panel.style.zIndex = '99999';
+    panel.style.zIndex  = '99999';
     panel.style.display = 'block';
   } else {
     closePaxPanel();
@@ -2472,23 +2485,4 @@ function renderAdminTable(bookings) {
       </td>
       <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
       <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td>${b.passengers?.length || 1} pax</td>
-      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
-      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
-    </tr>
-  `).join('');
-}
-
-// FAQ accordion toggle
-function toggleFaq(btn) {
-  var answer = btn.nextElementSibling;
-  if (!answer) return;
-  var isOpen = answer.style.display === 'block';
-  if (isOpen) {
-    answer.style.display = 'none';
-    btn.classList.remove('open');
-  } else {
-    answer.style.display = 'block';
-    btn.classList.add('open');
-  }
-}
+      <td>${b.passe

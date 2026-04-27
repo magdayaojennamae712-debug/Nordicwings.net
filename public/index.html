@@ -394,71 +394,85 @@
               <span id="pax-summary">1 Adult</span>
               <span style="color:#94a3b8;font-size:.8rem;">▼</span>
             </button>
-            <!-- Dropdown panel — fixed 300px wide, pops right -->
-            <div id="pax-panel" style="display:none;position:fixed;top:0;left:0;
-                 width:300px;background:#fff;border:1.5px solid #dbeafe;border-radius:14px;padding:14px 16px;
-                 box-shadow:0 8px 32px rgba(30,58,138,.18);z-index:1000;">
+            <!-- Passenger panel — bottom sheet on mobile, dropdown on desktop -->
+            <div id="pax-panel" style="display:none;position:fixed;background:#fff;
+                 border:1.5px solid #dbeafe;border-radius:16px 16px 0 0;padding:0;
+                 box-shadow:0 -4px 32px rgba(30,58,138,.18);z-index:99999;">
 
-              <!-- Adults -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;">
-                <div style="flex:1;min-width:0;">
-                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">👤 Adults</div>
-                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">18+ yrs · Full price</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                  <button type="button" onclick="changePax('adults',-1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
-                  <span id="pax-adults-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">1</span>
-                  <button type="button" onclick="changePax('adults',1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
-                </div>
+              <!-- Handle bar (mobile only) -->
+              <div style="text-align:center;padding:10px 0 0;">
+                <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;display:inline-block;"></div>
               </div>
 
-              <!-- Children -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;">
-                <div style="flex:1;min-width:0;">
-                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">🧒 Children</div>
-                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">2–17 yrs · Own seat · −25%</div>
+              <div style="padding:4px 20px 16px;">
+                <!-- Adults -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f5f9;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👤 Adults</div>
+                    <div style="font-size:.75rem;color:#64748b;margin-top:2px;">18+ yrs · Full price</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                    <button type="button" onclick="changePax('adults',-1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #cbd5e1;background:#f8fafc;
+                             font-size:1.3rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">−</button>
+                    <span id="pax-adults-disp" style="font-weight:800;font-size:1.1rem;color:#1e3a8a;min-width:24px;text-align:center;display:inline-block;">1</span>
+                    <button type="button" onclick="changePax('adults',1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #1e3a8a;background:#1e3a8a;
+                             font-size:1.3rem;cursor:pointer;color:#fff;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">+</button>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                  <button type="button" onclick="changePax('children',-1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
-                  <span id="pax-children-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">0</span>
-                  <button type="button" onclick="changePax('children',1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
-                </div>
-              </div>
 
-              <!-- Infants -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;">
-                <div style="flex:1;min-width:0;">
-                  <div style="font-weight:700;font-size:.9rem;color:#1e293b;">👶 Infants</div>
-                  <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">Under 2 · Lap (no seat) · −90%</div>
+                <!-- Children -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f5f9;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:.95rem;color:#1e293b;">🧒 Children</div>
+                    <div style="font-size:.75rem;color:#64748b;margin-top:2px;">2–17 yrs · Own seat</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                    <button type="button" onclick="changePax('children',-1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #cbd5e1;background:#f8fafc;
+                             font-size:1.3rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">−</button>
+                    <span id="pax-children-disp" style="font-weight:800;font-size:1.1rem;color:#1e3a8a;min-width:24px;text-align:center;display:inline-block;">0</span>
+                    <button type="button" onclick="changePax('children',1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #1e3a8a;background:#1e3a8a;
+                             font-size:1.3rem;cursor:pointer;color:#fff;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">+</button>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                  <button type="button" onclick="changePax('infants',-1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">−</button>
-                  <span id="pax-infants-disp" style="font-weight:800;font-size:.95rem;color:#1e3a8a;width:20px;text-align:center;display:inline-block;">0</span>
-                  <button type="button" onclick="changePax('infants',1)"
-                    style="width:28px;height:28px;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;
-                           font-size:1rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;padding:0;">+</button>
+
+                <!-- Infants -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:.95rem;color:#1e293b;">👶 Infants</div>
+                    <div style="font-size:.75rem;color:#64748b;margin-top:2px;">Under 2 · Lap (no seat)</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                    <button type="button" onclick="changePax('infants',-1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #cbd5e1;background:#f8fafc;
+                             font-size:1.3rem;cursor:pointer;color:#1e3a8a;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">−</button>
+                    <span id="pax-infants-disp" style="font-weight:800;font-size:1.1rem;color:#1e3a8a;min-width:24px;text-align:center;display:inline-block;">0</span>
+                    <button type="button" onclick="changePax('infants',1)"
+                      style="width:44px;height:44px;border-radius:50%;border:2px solid #1e3a8a;background:#1e3a8a;
+                             font-size:1.3rem;cursor:pointer;color:#fff;font-weight:800;line-height:1;
+                             padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">+</button>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Warning note (only shows when children/infants added) -->
-              <div id="pax-child-note" style="display:none;margin-top:10px;background:#fef9c3;border:1px solid #fde68a;
-                   border-radius:8px;padding:8px 10px;font-size:.74rem;color:#92400e;line-height:1.4;">
-                ⚠️ Children &amp; infants must travel with at least 1 adult.
-              </div>
+                <!-- Warning note -->
+                <div id="pax-child-note" style="display:none;margin-top:4px;background:#fef9c3;border:1px solid #fde68a;
+                     border-radius:8px;padding:10px 12px;font-size:.78rem;color:#92400e;line-height:1.5;">
+                  ⚠️ Children &amp; infants must travel with at least 1 adult.
+                </div>
 
-              <button type="button" onclick="closePaxPanel()"
-                style="width:100%;margin-top:12px;background:#1e3a8a;color:#fff;border:none;border-radius:9px;
-                       padding:9px;font-weight:700;font-size:.88rem;cursor:pointer;letter-spacing:.3px;">Done ✓</button>
+                <button type="button" onclick="closePaxPanel()"
+                  style="width:100%;margin-top:16px;background:#1e3a8a;color:#fff;border:none;border-radius:12px;
+                         padding:14px;font-weight:700;font-size:.95rem;cursor:pointer;letter-spacing:.3px;
+                         touch-action:manipulation;">Done ✓</button>
+              </div>
             </div>
           </div>
 
@@ -2318,87 +2332,4 @@
       LANGS.forEach(function(l){
         var item = document.createElement('button');
         item.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;' +
-          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:6px;' +
-          'font-size:.78rem;color:#1e293b;font-family:inherit;font-weight:500;width:100%;' +
-          'transition:background .12s;';
-        item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
-          '<span>' + l.label + '</span>';
-        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
-        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          // Close mobile menu after selecting language
-          var mm = document.getElementById('mobile-menu');
-          if (mm) mm.classList.remove('open');
-        };
-        mlist.appendChild(item);
-      });
-    }
-
-    // ── Toggle desktop dropdown ───────────────────────────────
-    window.nwToggleLang = function(e) {
-      e.stopPropagation();
-      var dd = document.getElementById('nw-lang-dropdown');
-      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-    };
-    document.addEventListener('click', function(){
-      var dd = document.getElementById('nw-lang-dropdown');
-      if (dd) dd.style.display = 'none';
-    });
-
-    // ── Set language via Google Translate ─────────────────────
-    window.nwSetLang = function(code, label) {
-      // Update desktop button label
-      var lbl = document.getElementById('nw-lang-label');
-      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
-
-      if (code === 'en') {
-        // Restore English — clear cookies and reload
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-        location.reload();
-        return;
-      }
-
-      // Set Google Translate language cookie
-      document.cookie = 'googtrans=/en/' + code + '; path=/';
-      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
-
-      // Trigger translation via hidden combo — retry if not loaded yet
-      function doTranslate() {
-        var sel = document.querySelector('.goog-te-combo');
-        if (sel) {
-          sel.value = code;
-          sel.dispatchEvent(new Event('change'));
-        } else {
-          setTimeout(doTranslate, 800);
-        }
-      }
-      doTranslate();
-    };
-
-    // ── Aggressively hide Google Translate bar ────────────────
-    // Prevents the dark bar / layout shift on mobile
-    var s = document.createElement('style');
-    s.textContent =
-      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
-      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
-      'body { top:0!important; }' +
-      '.skiptranslate { display:none!important; }' +
-      'iframe.goog-te-banner-frame { display:none!important; }' +
-      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
-    document.head.appendChild(s);
-
-    // Also remove the bar if it appears after translate loads
-    var observer = new MutationObserver(function() {
-      var bar = document.querySelector('.goog-te-banner-frame');
-      if (bar) bar.style.display = 'none';
-      document.body.style.top = '0';
-      document.body.style.marginTop = '0';
-    });
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-  })();
-  </script>
-
-</body>
-</html>
+          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:
