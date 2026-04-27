@@ -1010,24 +1010,37 @@ function renderFlightCards(flights) {
   `;
 
   const kiwiOrigin = searchParams.origin || '';
-  const kiwiDest = searchParams.dest || '';
-  const kiwiDate = searchParams.departDate || '';
-  const kiwiUrl = `https://kiwi.tpk.mx/Imxir0ir`;
-  const tripUrl = `https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585`;
+  const kiwiDest   = searchParams.dest   || '';
+  const kiwiDate   = searchParams.departDate || '';
+  const kiwiPass   = searchParams.numAdults || 1;
+
+  // Pre-filled deep links — route + date + passengers passed directly
+  const kiwiUrl = (kiwiOrigin && kiwiDest && kiwiDate)
+    ? `https://www.kiwi.com/en/search/results/${kiwiOrigin}/${kiwiDest}/${kiwiDate}?adults=${kiwiPass}&affilid=kiwi_affiliates`
+    : `https://kiwi.tpk.mx/Imxir0ir`;
+
+  const tripUrl = (kiwiOrigin && kiwiDest && kiwiDate)
+    ? `https://www.trip.com/flights/list?dcity=${kiwiOrigin}&acity=${kiwiDest}&ddate=${kiwiDate}&adult=${kiwiPass}&Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`
+    : `https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585`;
+
+  const fromName = ROUTE_NAMES[kiwiOrigin] || kiwiOrigin;
+  const toName   = ROUTE_NAMES[kiwiDest]   || kiwiDest;
+  const routeLabel = (kiwiOrigin && kiwiDest) ? `${fromName} → ${toName}` : 'your route';
+
   const kiwiBanner = `
     <div style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4);border:1.5px solid #bae6fd;border-radius:12px;
       padding:12px 16px;margin-bottom:12px;">
-      <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;margin-bottom:6px;">💡 Looking for cheaper flights? Compare other platforms:</div>
+      <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;margin-bottom:6px;">💡 Also compare prices for <strong>${routeLabel}</strong> on other platforms:</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <div style="flex:1;min-width:200px;">
-          <div style="font-size:.78rem;color:#0369a1;margin-bottom:6px;">🌍 Kiwi.com — budget airlines like Ryanair &amp; Wizz Air</div>
+          <div style="font-size:.78rem;color:#0369a1;margin-bottom:6px;">🌍 Kiwi.com — mix &amp; match airlines, find cheaper combos</div>
           <a href="${kiwiUrl}" target="_blank" rel="noopener"
             style="background:#0284c7;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
             Compare on Kiwi.com →
           </a>
         </div>
         <div style="flex:1;min-width:200px;">
-          <div style="font-size:.78rem;color:#1d4ed8;margin-bottom:6px;">✈️ Trip.com — hotels, flights &amp; packages worldwide</div>
+          <div style="font-size:.78rem;color:#1d4ed8;margin-bottom:6px;">✈️ Trip.com — flights, hotels &amp; packages worldwide</div>
           <a href="${tripUrl}" target="_blank" rel="noopener"
             style="background:#1d4ed8;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
             Compare on Trip.com →
@@ -2473,95 +2486,4 @@ function friendlyAuthError(code) {
   return map[code] || 'Something went wrong. Please try again.';
 }
 
-// ─────────────────────────────────────────────────────────────
-// ADMIN BUSINESS DASHBOARD
-// Only visible to owner (magdayaojennamae712@gmail.com)
-// ─────────────────────────────────────────────────────────────
-let _allAdminBookings = [];
-
-async function loadAdminDashboard() {
-  if (!currentUser || currentUser.email !== OWNER_EMAIL) {
-    showPage('home'); return;
-  }
-
-  document.getElementById('admin-loading').style.display = 'flex';
-  document.getElementById('admin-table').style.display   = 'none';
-  document.getElementById('admin-empty').style.display   = 'none';
-
-  try {
-    const snapshot = await db.collection('bookings')
-      .orderBy('createdAt', 'desc')
-      .get();
-
-    _allAdminBookings = [];
-    snapshot.forEach(doc => _allAdminBookings.push({ id: doc.id, ...doc.data() }));
-
-    document.getElementById('admin-loading').style.display = 'none';
-
-    if (_allAdminBookings.length === 0) {
-      document.getElementById('admin-empty').style.display = 'flex';
-      return;
-    }
-
-    renderAdminStats(_allAdminBookings);
-    renderAdminTable(_allAdminBookings);
-
-  } catch (err) {
-    console.error('Admin load error:', err);
-    document.getElementById('admin-loading').style.display = 'none';
-    document.getElementById('admin-empty').style.display   = 'flex';
-  }
-}
-
-function renderAdminStats(bookings) {
-  const total     = bookings.length;
-  const confirmed = bookings.filter(b => b.status === 'confirmed').length;
-  const revenue   = bookings
-    .filter(b => b.status === 'confirmed')
-    .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0);
-  const customers = new Set(bookings.map(b => b.userEmail)).size;
-
-  document.getElementById('stat-total-bookings').textContent  = total;
-  document.getElementById('stat-total-revenue').textContent   = '€' + revenue.toFixed(2);
-  document.getElementById('stat-total-customers').textContent = customers;
-  document.getElementById('stat-confirmed').textContent       = confirmed;
-}
-
-function renderAdminTable(bookings) {
-  if (!bookings.length) {
-    document.getElementById('admin-table').style.display = 'none';
-    document.getElementById('admin-empty').style.display = 'flex';
-    return;
-  }
-  document.getElementById('admin-empty').style.display = 'none';
-  document.getElementById('admin-table').style.display = 'table';
-
-  document.getElementById('admin-table-body').innerHTML = bookings.map(b => `
-    <tr>
-      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
-      <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</div>
-        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
-      </td>
-      <td><strong>${b.flight?.from || '?'} → ${b.flight?.to || '?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td>${b.passengers?.length || 1} pax</td>
-      <td><strong>€${parseFloat(b.totalPrice || 0).toFixed(2)}</strong></td>
-      <td><span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">${b.status || 'unknown'}</span></td>
-    </tr>
-  `).join('');
-}
-
-// FAQ accordion toggle
-function toggleFaq(btn) {
-  var answer = btn.nextElementSibling;
-  if (!answer) return;
-  var isOpen = answer.style.display === 'block';
-  if (isOpen) {
-    answer.style.display = 'none';
-    btn.classList.remove('open');
-  } else {
-    answer.style.display = 'block';
-    btn.classList.add('open');
-  }
-}
+// ────────────────────────────────────
