@@ -264,7 +264,7 @@
 
   <!-- PROMO BANNER -->
   <div id="promo-banner" style="background:#1e40af;color:#fff;text-align:center;padding:10px 44px 10px 12px;font-size:.85rem;font-weight:500;position:relative;width:100%;box-sizing:border-box;">
-    &#9992; <strong>Special Offer:</strong> Book today &mdash; real tickets, real airlines, secured by Stripe. &nbsp;<strong style="text-decoration:underline;cursor:pointer;" onclick="window.scrollTo({top:400,behavior:'smooth'})">Search now &rarr;</strong>
+    &#9992; Real tickets, real airlines &mdash; live prices powered by Duffel API, secured by Stripe. &nbsp;<strong style="text-decoration:underline;cursor:pointer;" onclick="window.scrollTo({top:400,behavior:'smooth'})">Search now &rarr;</strong>
     <button onclick="this.parentElement.style.display='none';" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.25);border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:4px;">&times;</button>
   </div>
 
@@ -2410,4 +2410,9 @@
       document.body.style.top = '0';
       document.body.style.marginTop = '0';
     });
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilte
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  })();
+  </script>
+
+</body>
+</html>

@@ -946,23 +946,48 @@ async function searchFlights() {
 
 // Airline code → full name map
 const AIRLINE_NAMES = {
-  'AY':'Finnair','EK':'Emirates','QR':'Qatar Airways','BA':'British Airways',
-  'LH':'Lufthansa','TK':'Turkish Airlines','AF':'Air France','KL':'KLM',
-  'SK':'SAS','DY':'Norwegian','FR':'Ryanair','U2':'easyJet','VY':'Vueling',
-  'IB':'Iberia','TP':'TAP Air Portugal','LX':'Swiss','OS':'Austrian',
-  'SN':'Brussels Airlines','EI':'Aer Lingus','BE':'flybe',
-  'W6':'Wizz Air','PC':'Pegasus','XW':'NokScoot','TG':'Thai Airways',
-  'SQ':'Singapore Airlines','MH':'Malaysia Airlines','CX':'Cathay Pacific',
-  'JL':'Japan Airlines','NH':'ANA','OZ':'Asiana Airlines','KE':'Korean Air',
+  // Finnish / Nordic
+  'AY':'Finnair','SK':'SAS','DY':'Norwegian','BT':'airBaltic','TF':'Braathens Regional',
+  'FC':'Finncomm Airlines','6H':'Nordic Regional Airlines','OHY':'Nordic Regional Airlines',
+  // European full-service
+  'EK':'Emirates','QR':'Qatar Airways','BA':'British Airways','LH':'Lufthansa',
+  'TK':'Turkish Airlines','AF':'Air France','KL':'KLM','IB':'Iberia',
+  'TP':'TAP Air Portugal','LX':'Swiss','OS':'Austrian Airlines','SN':'Brussels Airlines',
+  'EI':'Aer Lingus','AZ':'ITA Airways','LO':'LOT Polish Airlines','OK':'Czech Airlines',
+  'RO':'TAROM','SU':'Aeroflot','PS':'Ukraine International','A3':'Aegean Airlines',
+  'EW':'Eurowings','BT':'airBaltic','WY':'Oman Air','SV':'Saudia','MS':'EgyptAir',
+  'ET':'Ethiopian Airlines','KQ':'Kenya Airways','SA':'South African Airways',
+  // Budget European
+  'FR':'Ryanair','U2':'easyJet','W6':'Wizz Air','VY':'Vueling','TO':'Transavia France',
+  'HV':'Transavia','I2':'Iberia Express','LS':'Jet2','BY':'TUI Airways',
+  'BE':'Flybe','PC':'Pegasus Airlines','V7':'Volotea',
+  // Middle East / Asia full-service
+  'FZ':'flydubai','G9':'Air Arabia','TG':'Thai Airways','SQ':'Singapore Airlines',
+  'MH':'Malaysia Airlines','CX':'Cathay Pacific','JL':'Japan Airlines','NH':'ANA',
+  'OZ':'Asiana Airlines','KE':'Korean Air','GA':'Garuda Indonesia',
+  'CI':'China Airlines','BR':'EVA Air','TG':'Thai Airways','VN':'Vietnam Airlines',
+  'MU':'China Eastern','CA':'Air China','CZ':'China Southern',
+  // Philippines
   'PR':'Philippine Airlines','5J':'Cebu Pacific','Z2':'Philippines AirAsia',
-  'GA':'Garuda Indonesia','QZ':'Indonesia AirAsia','JT':'Lion Air',
-  'FZ':'flydubai','G9':'Air Arabia','WY':'Oman Air','SV':'Saudia',
-  'MS':'EgyptAir','ET':'Ethiopian Airlines','KQ':'Kenya Airways',
-  'SA':'South African','QF':'Qantas','NZ':'Air New Zealand','VA':'Virgin Australia',
-  'AC':'Air Canada','WS':'WestJet','AA':'American','UA':'United','DL':'Delta',
-  'WN':'Southwest','B6':'JetBlue','AS':'Alaska Airlines','F9':'Frontier',
-  'LA':'LATAM','G3':'Gol','AD':'Azul','CM':'Copa Airlines',
+  // Southeast Asia budget
+  'QZ':'Indonesia AirAsia','JT':'Lion Air','FD':'Thai AirAsia','AK':'AirAsia',
+  'XW':'NokScoot','ID':'Batik Air','SJ':'Sriwijaya Air','OD':'Batik Air Malaysia',
+  // Oceania
+  'QF':'Qantas','NZ':'Air New Zealand','VA':'Virgin Australia',
+  // Americas
+  'AC':'Air Canada','WS':'WestJet','AA':'American Airlines','UA':'United Airlines',
+  'DL':'Delta Air Lines','WN':'Southwest Airlines','B6':'JetBlue','AS':'Alaska Airlines',
+  'F9':'Frontier Airlines','LA':'LATAM','G3':'Gol','AD':'Azul','CM':'Copa Airlines',
 };
+
+// Budget carriers — no free checked bag, buy-on-board food
+const BUDGET_AIRLINES = new Set([
+  'FR','U2','W6','DY','PC','XW','VY','FD','AK','QZ','JT','ID','SJ', // Europe/Asia budget
+  '5J','Z2','OD',                          // Philippines/Malaysia budget
+  'FZ','G9',                               // Middle East LCC
+  'TO','HV','I2','LS','BY','V7',           // European budget (Transavia, Jet2, TUI, Volotea)
+  'F9','WN','G3','AD'                      // Americas budget
+]);
 
 // Render flight result cards (Skyscanner-style)
 function renderFlightCards(flights) {
@@ -1050,21 +1075,23 @@ function renderFlightList(flights) {
     const dealBadge = parseFloat(flight.price.grandTotal) <= minPrice * 1.05
       ? '<div class="badge-best">Best price</div>' : '';
 
-    // Baggage & meal info based on airline type, cabin and flight duration
-    const budgetAirlines = ['FR','U2','W6','DY','PC','XW','VY','FD','AK','QZ','JT','ID','SJ'];
-    const isBudget = budgetAirlines.includes(code);
+    // Baggage & meal info — use actual Duffel API data where available
+    const isBudget = BUDGET_AIRLINES.has(code);
     const isBiz = cabin === 'BUSINESS';
-    const baggage = isBiz
-      ? '🧳 2× 32kg checked · 18kg cabin'
-      : isBudget
-        ? '🎒 Cabin bag only (10kg) · Checked bag: add-on'
-        : '🧳 23kg checked · 8kg cabin included';
+    // Use real Duffel checked-bag quantity (stored at flight.baggage by server.js)
+    const checkedBagQty = flight.baggage?.checkedQty || 0;
+    const cabinBagQty   = flight.baggage?.cabinQty   || 0;
+    const baggage = isBudget
+      ? '🎒 Cabin bag only · Checked bag: paid add-on'
+      : checkedBagQty > 0
+        ? `🧳 ${checkedBagQty}× checked bag · Carry-on included`
+        : '🎒 Carry-on included · Checked bag: check fare';
     // Meal: only for long-haul (≥4h) or business class — not on short European routes
     const _durStr = flight.itineraries[0].duration || 'PT0H';
     const _durH = (parseInt(_durStr.match(/(\d+)H/)?.[1] || 0)) + (parseInt(_durStr.match(/(\d+)M/)?.[1] || 0) / 60);
     const isLongHaul = _durH >= 4;
     const meal = isBiz
-      ? '🍽️ Full meal · Drinks · Lounge access'
+      ? (isLongHaul ? '🍽️ Full meal · Drinks included' : '🍽️ Light meal included')
       : isBudget
         ? '🥤 Buy on board'
         : isLongHaul
@@ -1690,7 +1717,7 @@ async function setupBookingPage() {
             </div>
           </div>
           <div style="font-size:.75rem;color:#6b7280;margin-top:3px;padding-left:26px;">
-            Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${iataAircraftMap[s.aircraft?.code] || airlineAircraftMap[s.carrierCode] || aircraft}
+            Flight ${s.carrierCode}${s.number}${segDur ? ' · ' + segDur : ''} · ${iataAircraftMap[s.aircraft] || airlineAircraftMap[s.carrierCode] || aircraft}
           </div>
         </div>
         ${nextSeg ? (
@@ -1706,17 +1733,40 @@ async function setupBookingPage() {
       }).join('')}
     </div>
 
-    <!-- Included amenities -->
-    <div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
-      <div style="font-size:.78rem;font-weight:700;color:#15803d;margin-bottom:6px;">✅ WHAT'S INCLUDED</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.78rem;color:#374151;">
-        ${(selectedFlight.baggage?.checkedQty > 0) ? '<div>✓ Checked baggage</div>' : '<div style=\"color:#6b7280\">✗ No checked bag</div>'}
-        <div>✓ Carry-on bag</div>
-        ${isBiz ? '<div>✓ Meals included</div><div>✓ Lounge access</div><div>✓ Lie-flat seat</div><div>✓ Priority boarding</div>' : '<div>✓ Seat included</div><div>✓ 24/7 support</div>'}
-        <div>✓ Real e-ticket</div>
-        <div>✓ Secure Stripe payment</div>
-      </div>
-    </div>
+    <!-- Included amenities — built from actual Duffel data + realistic long-haul standards -->
+    ${(() => {
+      const _bCode = selectedFlight.itineraries[0].segments[0].carrierCode;
+      const _isBudg = BUDGET_AIRLINES.has(_bCode);
+      const _bd = selectedFlight.itineraries[0].duration || 'PT0H';
+      const _bh = (parseInt(_bd.match(/(\d+)H/)?.[1]||0)) + (parseInt(_bd.match(/(\d+)M/)?.[1]||0)/60);
+      const _isLongHaul = _bh >= 4;
+      const _hasChecked = selectedFlight.baggage?.checkedQty > 0;
+      const rows = [];
+      // Baggage
+      rows.push(_hasChecked ? '✓ Checked baggage' : '<span style="color:#6b7280">✗ No checked bag</span>');
+      rows.push(_isBudg ? '<span style="color:#6b7280">Carry-on: check airline</span>' : '✓ Carry-on bag');
+      // Meals
+      if (isBiz)       rows.push('✓ Full meal service');
+      else if (_isBudg) rows.push('<span style="color:#6b7280">Food: buy on board</span>');
+      else if (_isLongHaul) rows.push('✓ Meal service (airline)');
+      else              rows.push('☕ Snack service');
+      // Long-haul extras (standard on widebody long-haul flights)
+      if (_isLongHaul) {
+        rows.push('✓ Seatback entertainment');
+        rows.push('✓ Blanket & pillow');
+        rows.push('✓ USB / power outlet');
+      }
+      if (isBiz)        rows.push('✓ Priority boarding');
+      // Always true
+      rows.push('✓ Real e-ticket');
+      rows.push('✓ Secure Stripe payment');
+      const cells = rows.map(r => `<div>${r}</div>`).join('');
+      return `<div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+        <div style="font-size:.78rem;font-weight:700;color:#15803d;margin-bottom:6px;">✅ WHAT'S INCLUDED</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.78rem;color:#374151;">${cells}</div>
+        ${_isLongHaul ? '<div style="font-size:.7rem;color:#6b7280;margin-top:6px;">Long-haul extras subject to aircraft type. Wi-Fi varies by route — check with airline.</div>' : ''}
+      </div>`;
+    })()}
   `;
 
   // Show return flight section if round trip
@@ -1810,7 +1860,7 @@ async function setupBookingPage() {
     ${(() => { const _d = selectedFlight.itineraries[0].duration || 'PT0H'; const _h = (parseInt(_d.match(/(\d+)H/)?.[1]||0)) + (parseInt(_d.match(/(\d+)M/)?.[1]||0)/60); return _h >= 4 || isBiz ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Meals included</span><span>€0.00</span></div>' : ''; })()}
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ 24/7 booking support</span><span>€0.00</span></div>
     <div class="price-row total"><span>Total</span><span>€${grandTotal.toFixed(2)}</span></div>
-    <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Price guaranteed · No hidden fees</div>
+    <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Transparent pricing · No surprise charges at checkout</div>
   `;
   document.getElementById('price-breakdown').innerHTML = breakdownHtml;
 
