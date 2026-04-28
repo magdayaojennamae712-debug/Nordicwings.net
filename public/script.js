@@ -2999,4 +2999,8 @@ function renderAdminTable(bookings) {
       <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
       <td>
         <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
-           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
+      </td>
+    </tr>
+  `).join('');
+}

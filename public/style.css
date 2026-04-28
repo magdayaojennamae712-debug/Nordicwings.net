@@ -1301,3 +1301,4 @@ img { max-width: 100%; display: block; }
 @media(max-width:600px){
   .footer-social-banner { flex-direction: column; align-items: flex-start; }
 }
+                                                                               
