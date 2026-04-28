@@ -36,4 +36,31 @@
       "src": "/icon-1024.png",
       "sizes": "1024x1024",
       "type": "image/png",
-      "purpo
+      "purpose": "any"
+    }
+  ],
+  "categories": [
+    "travel",
+    "lifestyle"
+  ],
+  "screenshots": [
+    {
+      "src": "/skybook_facebook_banner.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "NordicWings Flight Search"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NordicWings App"
+    }
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "/"
+}
