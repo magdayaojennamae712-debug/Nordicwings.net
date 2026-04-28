@@ -883,14 +883,6 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     });
   }
 
-  // ── Duffel ONLY — only real bookable flights shown to customers ─
-  // Sky Scrapper results are NOT used: they have no Duffel offer ID
-  // and cannot be booked. Showing them would be misleading/fake.
-  if (!DUFFEL_API_KEY) {
-    console.log('No DUFFEL_API_KEY configured — returning empty results.');
-    return res.json([]);
-  }
-
   try {
     // 1️⃣ Try Tequila/Kiwi first — real flights, no balance needed
     console.log('Searching Tequila/Kiwi for real flights...');
@@ -916,7 +908,7 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
       }
     }
 
-    console.log('No flights found from any source.');
+    console.log('No flights found from Tequila or Duffel.');
     return res.json([]);
 
   } catch (err) {

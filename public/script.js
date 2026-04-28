@@ -1377,7 +1377,7 @@ function showAgencyPage() {
 }
 
 function proceedToBooking() {
-  // Tequila/Kiwi flight — open the real booking link directly, no Stripe needed
+  // Tequila/Kiwi flight — open the real booking link directly
   if (selectedFlight && selectedFlight.tequilaDeepLink) {
     window.open(selectedFlight.tequilaDeepLink, '_blank');
     return;
