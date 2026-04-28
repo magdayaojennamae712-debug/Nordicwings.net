@@ -1118,17 +1118,17 @@ function renderFlightList(flights) {
       : checkedBagQty > 0
         ? `🧳 ${checkedBagQty}× checked bag · Carry-on included`
         : '🎒 Carry-on included · Checked bag: check fare';
-    // Meal: only for long-haul (≥4h) or business class — not on short European routes
+    // Meal: only claim what is certain — never guess per airline
     const _durStr = flight.itineraries[0].duration || 'PT0H';
     const _durH = (parseInt(_durStr.match(/(\d+)H/)?.[1] || 0)) + (parseInt(_durStr.match(/(\d+)M/)?.[1] || 0) / 60);
-    const isLongHaul = _durH >= 4;
+    const isLongHaul = _durH >= 6;
     const meal = isBiz
-      ? (isLongHaul ? '🍽️ Full meal · Drinks included' : '🍽️ Light meal included')
+      ? '🍽️ Meal service included'
       : isBudget
         ? '🥤 Buy on board'
         : isLongHaul
-          ? '🍱 Meal included'
-          : '☕ Snack/drink service';
+          ? '🍱 Meal service (check airline)'
+          : '☕ Snack/drink (check airline)';
 
     return `
       <div class="fc" onclick="selectFlight(${i})" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
@@ -1751,38 +1751,33 @@ async function setupBookingPage() {
       }).join('')}
     </div>
 
-    <!-- Included amenities — built from actual Duffel data + realistic long-haul standards -->
+    <!-- Included amenities — only show what is confirmed from Duffel data -->
     ${(() => {
       const _bCode = selectedFlight.itineraries[0].segments[0].carrierCode;
       const _isBudg = BUDGET_AIRLINES.has(_bCode);
       const _bd = selectedFlight.itineraries[0].duration || 'PT0H';
       const _bh = (parseInt(_bd.match(/(\d+)H/)?.[1]||0)) + (parseInt(_bd.match(/(\d+)M/)?.[1]||0)/60);
-      const _isLongHaul = _bh >= 4;
+      const _isLongHaul = _bh >= 6;
       const _hasChecked = selectedFlight.baggage?.checkedQty > 0;
       const rows = [];
-      // Baggage
-      rows.push(_hasChecked ? '✓ Checked baggage' : '<span style="color:#6b7280">✗ No checked bag</span>');
+      // Baggage — only show if confirmed by Duffel
+      rows.push(_hasChecked ? '✓ Checked baggage' : '<span style="color:#6b7280">Checked bag: see fare</span>');
       rows.push(_isBudg ? '<span style="color:#6b7280">Carry-on: check airline</span>' : '✓ Carry-on bag');
-      // Meals
-      if (isBiz)       rows.push('✓ Full meal service');
+      // Meals — only confirmed claims
+      if (isBiz)        rows.push('✓ Meal service (business)');
       else if (_isBudg) rows.push('<span style="color:#6b7280">Food: buy on board</span>');
-      else if (_isLongHaul) rows.push('✓ Meal service (airline)');
-      else              rows.push('☕ Snack service');
-      // Long-haul extras (standard on widebody long-haul flights)
-      if (_isLongHaul) {
-        rows.push('✓ Seatback entertainment');
-        rows.push('✓ Blanket & pillow');
-        rows.push('✓ USB / power outlet');
-      }
-      if (isBiz)        rows.push('✓ Priority boarding');
-      // Always true
-      rows.push('✓ Real e-ticket');
+      else              rows.push('<span style="color:#6b7280">Meals: check airline</span>');
+      // Only show IFE/comfort for confirmed long-haul widebody flights (6h+)
+      if (isBiz) rows.push('✓ Priority boarding');
+      // Always true for every NordicWings booking
+      rows.push('✓ Real e-ticket issued');
       rows.push('✓ Secure Stripe payment');
+      rows.push('✓ 24/7 booking support');
       const cells = rows.map(r => `<div>${r}</div>`).join('');
       return `<div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
         <div style="font-size:.78rem;font-weight:700;color:#15803d;margin-bottom:6px;">✅ WHAT'S INCLUDED</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.78rem;color:#374151;">${cells}</div>
-        ${_isLongHaul ? '<div style="font-size:.7rem;color:#6b7280;margin-top:6px;">Long-haul extras subject to aircraft type. Wi-Fi varies by route — check with airline.</div>' : ''}
+        <div style="font-size:.7rem;color:#6b7280;margin-top:6px;">Meals, entertainment &amp; Wi-Fi vary by airline and aircraft. Check airline website for full details.</div>
       </div>`;
     })()}
   `;
