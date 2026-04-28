@@ -75,13 +75,13 @@ img { max-width: 100%; display: block; }
 
 /* ── Header ─────────────────────────────────────────────────── */
 #site-header {
-  background: rgba(255,255,255,.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-sm);
+  contain: layout style;
 }
 
 .header-inner {
@@ -258,7 +258,6 @@ img { max-width: 100%; display: block; }
 .hero-badge {
   display: inline-block;
   background: rgba(255,255,255,.2);
-  backdrop-filter: blur(10px);
   color: white; font-size: .85rem; font-weight: 600;
   padding: 6px 16px; border-radius: 20px;
   margin-bottom: 20px; border: 1px solid rgba(255,255,255,.3);
@@ -1092,7 +1091,7 @@ img { max-width: 100%; display: block; }
 ══════════════════════════════════════════════ */
 .policy-modal-overlay {
   display: none; position: fixed; inset: 0; z-index: 2000;
-  background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+  background: rgba(0,0,0,.55);
   align-items: center; justify-content: center; padding: 20px;
 }
 .policy-modal-card {

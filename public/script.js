@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', checkUrlParams);
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + pageId).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'instant' });
 
   // Load data when navigating to special pages
   if (pageId === 'dashboard') loadDashboard();
@@ -769,7 +769,11 @@ function generateClientFlights(orig, dest, date, numAdults) {
   });
 }
 
+let _searchInProgress = false;
 async function searchFlights() {
+  // Prevent double-clicks / multiple simultaneous searches
+  if (_searchInProgress) return;
+
   const originInput = document.getElementById('origin-input');
   const destInput   = document.getElementById('dest-input');
   const departDate  = document.getElementById('depart-input').value;
@@ -928,11 +932,13 @@ async function searchFlights() {
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
 
-  // Fetch real Duffel flights only
+  // Fetch flights
+  _searchInProgress = true;
   try {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), 20000); // 20s max wait
+    const _abortTimer = setTimeout(() => controller.abort(), 15000); // 15s max
     const resp = await fetch(`/api/flights/search?${qs}`, { signal: controller.signal });
+    clearTimeout(_abortTimer);
     if (!resp.ok) throw new Error('API error');
     const flights = await resp.json();
     document.getElementById('results-loading').style.display = 'none';
@@ -960,6 +966,8 @@ async function searchFlights() {
     console.warn('Flight search error:', err.message);
     document.getElementById('results-loading').style.display = 'none';
     document.getElementById('results-empty').style.display   = 'flex';
+  } finally {
+    _searchInProgress = false;
   }
 }
 
@@ -1076,6 +1084,10 @@ function renderFlightList(flights) {
   const container = document.getElementById('flights-container');
   if (!container) return;
 
+  // Pre-compute min price once (not inside the map loop)
+  const _allPrices = (window._flightsAll || flights).map(f => parseFloat(f.price.grandTotal));
+  const _minPrice  = _allPrices.length ? Math.min(..._allPrices) : 0;
+
   container.innerHTML = flights.map((flight, i) => {
     const seg      = flight.itineraries[0].segments[0];
     const lastSeg  = flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1];
@@ -1101,10 +1113,8 @@ function renderFlightList(flights) {
       ? `<div class="seats-urgent">🔥 Only ${seats} left!</div>`
       : (seats && seats <= 9 ? `<div class="seats-warning">${seats} seats left</div>` : '');
 
-    // Best deal badge (cheapest 20%)
-    const allPrices = (window._flightsAll||flights).map(f=>parseFloat(f.price.grandTotal));
-    const minPrice = Math.min(...allPrices);
-    const dealBadge = parseFloat(flight.price.grandTotal) <= minPrice * 1.05
+    // Best deal badge (cheapest 5% range)
+    const dealBadge = parseFloat(flight.price.grandTotal) <= _minPrice * 1.05
       ? '<div class="badge-best">Best price</div>' : '';
 
     // Baggage & meal info — use actual Duffel API data where available
@@ -2387,11 +2397,12 @@ async function loadDashboard() {
     }
 
     listEl.style.display = 'flex';
-    listEl.innerHTML = '';
 
+    // Build all HTML at once — never use innerHTML += in a loop (causes DOM reflow each iteration)
+    const cardsHtml = [];
     snapshot.forEach(doc => {
       const b = doc.data();
-      listEl.innerHTML += `
+      cardsHtml.push(`
         <div class="booking-card" id="booking-${doc.id}">
           <div>
             <span class="booking-status ${b.status === 'confirmed' ? 'status-confirmed' : 'status-cancelled'}">
@@ -2414,8 +2425,9 @@ async function loadDashboard() {
             </button>
           ` : '<span style="color:#9ca3af;font-size:.85rem;">Cancelled</span>'}
         </div>
-      `;
+      `);
     });
+    listEl.innerHTML = cardsHtml.join('');
 
   } catch (err) {
     loadingEl.style.display = 'none';
