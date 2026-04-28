@@ -124,6 +124,26 @@ function isValidDate(dateStr) {
 const RAPIDAPI_KEY  = process.env.RAPIDAPI_KEY;
 const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 
+// ── Hotelbeds API config ──────────────────────────────────────
+const HOTELBEDS_API_KEY = process.env.HOTELBEDS_API_KEY || '2c2c92e707865ec80970569434ecdbaf';
+const HOTELBEDS_SECRET  = process.env.HOTELBEDS_SECRET  || '4e909ddcd9';
+const HOTELBEDS_BASE    = 'https://api.test.hotelbeds.com'; // switch to api.hotelbeds.com when live
+
+function getHotelbedsHeaders() {
+  const crypto = require('crypto');
+  const timestamp = Math.round(Date.now() / 1000).toString();
+  const signature = crypto.createHash('sha256')
+    .update(HOTELBEDS_API_KEY + HOTELBEDS_SECRET + timestamp)
+    .digest('hex');
+  return {
+    'Api-key':        HOTELBEDS_API_KEY,
+    'X-Signature':    signature,
+    'Accept':         'application/json',
+    'Content-Type':   'application/json',
+    'Accept-Encoding':'gzip'
+  };
+}
+
 // ── Duffel API config ─────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════
 // ✅ DUFFEL LIVE API — NordicWings uses Duffel for ALL real flights
@@ -1767,6 +1787,85 @@ app.use((req, res) => {
     return res.status(404).json({ error: 'Not found.' });
   }
   res.status(404).json({ error: 'Not found.' });
+});
+
+// ============================================================
+// ROUTE: GET /api/hotels/search
+// Search hotels via Hotelbeds API
+// Query: destination (IATA or city), checkIn, checkOut, adults, rooms
+// ============================================================
+app.get('/api/hotels/search', async (req, res) => {
+  const { destination, checkIn, checkOut, adults, rooms } = req.query;
+  if (!destination || !checkIn || !checkOut) {
+    return res.status(400).json({ error: 'destination, checkIn and checkOut are required.' });
+  }
+
+  const cleanAdults = Math.min(Math.max(parseInt(adults) || 2, 1), 9);
+  const cleanRooms  = Math.min(Math.max(parseInt(rooms)  || 1, 1), 5);
+
+  try {
+    // Map IATA airport code → Hotelbeds destination code
+    // Hotelbeds uses their own destination codes — use content API to resolve
+    const destRes = await fetch(
+      `${HOTELBEDS_BASE}/hotel-content-api/1.0/locations/destinations?fields=all&language=ENG&from=1&to=5&useSecondaryLanguage=false&destinationCodes=${encodeURIComponent(destination.toUpperCase())}`,
+      { headers: getHotelbedsHeaders(), signal: AbortSignal.timeout(10000) }
+    );
+
+    let destCode = destination.toUpperCase();
+    if (destRes.ok) {
+      const destData = await destRes.json();
+      if (destData.destinations?.length) destCode = destData.destinations[0].code;
+    }
+
+    // Search hotels
+    const body = {
+      stay: { checkIn, checkOut },
+      occupancies: [{ rooms: cleanRooms, adults: cleanAdults, children: 0 }],
+      destination: { code: destCode },
+      filter: { maxHotels: 12, minCategory: 3 },
+      reviews: [{ type: 'HOTELBEDS', maxRate: 10, minRate: 5, minReviewCount: 3 }]
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const hotelRes = await fetch(`${HOTELBEDS_BASE}/hotel-api/1.0/hotels`, {
+      method: 'POST',
+      headers: getHotelbedsHeaders(),
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!hotelRes.ok) {
+      const errText = await hotelRes.text();
+      console.error('Hotelbeds error:', errText.substring(0, 300));
+      return res.json({ hotels: [] });
+    }
+
+    const data = await hotelRes.json();
+    const hotels = (data.hotels?.hotels || []).slice(0, 8).map(h => ({
+      code:       h.code,
+      name:       h.name,
+      stars:      h.categoryCode?.replace('EST', '') || '3',
+      minRate:    h.minRate,
+      maxRate:    h.maxRate,
+      currency:   h.currency,
+      rooms:      (h.rooms || []).slice(0, 2).map(r => ({
+        name:       r.name,
+        rate:       r.rates?.[0]?.net,
+        boardName:  r.rates?.[0]?.boardName || 'Room only',
+        rateKey:    r.rates?.[0]?.rateKey
+      }))
+    }));
+
+    console.log(`Hotelbeds returned ${hotels.length} hotels for ${destCode}`);
+    res.json({ hotels, destination: destCode });
+
+  } catch (err) {
+    console.error('Hotelbeds search error:', err.message);
+    res.json({ hotels: [] });
+  }
 });
 
 app.listen(PORT, () => {

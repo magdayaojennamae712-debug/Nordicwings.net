@@ -2236,6 +2236,71 @@ function showConfirmationPage(booking) {
     </div>
   `;
   showPage('confirmation');
+
+  // Auto-search hotels for destination
+  const destCode = booking.flight?.to;
+  const departDate = booking.flight?.departTime?.substring(0, 10);
+  if (destCode && departDate) {
+    const checkIn  = departDate;
+    const checkOut = new Date(new Date(departDate).getTime() + 7 * 86400000).toISOString().substring(0, 10);
+    searchHotelsForConfirmation(destCode, checkIn, checkOut, 2);
+  }
+}
+
+async function searchHotelsForConfirmation(destination, checkIn, checkOut, adults) {
+  const upsell  = document.getElementById('hotel-upsell');
+  const loading = document.getElementById('hotel-loading');
+  const results = document.getElementById('hotel-results');
+  if (!upsell) return;
+
+  upsell.style.display  = 'block';
+  loading.style.display = 'block';
+  results.style.display = 'none';
+
+  try {
+    const params = new URLSearchParams({ destination, checkIn, checkOut, adults, rooms: 1 });
+    const res = await fetch(`/api/hotels/search?${params}`);
+    const data = await res.json();
+    const hotels = data.hotels || [];
+
+    loading.style.display = 'none';
+
+    if (!hotels.length) {
+      upsell.style.display = 'none';
+      return;
+    }
+
+    results.innerHTML = hotels.slice(0, 4).map(h => {
+      const stars = '⭐'.repeat(Math.min(parseInt(h.stars) || 3, 5));
+      const price = h.rooms?.[0]?.rate ? `from €${parseFloat(h.rooms[0].rate).toFixed(0)}/night` : '';
+      const board = h.rooms?.[0]?.boardName || '';
+      return `
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-weight:700;color:#1a2b4a;font-size:.9rem;">${h.name}</div>
+            <div style="font-size:.78rem;color:#f59e0b;margin:2px 0;">${stars}</div>
+            <div style="font-size:.75rem;color:#6b7280;">${board}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800;color:#16a34a;font-size:1rem;">${price}</div>
+            <div style="font-size:.72rem;color:#6b7280;">per room · ${checkIn} – ${checkOut}</div>
+          </div>
+        </div>`;
+    }).join('') + `
+      <div style="text-align:center;margin-top:8px;">
+        <a href="https://tp.media/r?marker=719573&trs=519813&p=5869&u=https%3A%2F%2Fektatraveling.com&campaign_id=225"
+           target="_blank" rel="noopener"
+           style="display:inline-block;background:#1a2b4a;color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;margin-bottom:6px;">
+          🏨 Book a hotel at your destination →
+        </a>
+        <div style="font-size:.72rem;color:#9ca3af;">Best price guarantee · Free cancellation on most rooms</div>
+      </div>`;
+
+    results.style.display = 'block';
+  } catch (err) {
+    console.warn('Hotel search error:', err.message);
+    upsell.style.display = 'none';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2861,4 +2926,17 @@ function renderAdminTable(bookings) {
     <tr>
       <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
       <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.first
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passengers?.length||1}</td>
+      <td>
+        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+      </td>
+      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
+      <td>
+        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;

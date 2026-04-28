@@ -1210,6 +1210,15 @@
           <button class="btn-ghost" onclick="showPage('home')">Book Another Flight</button>
         </div>
 
+        <!-- Hotel upsell — Hotelbeds API -->
+        <div id="hotel-upsell" style="margin-top:28px;display:none;">
+          <div style="font-size:1rem;font-weight:700;color:#1a2b4a;margin-bottom:12px;">🏨 Need a hotel at your destination?</div>
+          <div id="hotel-loading" style="text-align:center;padding:16px;color:#6b7280;font-size:.85rem;">
+            <div class="spinner" style="margin:0 auto 8px;"></div>Searching hotels...
+          </div>
+          <div id="hotel-results" style="display:none;"></div>
+        </div>
+
         <!-- Compensair affiliate banner — earn commission if flight is delayed/cancelled -->
         <div style="margin-top:28px;background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1.5px solid #fcd34d;border-radius:14px;padding:18px 20px;">
           <div style="font-size:.85rem;font-weight:700;color:#92400e;margin-bottom:6px;">✈️ Know your passenger rights!</div>
@@ -2453,4 +2462,82 @@
           'transition:background .12s;';
         item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
           '<span>' + l.label + '</span>';
-       
+        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
+        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
+        item.onclick = function(){
+          nwSetLang(l.code, l.label);
+          // Close mobile menu after selecting language
+          var mm = document.getElementById('mobile-menu');
+          if (mm) mm.classList.remove('open');
+        };
+        mlist.appendChild(item);
+      });
+    }
+
+    // ── Toggle desktop dropdown ───────────────────────────────
+    window.nwToggleLang = function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('nw-lang-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    };
+    document.addEventListener('click', function(){
+      var dd = document.getElementById('nw-lang-dropdown');
+      if (dd) dd.style.display = 'none';
+    });
+
+    // ── Set language via Google Translate ─────────────────────
+    window.nwSetLang = function(code, label) {
+      // Update desktop button label
+      var lbl = document.getElementById('nw-lang-label');
+      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
+
+      if (code === 'en') {
+        // Restore English — clear cookies and reload
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+        location.reload();
+        return;
+      }
+
+      // Set Google Translate language cookie
+      document.cookie = 'googtrans=/en/' + code + '; path=/';
+      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
+
+      // Trigger translation via hidden combo — retry if not loaded yet
+      function doTranslate() {
+        var sel = document.querySelector('.goog-te-combo');
+        if (sel) {
+          sel.value = code;
+          sel.dispatchEvent(new Event('change'));
+        } else {
+          setTimeout(doTranslate, 800);
+        }
+      }
+      doTranslate();
+    };
+
+    // ── Aggressively hide Google Translate bar ────────────────
+    // Prevents the dark bar / layout shift on mobile
+    var s = document.createElement('style');
+    s.textContent =
+      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
+      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
+      'body { top:0!important; }' +
+      '.skiptranslate { display:none!important; }' +
+      'iframe.goog-te-banner-frame { display:none!important; }' +
+      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
+    document.head.appendChild(s);
+
+    // Also remove the bar if it appears after translate loads
+    var observer = new MutationObserver(function() {
+      var bar = document.querySelector('.goog-te-banner-frame');
+      if (bar) bar.style.display = 'none';
+      document.body.style.top = '0';
+      document.body.style.marginTop = '0';
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  })();
+  </script>
+
+</body>
+</html>
