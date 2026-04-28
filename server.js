@@ -132,9 +132,9 @@ const RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
 // ══════════════════════════════════════════════════════════════
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
-// NordicWings service fee: 5% of base fare, minimum €12 per ticket
-const MARKUP_RATE    = 0.05;  // 5% on every ticket
-const MARKUP_MIN_FEE = 12;    // minimum €12 booking fee regardless of price
+// NordicWings service fee: 3% of base fare, minimum €8 per ticket
+const MARKUP_RATE    = 0.03;  // 3% on every ticket
+const MARKUP_MIN_FEE = 8;     // minimum €8 booking fee regardless of price
 
 async function searchDuffelFlights(orig, dest, date, adults, children = 0, infants = 0, cabinClass = 'economy') {
   if (!DUFFEL_API_KEY) return null;
