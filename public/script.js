@@ -932,53 +932,101 @@ async function searchFlights() {
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
 
-  // Fetch flights
-  _searchInProgress = true;
-  try {
-    const controller = new AbortController();
-    const _abortTimer = setTimeout(() => controller.abort(), 15000); // 15s max
-    const resp = await fetch(`/api/flights/search?${qs}`, { signal: controller.signal });
-    clearTimeout(_abortTimer);
-    if (!resp.ok) throw new Error('API error');
-    const flights = await resp.json();
-    document.getElementById('results-loading').style.display = 'none';
-    if (!flights || !flights.length) {
-      // Pre-fill affiliate links with the customer's actual search
-      const orig  = searchParams.origin      || '';
-      const dest  = searchParams.dest        || '';
-      const date  = searchParams.departDate  || '';
-      const pass  = searchParams.numAdults   || 1;
-      const TP    = '719573';
-      const TC    = 'Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585';
-      if (orig && dest && date) {
-        const kiwiLink  = document.getElementById('empty-kiwi-link');
-        const tripLink  = document.getElementById('empty-trip-link');
-        const aviaLink  = document.getElementById('empty-aviasales-link');
-        if (kiwiLink)  kiwiLink.href  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
-        if (tripLink)  tripLink.href  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`;
-        if (aviaLink)  aviaLink.href  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`;
+  // Show affiliate results instantly — no API needed, customer books directly on airline
+  document.getElementById('results-loading').style.display = 'none';
+  document.getElementById('results-list').style.display    = 'block';
+  renderAffiliateResults(origin, dest, departDate, numAdults, numChildren, numInfants);
+}
 
-        // Airline direct links — pre-filled with route + date via Jetradar deep links
-        const omanLink    = document.getElementById('empty-omanair-link');
-        const ekLink      = document.getElementById('empty-emirates-link');
-        const ayLink      = document.getElementById('empty-finnair-link');
-        const qrLink      = document.getElementById('empty-qatar-link');
-        if (omanLink) omanLink.href = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=WY`;
-        if (ekLink)   ekLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=EK`;
-        if (ayLink)   ayLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=AY`;
-        if (qrLink)   qrLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=QR`;
-      }
-      document.getElementById('results-empty').style.display = 'flex';
-      return;
-    }
-    renderFlightCards(flights);
-  } catch (err) {
-    console.warn('Flight search error:', err.message);
-    document.getElementById('results-loading').style.display = 'none';
-    document.getElementById('results-empty').style.display   = 'flex';
-  } finally {
-    _searchInProgress = false;
-  }
+function renderAffiliateResults(orig, dest, date, adults, children, infants) {
+  const TP   = '719573';
+  const TC   = 'Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585';
+  const pax  = adults || 1;
+  const fromName = ROUTE_NAMES[orig] || orig;
+  const toName   = ROUTE_NAMES[dest] || dest;
+  const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
+
+  const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
+  const aviaUrl  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
+  const tripUrl  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
+  const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
+
+  const list = document.getElementById('results-list');
+  list.style.display = 'block';
+  list.innerHTML = `
+    <div style="max-width:700px;margin:0 auto;padding:8px 0;">
+      <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:16px;padding:22px 24px;margin-bottom:20px;color:#fff;">
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">✈ Find the best price for ${label}</div>
+        <div style="font-size:.85rem;opacity:.85;">${formatDate(date)} · ${pax} Adult${pax>1?'s':''}</div>
+        <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Click any option below — you'll be taken directly to the airline or booking site to complete your purchase securely.</div>
+      </div>
+
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        <a href="${kiwiUrl}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #bae6fd;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.8rem;">🥝</span>
+            <div>
+              <div style="font-weight:800;color:#0284c7;font-size:.95rem;">Kiwi.com</div>
+              <div style="font-size:.78rem;color:#475569;">Mix &amp; match airlines — often finds cheapest combos</div>
+            </div>
+          </div>
+          <span style="background:#0284c7;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
+        </a>
+        <a href="${aviaUrl}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.8rem;">🔍</span>
+            <div>
+              <div style="font-weight:800;color:#1a2b4a;font-size:.95rem;">Aviasales</div>
+              <div style="font-size:.78rem;color:#475569;">Compare 728 airlines worldwide</div>
+            </div>
+          </div>
+          <span style="background:#1a2b4a;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
+        </a>
+        <a href="${tripUrl}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.8rem;">✈️</span>
+            <div>
+              <div style="font-weight:800;color:#e53e3e;font-size:.95rem;">Trip.com</div>
+              <div style="font-size:.78rem;color:#475569;">Flights + hotels + packages worldwide</div>
+            </div>
+          </div>
+          <span style="background:#e53e3e;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
+        </a>
+      </div>
+
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">✈ Book directly with airline</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <a href="${jBase}&airline=WY" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇴🇲</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Oman Air</div><div style="font-size:.72rem;color:#64748b;">Gulf &amp; Asia routes</div></div>
+        </a>
+        <a href="${jBase}&airline=EK" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇦🇪</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Emirates</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Dubai</div></div>
+        </a>
+        <a href="${jBase}&airline=AY" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇫🇮</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Finnair</div><div style="font-size:.72rem;color:#64748b;">Europe &amp; Asia from HEL</div></div>
+        </a>
+        <a href="${jBase}&airline=QR" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇶🇦</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Qatar Airways</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Doha</div></div>
+        </a>
+      </div>
+
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;font-size:.78rem;color:#166534;text-align:center;">
+        ✓ All links are real airlines &amp; trusted booking sites &nbsp;·&nbsp; ✓ Secure payment on their website &nbsp;·&nbsp; ✓ Real ticket issued instantly
+      </div>
+    </div>
+  `;
 }
 
 // Airline code → full name map
