@@ -1088,6 +1088,25 @@ function renderFlightCards(flights) {
 
   list.innerHTML = kiwiBanner + sortBarHtml + '<div id="flights-container"></div>';
   renderFlightList(flights);
+
+  // ── Show airline direct links (always on results page) ──────
+  const TP = '719573';
+  const airlineSection = document.getElementById('airline-direct-section');
+  if (airlineSection) {
+    airlineSection.style.display = 'block';
+    const o = kiwiOrigin, d = kiwiDest, dt = kiwiDate, p = kiwiPass;
+    const base = `https://jetradar.com/flights/?marker=${TP}&origin=${o}&destination=${d}&depart_date=${dt}&adults=${p}`;
+    const oa = document.getElementById('results-omanair-link');
+    const ek = document.getElementById('results-emirates-link');
+    const ay = document.getElementById('results-finnair-link');
+    const qr = document.getElementById('results-qatar-link');
+    if (o && d && dt) {
+      if (oa) oa.href = base + '&airline=WY';
+      if (ek) ek.href = base + '&airline=EK';
+      if (ay) ay.href = base + '&airline=AY';
+      if (qr) qr.href = base + '&airline=QR';
+    }
+  }
 }
 
 function renderFlightList(flights) {
