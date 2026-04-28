@@ -2183,16 +2183,29 @@ function showConfirmationPage(booking) {
       </a>
     </div>
 
-    <!-- Searadar affiliate banner -->
-    <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid #bfdbfe;
+    <!-- EKTA Travel Insurance affiliate banner -->
+    <div style="margin-top:10px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;
       border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div>
-        <div style="font-weight:700;color:#1e40af;font-size:.85rem;">🛡️ Protect future trips</div>
-        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Travel insurance — cancel for any reason, medical cover, luggage</div>
+        <div style="font-weight:700;color:#166534;font-size:.85rem;">🛡️ Travel Insurance — EKTA</div>
+        <div style="font-size:.78rem;color:#15803d;margin-top:2px;">Medical cover, trip cancellation, lost luggage · Accepted by embassies worldwide</div>
+      </div>
+      <a href="https://tp.media/r?marker=719573&trs=519813&p=5869&u=https%3A%2F%2Fektatraveling.com&campaign_id=225" target="_blank" rel="noopener"
+        style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Get insured →
+      </a>
+    </div>
+
+    <!-- SeaRadar affiliate banner — ferry booking -->
+    <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;
+      border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;color:#1e40af;font-size:.85rem;">🚢 Need a ferry?</div>
+        <div style="font-size:.78rem;color:#1d4ed8;margin-top:2px;">Book ferry tickets across the Baltic, Mediterranean &amp; beyond — SeaRadar</div>
       </div>
       <a href="https://searadar.tpk.mx/XaNzHXVR" target="_blank" rel="noopener"
-        style="background:#1d4ed8;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
-        Get insured →
+        style="background:#2563eb;color:#fff;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+        Find ferries →
       </a>
     </div>
 
@@ -2848,17 +2861,4 @@ function renderAdminTable(bookings) {
     <tr>
       <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
       <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
-        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
-      </td>
-      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td style="text-align:center;">${b.passengers?.length||1}</td>
-      <td>
-        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
-        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
-      </td>
-      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
-      <td>
-        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
-           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;
+        <div class="admin-customer-name">${b.passengers?.[0]?.first
