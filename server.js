@@ -799,89 +799,33 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
     });
   }
 
-  // ── Try Duffel first (real flights, live API) ───────────────
-  if (DUFFEL_API_KEY) {
-    console.log('Trying Duffel API...');
-    const duffelFlights = await searchDuffelFlights(cleanOrigin, cleanDest, cleanDate, cleanAdults, cleanChildren, cleanInfants, cleanCabin);
-    if (duffelFlights && duffelFlights.length) {
-      console.log(`Duffel returned ${duffelFlights.length} real flights!`);
-      return res.json(duffelFlights);
-    }
-    console.log('Duffel returned no results — trying Sky Scrapper...');
-  }
-
-  // ⛔ No demo flights — only real Duffel results shown to customers
-  if (!RAPIDAPI_KEY) {
-    console.log('No RAPIDAPI_KEY — Duffel is the only flight source. Returning empty.');
+  // ── Duffel ONLY — only real bookable flights shown to customers ─
+  // Sky Scrapper results are NOT used: they have no Duffel offer ID
+  // and cannot be booked. Showing them would be misleading/fake.
+  if (!DUFFEL_API_KEY) {
+    console.log('No DUFFEL_API_KEY configured — returning empty results.');
     return res.json([]);
   }
 
   try {
-    const data = await skyFetch('/api/v2/flights/searchFlights', {
-      originSkyId:           cleanOrigin,
-      destinationSkyId:      cleanDest,
-      originEntityId:        resolvedOriginEntityId,
-      destinationEntityId:   resolvedDestinationEntityId,
-      date:                  cleanDate,
-      adults:                cleanAdults,
-      currency:              'EUR',
-      market:                'en-US',
-      countryCode:           'FI',
-      cabinClass:            'economy'
-    });
+    console.log('Searching Duffel for real bookable flights...');
+    const duffelFlights = await searchDuffelFlights(
+      cleanOrigin, cleanDest, cleanDate,
+      cleanAdults, cleanChildren, cleanInfants, cleanCabin
+    );
 
-    console.log('Flight search response status:', data?.status);
-    console.log('Itineraries count:', data?.data?.itineraries?.length || 0);
-
-    const itineraries = data?.data?.itineraries || [];
-    if (!itineraries.length) {
-      console.log('API returned 0 flights — showing empty results (no fake flights)');
-      return res.json([]);
+    if (duffelFlights && duffelFlights.length) {
+      console.log(`✅ Duffel returned ${duffelFlights.length} real bookable flights.`);
+      return res.json(duffelFlights);
     }
 
-    const flights = [];
-    for (let i = 0; i < Math.min(itineraries.length, 15); i++) {
-      try {
-        const it  = itineraries[i];
-        const leg = it.legs[0];
-        if (!leg) continue;
-        const price = it.price?.raw || 0;
+    // Duffel returned nothing — show empty so customer uses affiliate links
+    console.log('Duffel returned 0 results for this route/date — returning empty.');
+    return res.json([]);
 
-        flights.push({
-          id: `flight-${i}`,
-          price: {
-            grandTotal: price.toFixed(2),
-            currency:   'EUR',
-            fees:       [{ amount: (price * 0.1).toFixed(2) }]
-          },
-          numberOfBookableSeats: it.isSelfTransfer ? null : 9,
-          itineraries: [{
-            duration: `PT${Math.floor(leg.durationInMinutes / 60)}H${leg.durationInMinutes % 60}M`,
-            segments: (leg.segments || []).map(seg => ({
-              departure: { iataCode: seg.origin?.displayCode || '', at: seg.departure || '' },
-              arrival:   { iataCode: seg.destination?.displayCode || '', at: seg.arrival || '' },
-              carrierCode: seg.marketingCarrier?.alternateId || seg.operatingCarrier?.alternateId || 'XX',
-              number:      seg.flightNumber || ''
-            }))
-          }],
-          travelerPricings: [{
-            fareDetailsBySegment: [{ cabin: it.tags?.includes('business') ? 'BUSINESS' : 'ECONOMY' }]
-          }]
-        });
-      } catch (mapErr) {
-        console.error('Error mapping flight:', mapErr.message);
-      }
-    }
-
-    if (!flights.length) {
-      console.log('All flights failed to map — showing empty results (no fake flights)');
-      return res.json([]);
-    }
-
-    return res.json(flights);
   } catch (err) {
     console.error('Flight search error:', err.message);
-    return res.json([]);  // ⛔ Never show fake flights on error
+    return res.json([]);
   }
 });
 

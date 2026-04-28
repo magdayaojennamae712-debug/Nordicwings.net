@@ -1022,9 +1022,23 @@
       </div>
       <div id="results-empty" class="empty-state" style="display:none;">
         <div class="empty-icon">✈️</div>
-        <h3>No flights found</h3>
-        <p>No available flights for this route or date. Try different dates, nearby airports, or search via <a href="https://www.kiwi.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;">Kiwi.com</a> or <a href="https://www.trip.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;">Trip.com</a> for more options.</p>
-        <button class="btn-primary" onclick="showPage('home')">Search Again</button>
+        <h3>No direct bookings available for this route</h3>
+        <p style="margin-bottom:18px;">We couldn't find bookable seats for this route or date through our live system. Search on our trusted partner sites below — they show all airlines and real prices.</p>
+        <div id="empty-affiliate-links" style="display:flex;flex-direction:column;gap:12px;max-width:420px;margin:0 auto 20px;">
+          <a id="empty-kiwi-link" href="https://www.kiwi.com" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:12px;background:#0284c7;color:white;padding:14px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">
+            🥝 Search on Kiwi.com — mix &amp; match airlines for cheapest price
+          </a>
+          <a id="empty-trip-link" href="https://www.trip.com" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:12px;background:#e53e3e;color:white;padding:14px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">
+            ✈️ Search on Trip.com — worldwide flights &amp; hotels
+          </a>
+          <a id="empty-aviasales-link" href="https://aviasales.com" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:12px;background:#1a1a2e;color:white;padding:14px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">
+            🔍 Search on Aviasales — compare 728 airlines
+          </a>
+        </div>
+        <button class="btn-primary" onclick="showPage('home')">← Try Different Dates</button>
       </div>
       <div id="results-list" class="results-list" style="display:none;"></div>
 

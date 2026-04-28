@@ -928,7 +928,7 @@ async function searchFlights() {
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
 
-  // Try real API — fall back to client-generated demo on any error
+  // Fetch real Duffel flights only
   try {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 20000); // 20s max wait
@@ -937,6 +937,21 @@ async function searchFlights() {
     const flights = await resp.json();
     document.getElementById('results-loading').style.display = 'none';
     if (!flights || !flights.length) {
+      // Pre-fill affiliate links with the customer's actual search
+      const orig  = searchParams.origin      || '';
+      const dest  = searchParams.dest        || '';
+      const date  = searchParams.departDate  || '';
+      const pass  = searchParams.numAdults   || 1;
+      const TP    = '719573';
+      const TC    = 'Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585';
+      if (orig && dest && date) {
+        const kiwiLink  = document.getElementById('empty-kiwi-link');
+        const tripLink  = document.getElementById('empty-trip-link');
+        const aviaLink  = document.getElementById('empty-aviasales-link');
+        if (kiwiLink)  kiwiLink.href  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
+        if (tripLink)  tripLink.href  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`;
+        if (aviaLink)  aviaLink.href  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`;
+      }
       document.getElementById('results-empty').style.display = 'flex';
       return;
     }
