@@ -1304,8 +1304,13 @@ function showAgencyPage() {
     `${formatDate(seg.departure.at)} · ${formatDuration(f.itineraries[0].duration)} · ${allSegs.length === 1 ? 'Nonstop' : allSegs.length - 1 + ' stop'}`;
 
   // Agencies list — NordicWings Direct always shown first, then confirmed affiliate partners only
+  const isTequila = !!(f.tequilaDeepLink);
   const agencies = [
-    { name: 'NordicWings', rating: 5.0, reviews: 0,     price: price,   perks: '✓ Book directly · Real ticket issued instantly · Secure Stripe payment', direct: true,  stars: 5, highlight: true },
+    { name: 'NordicWings', rating: 5.0, reviews: 0, price: price,
+      perks: isTequila
+        ? '✓ Real ticket via Kiwi.com · Instant confirmation · Secure payment on Kiwi'
+        : '✓ Book directly · Real ticket issued instantly · Secure Stripe payment',
+      direct: true, stars: 5, highlight: true },
     { name: 'Kiwi.com',    rating: 4.8, reviews: 62400, price: price+1, perks: '✓ Mix & match airlines · Flexible dates · Best price guarantee',         direct: false, stars: 5, highlight: true },
     { name: 'Aviasales',   rating: 4.7, reviews: 48200, price: price+2, perks: '✓ Compare 728 airlines · No hidden fees · Trusted worldwide',            direct: false, stars: 5, highlight: true },
     { name: 'Jetradar',    rating: 4.7, reviews: 41800, price: price+3, perks: '✓ Cashback on flights · Real-time prices · 728 airlines',                direct: false, stars: 5, highlight: true },
@@ -1372,6 +1377,12 @@ function showAgencyPage() {
 }
 
 function proceedToBooking() {
+  // Tequila/Kiwi flight — open the real booking link directly, no Stripe needed
+  if (selectedFlight && selectedFlight.tequilaDeepLink) {
+    window.open(selectedFlight.tequilaDeepLink, '_blank');
+    return;
+  }
+  // Duffel flight — normal Stripe booking flow
   if (!currentUser) {
     openAuthModal('login');
     return;

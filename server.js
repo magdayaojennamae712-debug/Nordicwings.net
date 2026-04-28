@@ -144,12 +144,76 @@ function getHotelbedsHeaders() {
   };
 }
 
-// ── Duffel API config ─────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════
-// ✅ DUFFEL LIVE API — NordicWings uses Duffel for ALL real flights
-// Key is stored ONLY in Railway environment variables as DUFFEL_API_KEY
-// ⛔ NEVER show demo/fake flights. If Duffel returns nothing → show empty results.
-// ══════════════════════════════════════════════════════════════
+// ── Tequila (Kiwi.com) API config ────────────────────────────
+// PRIMARY flight source — real flights, no balance needed
+// Customer pays on Kiwi.com directly. Commission earned via API key.
+// Sign up free at: tequila.kiwi.com
+const TEQUILA_API_KEY = process.env.TEQUILA_API_KEY;
+const TEQUILA_BASE    = 'https://api.tequila.kiwi.com';
+
+function formatTequilaDate(isoDate) {
+  const [y, m, d] = isoDate.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+async function searchTequilaFlights(orig, dest, date, adults, children=0, infants=0, cabinClass='economy') {
+  if (!TEQUILA_API_KEY) return null;
+  const cabinMap = { economy:'M', premium_economy:'W', business:'C', first:'F' };
+  const cabin = cabinMap[cabinClass] || 'M';
+  const params = new URLSearchParams({
+    fly_from: orig, fly_to: dest,
+    date_from: formatTequilaDate(date), date_to: formatTequilaDate(date),
+    adults, children, infants,
+    selected_cabins: cabin,
+    curr: 'EUR', locale: 'en', limit: 20,
+    vehicle_type: 'aircraft', sort: 'price', partner_market: 'fi'
+  });
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    const res = await fetch(`${TEQUILA_BASE}/v2/search?${params}`, {
+      headers: { 'apikey': TEQUILA_API_KEY }, signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!res.ok) { console.error('Tequila error:', res.status); return null; }
+    const data = await res.json();
+    const offers = data.data || [];
+    if (!offers.length) return null;
+    console.log(`Tequila returned ${offers.length} flights for ${orig}→${dest}`);
+    const cabin_name = cabin==='C'?'BUSINESS':cabin==='F'?'FIRST':cabin==='W'?'PREMIUM_ECONOMY':'ECONOMY';
+    return offers.map(f => {
+      const totalSecs = f.duration?.departure || 0;
+      const hrs  = Math.floor(totalSecs / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const segments = (f.route || []).map(seg => {
+        const depMs  = new Date(seg.local_departure).getTime();
+        const arrMs  = new Date(seg.local_arrival).getTime();
+        const sHrs   = Math.floor((arrMs-depMs)/3600000);
+        const sMins  = Math.floor(((arrMs-depMs)%3600000)/60000);
+        return {
+          departure: { iataCode: seg.flyFrom, at: seg.local_departure },
+          arrival:   { iataCode: seg.flyTo,   at: seg.local_arrival   },
+          carrierCode: seg.airline,
+          number: String(seg.flight_no||'').replace(seg.airline,'').trim()||'0',
+          duration: `PT${sHrs}H${sMins}M`
+        };
+      });
+      return {
+        id: `tequila-${f.id}`,
+        tequilaDeepLink: f.deep_link,
+        price: { grandTotal: f.price.toFixed(2), currency:'EUR' },
+        baggage: { checkedQty: f.bags_price?.[1] ? 0 : 0, cabinQty: 1 },
+        itineraries: [{ duration:`PT${hrs}H${mins}M`, segments }],
+        travelerPricings: [{ fareDetailsBySegment:[{ cabin: cabin_name }] }]
+      };
+    });
+  } catch (err) {
+    console.error('Tequila search error:', err.message);
+    return null;
+  }
+}
+
+// ── Duffel API config (fallback) ──────────────────────────────
 const DUFFEL_API_KEY  = process.env.DUFFEL_API_KEY;
 const DUFFEL_BASE_URL = 'https://api.duffel.com';
 // NordicWings service fee: 3% of base fare, minimum €8 per ticket
@@ -828,19 +892,31 @@ app.get('/api/flights/search', searchLimiter, async (req, res) => {
   }
 
   try {
-    console.log('Searching Duffel for real bookable flights...');
-    const duffelFlights = await searchDuffelFlights(
+    // 1️⃣ Try Tequila/Kiwi first — real flights, no balance needed
+    console.log('Searching Tequila/Kiwi for real flights...');
+    const tequilaFlights = await searchTequilaFlights(
       cleanOrigin, cleanDest, cleanDate,
       cleanAdults, cleanChildren, cleanInfants, cleanCabin
     );
-
-    if (duffelFlights && duffelFlights.length) {
-      console.log(`✅ Duffel returned ${duffelFlights.length} real bookable flights.`);
-      return res.json(duffelFlights);
+    if (tequilaFlights && tequilaFlights.length) {
+      console.log(`✅ Tequila returned ${tequilaFlights.length} real flights.`);
+      return res.json(tequilaFlights);
     }
 
-    // Duffel returned nothing — show empty so customer uses affiliate links
-    console.log('Duffel returned 0 results for this route/date — returning empty.');
+    // 2️⃣ Fall back to Duffel if Tequila returns nothing
+    if (DUFFEL_API_KEY) {
+      console.log('Tequila empty — trying Duffel...');
+      const duffelFlights = await searchDuffelFlights(
+        cleanOrigin, cleanDest, cleanDate,
+        cleanAdults, cleanChildren, cleanInfants, cleanCabin
+      );
+      if (duffelFlights && duffelFlights.length) {
+        console.log(`✅ Duffel returned ${duffelFlights.length} real bookable flights.`);
+        return res.json(duffelFlights);
+      }
+    }
+
+    console.log('No flights found from any source.');
     return res.json([]);
 
   } catch (err) {
