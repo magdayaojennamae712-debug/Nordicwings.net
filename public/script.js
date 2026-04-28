@@ -957,6 +957,16 @@ async function searchFlights() {
         if (kiwiLink)  kiwiLink.href  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
         if (tripLink)  tripLink.href  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`;
         if (aviaLink)  aviaLink.href  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`;
+
+        // Airline direct links — pre-filled with route + date via Jetradar deep links
+        const omanLink    = document.getElementById('empty-omanair-link');
+        const ekLink      = document.getElementById('empty-emirates-link');
+        const ayLink      = document.getElementById('empty-finnair-link');
+        const qrLink      = document.getElementById('empty-qatar-link');
+        if (omanLink) omanLink.href = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=WY`;
+        if (ekLink)   ekLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=EK`;
+        if (ayLink)   ayLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=AY`;
+        if (qrLink)   qrLink.href   = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&airline=QR`;
       }
       document.getElementById('results-empty').style.display = 'flex';
       return;
