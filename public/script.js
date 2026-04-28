@@ -2863,28 +2863,4 @@ function renderAdminTable(bookings) {
 
 function _adminFilter(bookings) {
   const q      = (document.getElementById('admin-search')?.value || '').toLowerCase();
-  const status = document.getElementById('admin-filter')?.value || 'all';
-  return bookings.filter(b => {
-    const name  = `${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}`.toLowerCase();
-    const email = (b.contact?.email || b.userEmail || '').toLowerCase();
-    const route = `${b.flight?.from||''} ${b.flight?.to||''}`.toLowerCase();
-    const ref   = (b.bookingRef||'').toLowerCase();
-    const matchQ = !q || name.includes(q) || email.includes(q) || route.includes(q) || ref.includes(q);
-    const matchS = status === 'all' || b.status === status;
-    return matchQ && matchS;
-  });
-}
-
-// FAQ accordion toggle
-function toggleFaq(btn) {
-  var answer = btn.nextElementSibling;
-  if (!answer) return;
-  var isOpen = answer.style.display === 'block';
-  if (isOpen) {
-    answer.style.display = 'none';
-    btn.classList.remove('open');
-  } else {
-    answer.style.display = 'block';
-    btn.classList.add('open');
-  }
-}
+  const statu

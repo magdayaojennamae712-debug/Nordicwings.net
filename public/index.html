@@ -1039,6 +1039,18 @@
           </a>
         </div>
         <button class="btn-primary" onclick="showPage('home')">← Try Different Dates</button>
+
+        <!-- SeaRadar affiliate banner — shown on no-flights page -->
+        <div style="margin-top:24px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:18px 20px;max-width:420px;margin-left:auto;margin-right:auto;">
+          <div style="font-size:.85rem;font-weight:700;color:#1e40af;margin-bottom:6px;">🚢 Considering a ferry instead?</div>
+          <p style="font-size:.82rem;color:#1e3a8a;margin-bottom:12px;line-height:1.5;">
+            Travel by sea across the Baltic, Mediterranean &amp; beyond. Track vessels and book ferry tickets on SeaRadar.
+          </p>
+          <a href="https://searadar.tpk.mx/XaNzHXVR" target="_blank" rel="noopener"
+             style="display:inline-block;background:#2563eb;color:white;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;">
+            🌊 Explore ferry routes →
+          </a>
+        </div>
       </div>
       <div id="results-list" class="results-list" style="display:none;"></div>
 
@@ -1197,6 +1209,19 @@
           <button class="btn-primary" onclick="showPage('dashboard')">View My Bookings</button>
           <button class="btn-ghost" onclick="showPage('home')">Book Another Flight</button>
         </div>
+
+        <!-- Compensair affiliate banner — earn commission if flight is delayed/cancelled -->
+        <div style="margin-top:28px;background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1.5px solid #fcd34d;border-radius:14px;padding:18px 20px;">
+          <div style="font-size:.85rem;font-weight:700;color:#92400e;margin-bottom:6px;">✈️ Know your passenger rights!</div>
+          <p style="font-size:.82rem;color:#78350f;margin-bottom:12px;line-height:1.5;">
+            If your flight is <strong>delayed over 3 hours</strong> or <strong>cancelled</strong>, you may be entitled to up to <strong>€600 compensation</strong> from the airline — by EU law.
+          </p>
+          <a href="https://compensair.tpk.mx/NnkftqmX" target="_blank" rel="noopener"
+             style="display:inline-block;background:#f59e0b;color:white;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;">
+            💰 Check if you can claim compensation →
+          </a>
+          <div style="font-size:.72rem;color:#a16207;margin-top:8px;">Free to check • No win, no fee • Powered by Compensair</div>
+        </div>
       </div>
     </div>
   </main>
@@ -1227,6 +1252,19 @@
         <button class="btn-primary" onclick="showPage('home')">Search Flights</button>
       </div>
       <div id="dashboard-list" class="bookings-list" style="display:none;"></div>
+
+      <!-- Compensair affiliate banner — visible to logged-in customers -->
+      <div style="margin:24px auto 0;max-width:520px;background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1.5px solid #fcd34d;border-radius:14px;padding:18px 20px;">
+        <div style="font-size:.85rem;font-weight:700;color:#92400e;margin-bottom:6px;">✈️ Was your flight delayed or cancelled?</div>
+        <p style="font-size:.82rem;color:#78350f;margin-bottom:12px;line-height:1.5;">
+          Under EU law you may be entitled to up to <strong>€600 compensation</strong> if your flight was delayed over 3 hours or cancelled. Free to check!
+        </p>
+        <a href="https://compensair.tpk.mx/NnkftqmX" target="_blank" rel="noopener"
+           style="display:inline-block;background:#f59e0b;color:white;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;">
+          💰 Check your compensation →
+        </a>
+        <div style="font-size:.72rem;color:#a16207;margin-top:8px;">Free to check • No win, no fee • Powered by Compensair</div>
+      </div>
     </div>
   </main>
 
@@ -2416,81 +2454,4 @@
         item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
           '<span>' + l.label + '</span>';
         item.onmouseover = function(){ this.style.background='#e0f0ff'; };
-        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          // Close mobile menu after selecting language
-          var mm = document.getElementById('mobile-menu');
-          if (mm) mm.classList.remove('open');
-        };
-        mlist.appendChild(item);
-      });
-    }
-
-    // ── Toggle desktop dropdown ───────────────────────────────
-    window.nwToggleLang = function(e) {
-      e.stopPropagation();
-      var dd = document.getElementById('nw-lang-dropdown');
-      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-    };
-    document.addEventListener('click', function(){
-      var dd = document.getElementById('nw-lang-dropdown');
-      if (dd) dd.style.display = 'none';
-    });
-
-    // ── Set language via Google Translate ─────────────────────
-    window.nwSetLang = function(code, label) {
-      // Update desktop button label
-      var lbl = document.getElementById('nw-lang-label');
-      if (lbl) lbl.textContent = code === 'zh-CN' ? 'ZH' : code.toUpperCase().substring(0,2);
-
-      if (code === 'en') {
-        // Restore English — clear cookies and reload
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-        location.reload();
-        return;
-      }
-
-      // Set Google Translate language cookie
-      document.cookie = 'googtrans=/en/' + code + '; path=/';
-      document.cookie = 'googtrans=/en/' + code + '; path=/; domain=.' + location.hostname;
-
-      // Trigger translation via hidden combo — retry if not loaded yet
-      function doTranslate() {
-        var sel = document.querySelector('.goog-te-combo');
-        if (sel) {
-          sel.value = code;
-          sel.dispatchEvent(new Event('change'));
-        } else {
-          setTimeout(doTranslate, 800);
-        }
-      }
-      doTranslate();
-    };
-
-    // ── Aggressively hide Google Translate bar ────────────────
-    // Prevents the dark bar / layout shift on mobile
-    var s = document.createElement('style');
-    s.textContent =
-      '.goog-te-banner-frame, .goog-te-gadget, #goog-gt-tt, ' +
-      '.goog-tooltip, .goog-tooltip-content { display:none!important; }' +
-      'body { top:0!important; }' +
-      '.skiptranslate { display:none!important; }' +
-      'iframe.goog-te-banner-frame { display:none!important; }' +
-      'body.translated-ltr, body.translated-rtl { margin-top:0!important; top:0!important; }';
-    document.head.appendChild(s);
-
-    // Also remove the bar if it appears after translate loads
-    var observer = new MutationObserver(function() {
-      var bar = document.querySelector('.goog-te-banner-frame');
-      if (bar) bar.style.display = 'none';
-      document.body.style.top = '0';
-      document.body.style.marginTop = '0';
-    });
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-  })();
-  </script>
-
-</body>
-</html>
+        item.onmouseout  = function
