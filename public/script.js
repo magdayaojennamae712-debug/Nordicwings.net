@@ -1113,15 +1113,17 @@ function renderFlightList(flights) {
     // Use real Duffel checked-bag quantity (stored at flight.baggage by server.js)
     const checkedBagQty = flight.baggage?.checkedQty || 0;
     const cabinBagQty   = flight.baggage?.cabinQty   || 0;
-    const baggage = isBudget
-      ? '🎒 Cabin bag only · Checked bag: paid add-on'
-      : checkedBagQty > 0
-        ? `🧳 ${checkedBagQty}× checked bag · Carry-on included`
-        : '🎒 Carry-on included · Checked bag: check fare';
     // Meal: only claim what is certain — never guess per airline
     const _durStr = flight.itineraries[0].duration || 'PT0H';
     const _durH = (parseInt(_durStr.match(/(\d+)H/)?.[1] || 0)) + (parseInt(_durStr.match(/(\d+)M/)?.[1] || 0) / 60);
     const isLongHaul = _durH >= 6;
+    const baggage = isBudget
+      ? '🎒 Cabin bag only · Checked bag: paid add-on'
+      : checkedBagQty > 0
+        ? `🧳 ${checkedBagQty}× checked bag (23kg) · Carry-on included`
+        : isLongHaul && !isBudget
+          ? '🧳 23kg checked bag typically included · Verify with airline'
+          : '🎒 Carry-on included · Checked bag: check fare';
     const meal = isBiz
       ? '🍽️ Meal service included'
       : isBudget
@@ -1760,8 +1762,12 @@ async function setupBookingPage() {
       const _isLongHaul = _bh >= 6;
       const _hasChecked = selectedFlight.baggage?.checkedQty > 0;
       const rows = [];
-      // Baggage — only show if confirmed by Duffel
-      rows.push(_hasChecked ? '✓ Checked baggage' : '<span style="color:#6b7280">Checked bag: see fare</span>');
+      // Baggage — use Duffel data, fall back to long-haul hint
+      rows.push(_hasChecked
+        ? '✓ Checked baggage (23kg)'
+        : (_isLongHaul && !_isBudg)
+          ? '🧳 23kg bag typically included (verify with airline)'
+          : '<span style="color:#6b7280">Checked bag: see fare</span>');
       rows.push(_isBudg ? '<span style="color:#6b7280">Carry-on: check airline</span>' : '✓ Carry-on bag');
       // Meals — only confirmed claims
       if (isBiz)        rows.push('✓ Meal service (business)');
@@ -2855,12 +2861,4 @@ function renderAdminTable(bookings) {
       <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
       <td>
         <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
-           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">✉ Email</a>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function _adminFilter(bookings) {
-  const q      = (document.getElementById('admin-search')?.value || '').toLowerCase();
-  const statu
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;
