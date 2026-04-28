@@ -2266,7 +2266,9 @@ async function searchHotelsForConfirmation(destination, checkIn, checkOut, adult
     loading.style.display = 'none';
 
     if (!hotels.length) {
-      upsell.style.display = 'none';
+      // Fallback: show affiliate hotel links when Hotelbeds returns nothing
+      results.innerHTML = hotelAffiliateFallback(destination);
+      results.style.display = 'block';
       return;
     }
 
@@ -2299,8 +2301,43 @@ async function searchHotelsForConfirmation(destination, checkIn, checkOut, adult
     results.style.display = 'block';
   } catch (err) {
     console.warn('Hotel search error:', err.message);
-    upsell.style.display = 'none';
+    // Show fallback even on error
+    results.innerHTML = hotelAffiliateFallback(destination);
+    results.style.display = 'block';
   }
+}
+
+function hotelAffiliateFallback(destination) {
+  const tripUrl = `https://www.trip.com/hotels/?Allianceid=8098413&SID=306552835`;
+  const bookingUrl = `https://www.booking.com/?marker=719573`;
+  const hotelsUrl = `https://www.hotels.com/?affid=719573`;
+  return `
+    <div style="margin-bottom:10px;">
+      <a href="${tripUrl}" target="_blank" rel="noopener"
+         style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:8px;text-decoration:none;">
+        <div>
+          <div style="font-weight:700;color:#1a2b4a;font-size:.9rem;">🏨 Trip.com Hotels</div>
+          <div style="font-size:.75rem;color:#6b7280;">Best price guarantee · 1.4M+ hotels worldwide</div>
+        </div>
+        <div style="background:#1a2b4a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:700;white-space:nowrap;">Search Hotels →</div>
+      </a>
+      <a href="${bookingUrl}" target="_blank" rel="noopener"
+         style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:8px;text-decoration:none;">
+        <div>
+          <div style="font-weight:700;color:#1a2b4a;font-size:.9rem;">🛎️ Booking.com</div>
+          <div style="font-size:.75rem;color:#6b7280;">Free cancellation on most rooms · 28M+ listings</div>
+        </div>
+        <div style="background:#003580;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:700;white-space:nowrap;">Search Hotels →</div>
+      </a>
+      <a href="${hotelsUrl}" target="_blank" rel="noopener"
+         style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;text-decoration:none;">
+        <div>
+          <div style="font-weight:700;color:#1a2b4a;font-size:.9rem;">🌟 Hotels.com</div>
+          <div style="font-size:.75rem;color:#6b7280;">Earn free nights · 500,000+ hotels</div>
+        </div>
+        <div style="background:#c8002a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:700;white-space:nowrap;">Search Hotels →</div>
+      </a>
+    </div>`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2868,4 +2905,75 @@ function renderAffiliateTab() {
         <div>
           <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Platform</label>
           <select id="calc-platform" onchange="calcAffiliate()" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;">
-            <option value="trip-flight">Trip.com 
+            <option value="trip-flight">Trip.com — Flight (1.5%)</option>
+            <option value="trip-hotel">Trip.com — Hotel (5%)</option>
+            <option value="kiwi">Kiwi.com — Flight (1.8%)</option>
+            <option value="booking">Booking.com — Hotel (4%)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Booking Value (€)</label>
+          <input type="number" id="calc-value" value="500" oninput="calcAffiliate()" min="1"
+            style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Number of Bookings / Month</label>
+          <input type="number" id="calc-count" value="10" oninput="calcAffiliate()" min="1"
+            style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:.85rem;box-sizing:border-box;">
+        </div>
+      </div>
+      <div id="calc-result" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.4rem;font-weight:900;color:#15803d;" id="calc-monthly">—</div>
+        <div style="font-size:.82rem;color:#16a34a;">estimated monthly affiliate income</div>
+        <div style="font-size:.78rem;color:#6b7280;margin-top:4px;" id="calc-annual">—</div>
+      </div>
+    </div>
+  `;
+  calcAffiliate();
+}
+
+function calcAffiliate() {
+  const platform = document.getElementById('calc-platform')?.value;
+  const val      = parseFloat(document.getElementById('calc-value')?.value) || 0;
+  const count    = parseInt(document.getElementById('calc-count')?.value) || 0;
+  const rates    = { 'trip-flight':0.015, 'trip-hotel':0.05, 'kiwi':0.018, 'booking':0.04 };
+  const rate     = rates[platform] || 0.015;
+  const monthly  = val * rate * count;
+  const annual   = monthly * 12;
+  const mr = document.getElementById('calc-monthly');
+  const ar = document.getElementById('calc-annual');
+  if (mr) mr.textContent = '€' + monthly.toFixed(2) + ' / month';
+  if (ar) ar.textContent = 'That\'s approximately €' + annual.toFixed(0) + ' per year';
+}
+
+function renderAdminTable(bookings) {
+  const filtered = _adminFilter(bookings);
+  const tableEl  = document.getElementById('admin-table');
+  const emptyEl  = document.getElementById('admin-empty');
+  if (!tableEl) return;
+  if (!filtered.length) {
+    tableEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'flex';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  tableEl.style.display = 'table';
+
+  document.getElementById('admin-table-body').innerHTML = filtered.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passengers?.length||1}</td>
+      <td>
+        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+      </td>
+      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
+      <td>
+        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;

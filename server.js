@@ -1822,8 +1822,7 @@ app.get('/api/hotels/search', async (req, res) => {
       stay: { checkIn, checkOut },
       occupancies: [{ rooms: cleanRooms, adults: cleanAdults, children: 0 }],
       destination: { code: destCode },
-      filter: { maxHotels: 12, minCategory: 3 },
-      reviews: [{ type: 'HOTELBEDS', maxRate: 10, minRate: 5, minReviewCount: 3 }]
+      filter: { maxHotels: 12, minCategory: 1 }
     };
 
     const controller = new AbortController();
