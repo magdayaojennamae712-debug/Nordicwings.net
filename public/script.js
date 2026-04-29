@@ -21,26 +21,34 @@ const FIREBASE_CONFIG = {
 const STRIPE_PUBLISHABLE_KEY = "pk_live_51TLzx6A2y3gkkjexteIatqrlYXOzr0czlPkEN4F2faog5HqFSQM574swwi0HVrsMt4kr6gYdiyeZvvC0jS9tPuDH00KmkEAZry";
 
 // ─────────────────────────────────────────────────────────────
-// FIREBASE INIT — wrapped safely so any failure never freezes the page
+// FIREBASE INIT — fully deferred, never blocks page or search
 // ─────────────────────────────────────────────────────────────
 let auth = null;
 let db   = null;
-try {
-  if (typeof firebase !== 'undefined') {
+let stripe = null;
+
+function initFirebaseSafe() {
+  try {
+    if (typeof firebase === 'undefined') return;
+    if (firebase.apps && firebase.apps.length) return; // already inited
     firebase.initializeApp(FIREBASE_CONFIG);
     auth = firebase.auth();
     db   = firebase.firestore();
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(function(user) {
       currentUser = user;
-      updateNavForAuth(user);
+      if (typeof updateNavForAuth === 'function') updateNavForAuth(user);
     });
+  } catch(e) {
+    console.warn('Firebase unavailable:', e.message);
   }
-} catch(e) {
-  console.warn('Firebase init skipped:', e.message);
 }
 
-// Stripe — not used in affiliate mode, kept for legacy compatibility
-let stripe = null;
+// Try to init firebase after everything loads — never blocks search/UI
+if (document.readyState === 'complete') {
+  initFirebaseSafe();
+} else {
+  window.addEventListener('load', initFirebaseSafe);
+}
 
 // ─────────────────────────────────────────────────────────────
 // STATE — app-level variables

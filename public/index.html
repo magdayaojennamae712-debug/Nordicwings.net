@@ -213,9 +213,6 @@
   </script>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" async></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" async></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" async></script>
 
   <!-- ===== SEO: Structured Data (Google Rich Results) ===== -->
   <script type="application/ld+json">
@@ -341,7 +338,7 @@
         <p>Search hundreds of airlines. Find the best prices. Book in minutes.</p>
         <div class="hero-trust-strip">
           <div class="hts-item">🔒 SSL Secured</div>
-          <div class="hts-item">💳 Stripe Protected</div>
+          <div class="hts-item">🆓 Free to Use</div>
           <div class="hts-item">✈ 500+ Airlines</div>
           <div class="hts-item">🛡️ GDPR Compliant</div>
         </div>
@@ -899,7 +896,7 @@
         <div class="footer-trust-row">
           <div class="footer-trust-badges">
             <div class="ftb">🔒 SSL Secured</div>
-            <div class="ftb">💳 Stripe Verified</div>
+            <div class="ftb">🆓 Free to Use</div>
             <div class="ftb">✈ Real Flight Data</div>
             <div class="ftb">🛡️ GDPR Compliant</div>
             <div class="ftb">🏆 Trusted Business</div>
@@ -2071,6 +2068,10 @@
     </div>
   </div>
 
+  <!-- Firebase SDK — loaded last so it never blocks the page -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
   <script src="script.js" defer></script>
   <script>
     function toggleFaq(btn) {
