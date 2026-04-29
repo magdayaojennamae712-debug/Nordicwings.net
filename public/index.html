@@ -1038,6 +1038,35 @@
             🔍 Search on Aviasales — compare 728 airlines
           </a>
         </div>
+
+        <!-- ── Airline Direct Links ── -->
+        <p style="font-size:.82rem;color:#64748b;margin:18px 0 10px;font-weight:600;">Or book directly with the airline:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin:0 auto 20px;">
+          <a id="empty-omanair-link" href="https://www.omanair.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:14px 10px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.82rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <span style="font-size:1.4rem;">🇴🇲</span>
+            <span>Oman Air</span>
+            <span style="font-size:.72rem;color:#64748b;font-weight:400;">WY · Gulf &amp; Asia</span>
+          </a>
+          <a id="empty-emirates-link" href="https://www.emirates.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:14px 10px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.82rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <span style="font-size:1.4rem;">🇦🇪</span>
+            <span>Emirates</span>
+            <span style="font-size:.72rem;color:#64748b;font-weight:400;">EK · Worldwide</span>
+          </a>
+          <a id="empty-finnair-link" href="https://www.finnair.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:14px 10px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.82rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <span style="font-size:1.4rem;">🇫🇮</span>
+            <span>Finnair</span>
+            <span style="font-size:.72rem;color:#64748b;font-weight:400;">AY · Europe &amp; Asia</span>
+          </a>
+          <a id="empty-qatar-link" href="https://www.qatarairways.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:14px 10px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.82rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <span style="font-size:1.4rem;">🇶🇦</span>
+            <span>Qatar Airways</span>
+            <span style="font-size:.72rem;color:#64748b;font-weight:400;">QR · Worldwide</span>
+          </a>
+        </div>
         <button class="btn-primary" onclick="showPage('home')">← Try Different Dates</button>
 
         <!-- SeaRadar affiliate banner — shown on no-flights page -->
@@ -1053,6 +1082,37 @@
         </div>
       </div>
       <div id="results-list" class="results-list" style="display:none;"></div>
+
+      <!-- ── Book Direct with Airlines (always visible on results) ── -->
+      <div id="airline-direct-section" style="display:none;margin-top:24px;padding:18px 20px;background:#f8faff;border:1.5px solid #e0e7ff;border-radius:14px;">
+        <div style="font-size:.82rem;font-weight:700;color:#1e40af;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em;">✈ Also book directly with the airline</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+          <a id="results-omanair-link" href="https://www.omanair.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:12px 8px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.78rem;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s;">
+            <span style="font-size:1.5rem;">🇴🇲</span>
+            <span>Oman Air</span>
+            <span style="font-size:.68rem;color:#64748b;font-weight:500;">WY</span>
+          </a>
+          <a id="results-emirates-link" href="https://www.emirates.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:12px 8px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.78rem;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s;">
+            <span style="font-size:1.5rem;">🇦🇪</span>
+            <span>Emirates</span>
+            <span style="font-size:.68rem;color:#64748b;font-weight:500;">EK</span>
+          </a>
+          <a id="results-finnair-link" href="https://www.finnair.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:12px 8px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.78rem;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s;">
+            <span style="font-size:1.5rem;">🇫🇮</span>
+            <span>Finnair</span>
+            <span style="font-size:.68rem;color:#64748b;font-weight:500;">AY</span>
+          </a>
+          <a id="results-qatar-link" href="https://www.qatarairways.com" target="_blank" rel="noopener"
+            style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1.5px solid #e2e8f0;color:#1a2b4a;padding:12px 8px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.78rem;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s;">
+            <span style="font-size:1.5rem;">🇶🇦</span>
+            <span>Qatar Airways</span>
+            <span style="font-size:.68rem;color:#64748b;font-weight:500;">QR</span>
+          </a>
+        </div>
+      </div>
 
       <!-- ── Travelpayouts Ad Banner (earns commission) ── -->
       <div class="ad-banner-wrap">
@@ -1423,10 +1483,91 @@
       <!-- Hero -->
       <div class="support-hero">
         <h1>How can we help you?</h1>
-        <p>Find answers to common questions about booking flights with NordicWings</p>
+        <p>Find answers to common questions about finding flights with NordicWings</p>
         <div class="support-contact-bar">
           <span>✉️ <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a></span>
           <span>⏰ Response within 24 hours</span>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS BOX -->
+      <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:16px;padding:24px 28px;margin-bottom:28px;max-width:800px;margin-left:auto;margin-right:auto;">
+        <div style="font-size:1rem;font-weight:800;color:#1e40af;margin-bottom:12px;">ℹ️ How NordicWings works</div>
+        <p style="color:#1e3a8a;font-size:.9rem;line-height:1.7;margin-bottom:10px;">
+          NordicWings is a <strong>flight search and comparison platform</strong>. We help you find the best flights and connect you directly to the airline or booking site to complete your purchase. <strong>All payments are made securely on the airline or partner website</strong> — not through NordicWings.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <span style="background:#dbeafe;color:#1e40af;padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:700;">✓ Real flights</span>
+          <span style="background:#dcfce7;color:#166534;padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:700;">✓ Secure payment on airline site</span>
+          <span style="background:#fef3c7;color:#92400e;padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:700;">✓ Ticket issued instantly by airline</span>
+        </div>
+      </div>
+
+      <!-- CONTACT PROVIDERS -->
+      <div style="max-width:800px;margin:0 auto 32px;">
+        <div style="font-size:.88rem;font-weight:800;color:#1a2b4a;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;">📞 Having a problem with your booking? Contact your provider directly:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#0284c7;margin-bottom:4px;">🥝 Kiwi.com</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked via Kiwi.com</div>
+            <a href="https://www.kiwi.com/en/pages/contact" target="_blank" style="font-size:.78rem;color:#0284c7;font-weight:700;">kiwi.com/en/pages/contact →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#e53e3e;margin-bottom:4px;">✈️ Trip.com</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked via Trip.com</div>
+            <a href="https://uk.trip.com/support/support-center.html" target="_blank" style="font-size:.78rem;color:#e53e3e;font-weight:700;">trip.com/support →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#1a2b4a;margin-bottom:4px;">🔍 Aviasales / Jetradar</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked via Aviasales</div>
+            <a href="https://support.aviasales.com" target="_blank" style="font-size:.78rem;color:#1a2b4a;font-weight:700;">support.aviasales.com →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#c8102e;margin-bottom:4px;">🇦🇪 Emirates</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with Emirates</div>
+            <a href="https://www.emirates.com/english/help/" target="_blank" style="font-size:.78rem;color:#c8102e;font-weight:700;">emirates.com/help →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#5c0632;margin-bottom:4px;">🇶🇦 Qatar Airways</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with Qatar</div>
+            <a href="https://www.qatarairways.com/en/support.html" target="_blank" style="font-size:.78rem;color:#5c0632;font-weight:700;">qatarairways.com/support →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#003580;margin-bottom:4px;">🇫🇮 Finnair</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with Finnair</div>
+            <a href="https://www.finnair.com/en/help" target="_blank" style="font-size:.78rem;color:#003580;font-weight:700;">finnair.com/help →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#8B0000;margin-bottom:4px;">🇴🇲 Oman Air</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with Oman Air</div>
+            <a href="https://www.omanair.com/en/contact-us" target="_blank" style="font-size:.78rem;color:#8B0000;font-weight:700;">omanair.com/contact →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#0050a0;margin-bottom:4px;">🇵🇭 Philippine Airlines</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with PAL</div>
+            <a href="https://www.philippineairlines.com/en/ph/home/help-center" target="_blank" style="font-size:.78rem;color:#0050a0;font-weight:700;">philippineairlines.com/help →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#ff6600;margin-bottom:4px;">🟠 Cebu Pacific</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">Booked directly with Cebu Pacific</div>
+            <a href="https://www.cebupacificair.com/en-ph/pages/contact-us" target="_blank" style="font-size:.78rem;color:#ff6600;font-weight:700;">cebupacificair.com/contact →</a>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
+            <div style="font-weight:800;color:#1e40af;margin-bottom:4px;">📧 NordicWings</div>
+            <div style="font-size:.78rem;color:#475569;margin-bottom:6px;">General questions &amp; help finding flights</div>
+            <a href="mailto:hello@nordicwings.net" style="font-size:.78rem;color:#1e40af;font-weight:700;">hello@nordicwings.net →</a>
+          </div>
+
         </div>
       </div>
 
@@ -1443,7 +1584,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>Enter your departure city, destination, travel dates and number of passengers on the home page, then click <strong>Search Flights</strong>. Browse the results and click <strong>Book Now</strong> on the flight you want. You will be guided through a secure passenger details form and payment.</p>
+              <p>Enter your departure city, destination, travel dates and number of passengers on the home page, then click <strong>Search Flights</strong>. Browse the results and click the airline or booking site you want. You will be taken directly to their website to complete your booking securely.</p>
             </div>
           </div>
 
@@ -1453,7 +1594,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>Yes! When you book directly through NordicWings (look for the blue <strong>"Book directly"</strong> badge), your ticket is issued in real-time via our airline system. You will receive a booking reference instantly on screen.</p>
+              <p>Yes! When you click through to an airline or booking site and complete your purchase, your ticket is confirmed immediately by them. You will receive a booking confirmation email directly from the airline or partner site.</p>
             </div>
           </div>
 
@@ -1463,7 +1604,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>We accept all major credit and debit cards (Visa, Mastercard, American Express) through our secure Stripe payment system. Your card details are never stored on our servers.</p>
+              <p>Payment is made directly on the airline or booking site you choose (Kiwi.com, Emirates, Finnair, Trip.com, etc.). Each provider accepts major credit/debit cards. NordicWings does not process or store any payment information.</p>
             </div>
           </div>
 
@@ -1493,7 +1634,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>Cancellations must be requested at least <strong>48 hours before departure</strong> by emailing <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a> with your booking reference. Refunds depend on the airline's fare rules — most promotional fares are non-refundable. The NordicWings service fee is non-refundable. See our full <strong>Cancellations &amp; Refunds</strong> section below for details.</p>
+              <p>Since your booking is made directly with the airline or partner site, all cancellations and refunds are handled by them according to their own policy. Contact your booking provider directly using the links in the <strong>Contact Your Provider</strong> section above. For help finding the right contact, email us at <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a>.</p>
             </div>
           </div>
         </div>
@@ -1518,7 +1659,7 @@
               <span class="faq-arrow">▼</span>
             </button>
             <div class="faq-a">
-              <p>We add a transparent service fee of 5% on top of the airline's base fare (minimum €12 per ticket). This covers our operating costs and allows us to offer support in Finnish and English. You are always shown the exact total price before paying — no hidden charges.</p>
+              <p>NordicWings is a free flight search platform. We earn a small affiliate commission from our partner airlines and booking sites when you complete a booking through our links. This costs you nothing extra — the price you see on the partner site is the same as booking directly.</p>
             </div>
           </div>
 
