@@ -1008,27 +1008,65 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
       </div>
 
       <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">✈ Book directly with airline</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-        <a href="${jBase}&airline=WY" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
-          <span style="font-size:1.6rem;">🇴🇲</span>
-          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Oman Air</div><div style="font-size:.72rem;color:#64748b;">Gulf &amp; Asia routes</div></div>
-        </a>
-        <a href="${jBase}&airline=EK" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
-          <span style="font-size:1.6rem;">🇦🇪</span>
-          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Emirates</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Dubai</div></div>
-        </a>
-        <a href="${jBase}&airline=AY" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
-          <span style="font-size:1.6rem;">🇫🇮</span>
-          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Finnair</div><div style="font-size:.72rem;color:#64748b;">Europe &amp; Asia from HEL</div></div>
-        </a>
-        <a href="${jBase}&airline=QR" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
-          <span style="font-size:1.6rem;">🇶🇦</span>
-          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Qatar Airways</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Doha</div></div>
-        </a>
+
+      <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌿 NORDIC & EUROPEAN</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        ${[['AY','Finnair','Europe & Asia from HEL'],['DY','Norwegian','Budget Nordic & Europe'],['SK','SAS','Scandinavian & Europe'],['LH','Lufthansa','Global via Frankfurt'],['KL','KLM','Worldwide via Amsterdam'],['AF','Air France','Worldwide via Paris'],['BA','British Airways','Via London Heathrow'],['TK','Turkish Airlines','Worldwide via Istanbul'],['FR','Ryanair','Cheapest European budget'],['U2','easyJet','European budget routes'],['W6','Wizz Air','Eastern Europe budget'],['SN','Brussels Airlines','Europe & Africa']].map(([code,name,desc])=>`
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
+            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
+          <div style="min-width:0;">
+            <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
+          </div>
+        </a>`).join('')}
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌙 GULF & MIDDLE EAST</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        ${[['EK','Emirates','Worldwide via Dubai'],['QR','Qatar Airways','Worldwide via Doha'],['WY','Oman Air','Gulf, Asia & Europe'],['FZ','flydubai','Budget Gulf & beyond'],['SV','Saudia','Middle East & worldwide'],['G9','Air Arabia','Budget Middle East']].map(([code,name,desc])=>`
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
+            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
+          <div style="min-width:0;">
+            <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
+          </div>
+        </a>`).join('')}
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌏 ASIA & PACIFIC</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        ${[['SQ','Singapore Airlines','World class via Singapore'],['TG','Thai Airways','Asia via Bangkok'],['MH','Malaysia Airlines','Asia via Kuala Lumpur'],['CX','Cathay Pacific','Asia via Hong Kong'],['JL','Japan Airlines','Japan & Asia'],['NH','ANA','Japan & worldwide'],['KE','Korean Air','Asia via Seoul'],['VN','Vietnam Airlines','Vietnam & Asia'],['GA','Garuda Indonesia','Indonesia & Asia'],['AK','AirAsia','Budget Asia routes']].map(([code,name,desc])=>`
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
+            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
+          <div style="min-width:0;">
+            <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
+          </div>
+        </a>`).join('')}
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🇵🇭 PHILIPPINES AIRLINES</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
+        ${[['PR','Philippine Airlines','Full service MNL hub'],['5J','Cebu Pacific','Budget all PH domestic'],['Z2','Philippines AirAsia','Budget domestic & Asia']].map(([code,name,desc])=>`
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
+            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
+          <div style="min-width:0;">
+            <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
+          </div>
+        </a>`).join('')}
       </div>
 
       <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;font-size:.78rem;color:#166534;text-align:center;">
@@ -1229,7 +1267,7 @@ function renderFlightList(flights) {
           : '☕ Snack/drink (check airline)';
 
     return `
-      <div class="fc" onclick="selectFlight(${i})" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
+      <div class="fc" data-price="${flight.price.grandTotal}" data-dur="${flight.itineraries[0].duration}" data-stops="${stops}">
         <div class="fc-airline">
           <img src="https://www.gstatic.com/flights/airline_logos/70px/${code}.png"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
@@ -1280,7 +1318,7 @@ function renderFlightList(flights) {
           ${seatsBadge}
           <div class="fc-price">${sym}${price}</div>
           <div class="fc-per">per person</div>
-          <button class="fc-select-btn">Select <span>→</span></button>
+          <a class="fc-select-btn" href="https://jetradar.com/flights/?marker=719573&origin=${searchParams.origin||''}&destination=${searchParams.dest||''}&depart_date=${searchParams.departDate||''}&adults=${searchParams.numAdults||1}&airline=${code}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">Book →</a>
         </div>
       </div>
     `;
@@ -1402,15 +1440,10 @@ function showAgencyPage() {
   // Agencies list — NordicWings Direct always shown first, then confirmed affiliate partners only
   const isTequila = !!(f.tequilaDeepLink);
   const agencies = [
-    { name: 'NordicWings', rating: 5.0, reviews: 0, price: price,
-      perks: isTequila
-        ? '✓ Real ticket via Kiwi.com · Instant confirmation · Secure payment on Kiwi'
-        : '✓ Book directly · Real ticket issued instantly · Secure Stripe payment',
-      direct: true, stars: 5, highlight: true },
-    { name: 'Kiwi.com',    rating: 4.8, reviews: 62400, price: price+1, perks: '✓ Mix & match airlines · Flexible dates · Best price guarantee',         direct: false, stars: 5, highlight: true },
-    { name: 'Aviasales',   rating: 4.7, reviews: 48200, price: price+2, perks: '✓ Compare 728 airlines · No hidden fees · Trusted worldwide',            direct: false, stars: 5, highlight: true },
-    { name: 'Jetradar',    rating: 4.7, reviews: 41800, price: price+3, perks: '✓ Cashback on flights · Real-time prices · 728 airlines',                direct: false, stars: 5, highlight: true },
-    { name: 'Trip.com',    rating: 4.7, reviews: 3821,  price: price+5, perks: '✓ Pay now or pay later · 24/7 support · Worldwide coverage',            direct: false, stars: 5, highlight: false },
+    { name: 'Kiwi.com',    rating: 4.8, reviews: 62400, price: price,   perks: '✓ Mix & match airlines · Flexible dates · Best price guarantee',  direct: false, stars: 5, highlight: true },
+    { name: 'Aviasales',   rating: 4.7, reviews: 48200, price: price+1, perks: '✓ Compare 728 airlines · No hidden fees · Trusted worldwide',      direct: false, stars: 5, highlight: true },
+    { name: 'Jetradar',    rating: 4.7, reviews: 41800, price: price+2, perks: '✓ Cashback on flights · Real-time prices · 728 airlines',          direct: false, stars: 5, highlight: true },
+    { name: 'Trip.com',    rating: 4.7, reviews: 3821,  price: price+3, perks: '✓ Pay now or pay later · 24/7 support · Worldwide coverage',      direct: false, stars: 5, highlight: true },
   ];
 
   document.getElementById('agencies-list').innerHTML = `
