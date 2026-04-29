@@ -282,7 +282,7 @@
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('home')">Home</a>
         <a href="#how-it-works" class="nav-link">How it Works</a>
         <a href="#destinations" class="nav-link">Destinations</a>
-        <a href="javascript:void(0)" class="nav-link" onclick="showPage('book')" style="color:#1d4ed8;font-weight:700;">✈️ Book Now</a>
+        <a href="javascript:void(0)" class="nav-link" onclick="showPage('book')" style="color:#0369a1;font-weight:700;">⚓ Sea Travel</a>
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('support')">Support</a>
         <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">My Bookings</button>
         <button class="btn-ghost" id="nav-admin" onclick="showPage('admin')" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">📊 Business</button>
@@ -1954,82 +1954,144 @@
   </main>
 
   <!-- ═══════════════════════════════════════════════════════
-       PAGE: BOOK NOW (Searadar white-label flight search)
+       PAGE: BOOK NOW (Sea travel — Searadar yacht charters + ferries)
   ════════════════════════════════════════════════════════ -->
   <main id="page-book" class="page">
-    <div class="page-inner" style="max-width:1100px;padding:0 16px 40px;">
+    <div class="page-inner" style="max-width:1100px;padding:0 16px 48px;">
 
       <!-- Back button -->
       <button class="back-btn" onclick="showPage('home')" style="margin:20px 0 10px;">← Back to Home</button>
 
       <!-- Hero heading -->
       <div style="text-align:center;margin-bottom:28px;">
-        <div style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:#fff;font-size:.78rem;font-weight:700;letter-spacing:1px;padding:5px 16px;border-radius:20px;text-transform:uppercase;margin-bottom:10px;">
-          ✈️ Powered by Travelpayouts
+        <div style="display:inline-block;background:linear-gradient(135deg,#0369a1,#06b6d4);color:#fff;font-size:.78rem;font-weight:700;letter-spacing:1px;padding:5px 16px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;">
+          ⚓ Sea Travel — Powered by Travelpayouts
         </div>
-        <h1 style="margin:0 0 8px;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;color:#1a2b4a;">Find &amp; Book Your Flight</h1>
-        <p style="margin:0;color:#64748b;font-size:1rem;">Compare hundreds of airlines — best price guaranteed, free to use</p>
+        <h1 style="margin:0 0 10px;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;color:#0c2340;">Travel by Sea ⛵</h1>
+        <p style="margin:0 auto;max-width:580px;color:#475569;font-size:1rem;line-height:1.6;">
+          Explore the world from the water — charter a private yacht, join a sailing adventure, or hop on a ferry across the Baltic Sea. Relaxing, scenic, and unforgettable.
+        </p>
       </div>
 
-      <!-- Destination photo strip -->
+      <!-- Sea destination photo strip -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;border-radius:16px;overflow:hidden;">
-        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
-          <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London"
+        <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80" alt="Mediterranean Sea"
             style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇬🇧 London</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🌊 Mediterranean</div>
         </div>
-        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
-          <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris"
+        <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=400&q=80" alt="Baltic Sea"
             style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇫🇷 Paris</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">⚓ Baltic Sea</div>
         </div>
-        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
-          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai"
+        <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&q=80" alt="Yacht Charter"
             style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇦🇪 Dubai</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">⛵ Yacht Charter</div>
         </div>
-        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
-          <img src="https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=400&q=80" alt="Tokyo"
+        <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1548574505-5e239809ee19?w=400&q=80" alt="Sailing"
             style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇯🇵 Tokyo</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🏝 Island Hopping</div>
         </div>
+      </div>
+
+      <!-- Why travel by sea section -->
+      <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:16px;padding:24px;margin-bottom:28px;border:1px solid #bae6fd;">
+        <h2 style="margin:0 0 16px;font-size:1.2rem;font-weight:800;color:#0c2340;text-align:center;">Why Travel by Sea? 🌊</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
+          <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🧘</div>
+            <div style="font-weight:700;color:#0c2340;font-size:.9rem;margin-bottom:4px;">Relaxing Journey</div>
+            <div style="font-size:.78rem;color:#64748b;line-height:1.5;">No airport queues — enjoy the open sea and beautiful coastal views</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <div style="font-size:1.8rem;margin-bottom:8px;">⛵</div>
+            <div style="font-weight:700;color:#0c2340;font-size:.9rem;margin-bottom:4px;">Private Yacht Charter</div>
+            <div style="font-size:.78rem;color:#64748b;line-height:1.5;">Rent a sailing yacht or motorboat — explore hidden bays and islands at your own pace</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🌍</div>
+            <div style="font-weight:700;color:#0c2340;font-size:.9rem;margin-bottom:4px;">Unique Destinations</div>
+            <div style="font-size:.78rem;color:#64748b;line-height:1.5;">Reach places only accessible by sea — Croatia, Greece, Turkey, Caribbean and more</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+            <div style="font-size:1.8rem;margin-bottom:8px;">👨‍👩‍👧</div>
+            <div style="font-weight:700;color:#0c2340;font-size:.9rem;margin-bottom:4px;">Family &amp; Groups</div>
+            <div style="font-size:.78rem;color:#64748b;line-height:1.5;">Perfect for families, couples or groups — your own floating holiday home</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Helsinki → Tallinn ferry section -->
+      <div style="background:#fff;border-radius:16px;padding:22px;margin-bottom:28px;box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #e2e8f0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:1.6rem;">🚢</span>
+          <div>
+            <div style="font-weight:800;color:#0c2340;font-size:1rem;">Helsinki → Tallinn Ferry</div>
+            <div style="font-size:.8rem;color:#64748b;">2.5 hours across the Baltic Sea — one of Europe's most popular routes</div>
+          </div>
+        </div>
+        <p style="margin:0 0 16px;font-size:.88rem;color:#374151;line-height:1.6;">
+          The Helsinki–Tallinn route is served by large passenger ferries — not yacht charters. Book directly with these trusted ferry companies:
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+          <a href="https://www.tallinksilja.com" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:10px;background:#1a3a6b;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;">
+            🚢 Tallink Silja Line
+            <span style="margin-left:auto;font-size:.75rem;opacity:.8;">HEL↔TLL</span>
+          </a>
+          <a href="https://www.vikingline.com" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:10px;background:#c0392b;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;">
+            🚢 Viking Line
+            <span style="margin-left:auto;font-size:.75rem;opacity:.8;">HEL↔TLL</span>
+          </a>
+          <a href="https://www.eckeroline.fi" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:10px;background:#0d6e4e;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;">
+            🚢 Eckerö Line
+            <span style="margin-left:auto;font-size:.75rem;opacity:.8;">HEL↔TLL</span>
+          </a>
+        </div>
+        <p style="margin:12px 0 0;font-size:.76rem;color:#94a3b8;">✅ Tickets from ~€25 one way · Comfortable lounges, restaurants &amp; cabins onboard</p>
       </div>
 
       <!-- Trust badges row -->
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:24px;">
         <div style="display:flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#15803d;">✅ Free to use — no hidden fees</div>
         <div style="display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#1d4ed8;">🔒 Secure booking via trusted partners</div>
-        <div style="display:flex;align-items:center;gap:6px;background:#fef3c7;border:1px solid #fde68a;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#b45309;">✈️ 500+ airlines compared</div>
+        <div style="display:flex;align-items:center;gap:6px;background:#e0f2fe;border:1px solid #7dd3fc;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#0369a1;">⛵ 1000s of yachts worldwide</div>
       </div>
 
       <!-- Searadar white-label iframe -->
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;border:1px solid #e2e8f0;">
-        <div style="background:linear-gradient(135deg,#1d4ed8,#0ea5e9);padding:14px 20px;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:1.4rem;">✈️</span>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;border:1px solid #bae6fd;">
+        <div style="background:linear-gradient(135deg,#0369a1,#06b6d4);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">⚓</span>
           <div>
-            <div style="color:#fff;font-weight:700;font-size:1rem;">NordicWings Flight Search</div>
-            <div style="color:rgba(255,255,255,.8);font-size:.78rem;">Search, compare &amp; book — powered by Travelpayouts</div>
+            <div style="color:#fff;font-weight:700;font-size:1rem;">NordicWings Yacht &amp; Sea Charter</div>
+            <div style="color:rgba(255,255,255,.85);font-size:.78rem;">Search, compare &amp; book yacht charters worldwide — powered by Travelpayouts</div>
           </div>
         </div>
         <iframe
           id="searadar-frame"
           src="https://searadar.tpk.mx/XaNzHXVR"
           width="100%"
-          height="700"
+          height="750"
           frameborder="0"
           scrolling="yes"
           allow="payment"
-          style="display:block;min-height:700px;"
+          style="display:block;min-height:750px;"
           loading="lazy"
-          title="NordicWings Flight Search">
+          title="NordicWings Yacht Charter Search">
         </iframe>
       </div>
 
       <!-- Bottom info -->
-      <div style="text-align:center;margin-top:20px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
-        <p style="margin:0;font-size:.82rem;color:#64748b;">
-          🔍 Flights are compared across <strong>hundreds of airlines</strong> including Finnair, SAS, Norwegian, Emirates, Qatar Airways, Ryanair and more.<br/>
-          When you book, you pay directly to the airline or travel agency — NordicWings is free to use.
+      <div style="text-align:center;margin-top:20px;padding:16px;background:#f0f9ff;border-radius:12px;border:1px solid #bae6fd;">
+        <p style="margin:0;font-size:.82rem;color:#475569;line-height:1.7;">
+          ⚓ Yacht charters available in <strong>Croatia, Greece, Turkey, Spain, Caribbean, Thailand</strong> and 60+ countries.<br/>
+          🚢 For Baltic Sea ferries (Helsinki ↔ Tallinn ↔ Stockholm), use the ferry links above.<br/>
+          NordicWings is free — you pay directly to the charter company or ferry operator when you book.
         </p>
       </div>
 
