@@ -2706,6 +2706,19 @@ async function signInUser() {
 }
 
 // Sign Up
+// Toggle password visibility (👁 / 🙈)
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
 async function signUpUser() {
   const name     = document.getElementById('signup-name').value.trim();
   const email    = document.getElementById('signup-email').value.trim();
@@ -2722,6 +2735,15 @@ async function signUpUser() {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName: name });
     document.getElementById('auth-overlay').style.display = 'none';
+
+    // Send welcome email
+    try {
+      await fetch('/api/welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+    } catch(e) { /* non-critical, ignore */ }
 
     if (selectedFlight) {
       showAgencyPage();

@@ -1935,6 +1935,106 @@ app.get('/api/hotels/search', async (req, res) => {
   }
 });
 
+// ── ROUTE: POST /api/welcome-email ───────────────────────────
+// Called after new user registers — sends branded welcome email
+app.post('/api/welcome-email', async (req, res) => {
+  const { name, email } = req.body || {};
+  if (!email) return res.status(400).json({ ok: false, error: 'Missing email' });
+
+  if (!emailTransporter) {
+    console.warn('⚠️  Welcome email skipped — email not configured.');
+    return res.json({ ok: false, note: 'email not configured' });
+  }
+
+  const firstName = (name || 'Traveller').split(' ')[0];
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:32px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#1d4ed8 0%,#0ea5e9 100%);padding:36px 40px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:6px;">✈️</div>
+            <div style="color:#ffffff;font-size:1.7rem;font-weight:800;letter-spacing:-0.5px;">NordicWings</div>
+            <div style="color:rgba(255,255,255,.8);font-size:.85rem;margin-top:4px;">Your Gateway to the World</div>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <p style="margin:0 0 18px;font-size:1.15rem;font-weight:700;color:#1a2b4a;">Welcome aboard, ${firstName}! 🎉</p>
+            <p style="margin:0 0 16px;font-size:.97rem;color:#374151;line-height:1.6;">
+              Thank you for signing up to <strong>NordicWings.net</strong>. We're thrilled to have you with us!
+            </p>
+            <p style="margin:0 0 16px;font-size:.97rem;color:#374151;line-height:1.6;">
+              With NordicWings you can search and compare flights from hundreds of airlines worldwide — including Finnair, SAS, Norwegian, Emirates, Qatar Airways, and many more — all in one place, completely free.
+            </p>
+            <!-- Feature boxes -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
+                <td width="30%" style="background:#eff6ff;border-radius:10px;padding:14px;text-align:center;vertical-align:top;">
+                  <div style="font-size:1.4rem;">🔍</div>
+                  <div style="font-size:.8rem;font-weight:700;color:#1d4ed8;margin-top:6px;">Compare Flights</div>
+                </td>
+                <td width="4%"></td>
+                <td width="30%" style="background:#f0fdf4;border-radius:10px;padding:14px;text-align:center;vertical-align:top;">
+                  <div style="font-size:1.4rem;">💰</div>
+                  <div style="font-size:.8rem;font-weight:700;color:#16a34a;margin-top:6px;">Best Prices</div>
+                </td>
+                <td width="4%"></td>
+                <td width="32%" style="background:#fef3c7;border-radius:10px;padding:14px;text-align:center;vertical-align:top;">
+                  <div style="font-size:1.4rem;">🌍</div>
+                  <div style="font-size:.8rem;font-weight:700;color:#d97706;margin-top:6px;">500+ Destinations</div>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 28px;font-size:.97rem;color:#374151;line-height:1.6;">
+              Ready to explore? Search for your next adventure now:
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="https://nordicwings.net" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:#ffffff;text-decoration:none;font-weight:700;font-size:1rem;padding:14px 36px;border-radius:50px;letter-spacing:.3px;">
+                ✈️ Search Flights Now
+              </a>
+            </div>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #e2e8f0;">
+            <p style="margin:0;font-size:.78rem;color:#94a3b8;">
+              © 2025 NordicWings.net &nbsp;·&nbsp; <a href="https://nordicwings.net" style="color:#1d4ed8;text-decoration:none;">Visit Website</a>
+            </p>
+            <p style="margin:6px 0 0;font-size:.72rem;color:#cbd5e1;">
+              You're receiving this because you created an account at NordicWings.net.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    await emailTransporter.sendMail({
+      from:    `"NordicWings ✈" <${process.env.GMAIL_USER}>`,
+      to:      email,
+      subject: '✈️ Welcome to NordicWings — Your Journey Starts Here!',
+      html
+    });
+    console.log(`✉️  Welcome email sent to ${email}`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Welcome email error:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log('NordicWings is running on port ' + PORT);
   console.log('Security: Helmet + CSP + Rate limiting + Input validation enabled');
