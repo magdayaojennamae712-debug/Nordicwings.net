@@ -216,9 +216,9 @@
   <script src="https://js.stripe.com/v3/" defer></script>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
 
   <!-- ===== SEO: Structured Data (Google Rich Results) ===== -->
   <script type="application/ld+json">
@@ -2074,7 +2074,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
   <script>
     function toggleFaq(btn) {
       var answer = btn.nextElementSibling;
@@ -2183,11 +2183,11 @@
       },
       cancellation: {
         title: '&#8617; Cancellation &amp; Refund Policy',
-        html: '<p><em>Last updated: April 2026</em></p><p>We understand plans change. Here is our clear policy on cancellations and refunds.</p><h3>How to Cancel</h3><p>Log in &rarr; <strong>My Bookings</strong> &rarr; select your booking &rarr; <strong>Cancel Booking</strong>. You will receive a cancellation confirmation email.</p><h3>Refund Windows</h3><ul><li><strong>Within 24 hours of booking</strong> (flight 7+ days away): Full refund</li><li><strong>After 24 hours:</strong> Subject to airline fare conditions</li><li><strong>Non-refundable fares:</strong> Airport taxes and fees only refunded</li><li><strong>Flexible fares:</strong> Full refund per airline policy</li></ul><h3>Refund Timeline</h3><p>Refunds processed within <strong>5&ndash;10 business days</strong>, returned to your original payment method.</p><h3>EU Passenger Rights</h3><p>If your flight is cancelled or significantly delayed by the airline, you may be entitled to a full refund under <strong>EU Regulation 261/2004</strong>.</p><div class=\'policy-contact-box\'><p>&#128231; Need help? Include your booking reference: <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p></div>'
+        html: '<p><em>Last updated: April 2026</em></p><p>NordicWings is a <strong>free flight comparison and affiliate platform</strong>. We do not process payments or hold bookings &mdash; all bookings are made directly with the airline or partner site you choose.</p><h3>How to Cancel Your Flight</h3><p>Contact the airline or booking partner you booked with directly. Your booking confirmation email will have their cancellation link and contact details.</p><h3>Contact Your Booking Provider</h3><ul><li><strong>Kiwi.com</strong> &rarr; kiwi.com/en/pages/contact</li><li><strong>Expedia</strong> &rarr; expedia.com/service</li><li><strong>Finnair</strong> &rarr; finnair.com/help</li><li><strong>Emirates</strong> &rarr; emirates.com/help</li><li><strong>Qatar Airways</strong> &rarr; qatarairways.com/help</li><li><strong>Jetradar / Aviasales</strong> &rarr; support.aviasales.com</li></ul><h3>Refunds</h3><p>Refund eligibility depends entirely on the fare rules of the airline or partner you booked with. Common rules:</p><ul><li><strong>Flexible fares:</strong> Full refund per airline policy</li><li><strong>Standard fares:</strong> Subject to airline fare conditions</li><li><strong>Non-refundable fares:</strong> Airport taxes only may be refunded</li></ul><h3>EU Passenger Rights</h3><p>If your flight is cancelled or significantly delayed by the airline, you may be entitled to compensation under <strong>EU Regulation 261/2004</strong> regardless of where you booked.</p><div class=\'policy-contact-box\'><p>&#128231; Need help finding the right contact? <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p></div>'
       },
       help: {
         title: '&#10067; Help Center',
-        html: '<h3>How do I search for flights?</h3><p>Enter your departure city, destination, and travel date in the search box on the homepage. Click <strong>Search Flights</strong> and browse available options.</p><h3>How do I book a flight?</h3><p>Select your preferred flight, click <strong>Select</strong>, choose a booking option, enter passenger details, and pay securely via Stripe.</p><h3>Do I need an account to book?</h3><p>Yes &mdash; a free NordicWings account is required. Creating one takes under 30 seconds.</p><h3>Is my payment secure?</h3><p>Absolutely. All payments are processed by <strong>Stripe</strong>. Your card details are never stored on our servers.</p><h3>How do I cancel a booking?</h3><p>Log in &rarr; My Bookings &rarr; select your booking &rarr; Cancel Booking. See our full Cancellation Policy for refund details.</p><h3>I did not receive a confirmation email</h3><p>Check your spam/junk folder first. If it is not there, email us with your booking reference number.</p><h3>What airlines does NordicWings cover?</h3><p>500+ airlines including Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, Philippine Airlines, Ryanair, EasyJet, and many more worldwide.</p><div class=\'policy-contact-box\'><p>&#128231; Still need help? <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response time: within 24 hours, Mon&ndash;Fri.</p></div>'
+        html: '<h3>How do I search for flights?</h3><p>Enter your departure city, destination, and travel date in the search box on the homepage. Click <strong>Search Flights</strong> and browse available options.</p><h3>How do I book a flight?</h3><p>Select your preferred flight and click the airline or partner link. You will be taken directly to their site to complete the booking &mdash; NordicWings charges no fees.</p><h3>Do I need an account to book?</h3><p>No &mdash; NordicWings is free to use without an account. Creating an account lets you save favourite routes and track deals.</p><h3>Is my payment secure?</h3><p>Yes. Payment is made directly on the airline or partner site (Kiwi.com, Expedia, Emirates, etc.). NordicWings never sees or stores your payment details.</p><h3>How do I cancel a booking?</h3><p>Contact the airline or partner site directly where you completed your booking. Check your confirmation email for their cancellation link.</p><h3>I did not receive a confirmation email</h3><p>Check your spam/junk folder first. If it is not there, email us with your booking reference number.</p><h3>What airlines does NordicWings cover?</h3><p>500+ airlines including Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, Philippine Airlines, Ryanair, EasyJet, and many more worldwide.</p><div class=\'policy-contact-box\'><p>&#128231; Still need help? <a href="mailto:hello@nordicwings.net"><strong>hello@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response time: within 24 hours, Mon&ndash;Fri.</p></div>'
       },
       contact: {
         title: '&#128231; Contact Us',
