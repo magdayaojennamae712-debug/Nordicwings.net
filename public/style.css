@@ -181,8 +181,16 @@ img { max-width: 100%; display: block; }
   padding: 15px 32px; font-size: 1rem;
   border-radius: var(--radius-sm); align-self: flex-end;
   min-width: 180px; justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .btn-search:hover { background: var(--blue-dark); }
+.btn-search:active, .btn-search:disabled { background: var(--blue-dark); opacity: .8; transform: scale(.98); }
+@media (max-width: 600px) {
+  .btn-search { padding: 17px 24px; font-size: 1.05rem; min-width: 0; }
+}
 
 .btn-book {
   width: 100%; background: var(--blue); color: white;
@@ -1300,4 +1308,38 @@ img { max-width: 100%; display: block; }
 .fsb-ig:hover { opacity: .9; text-decoration: none; transform: translateY(-1px); }
 @media(max-width:600px){
   .footer-social-banner { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── SEO Route Guide Section ─────────────────────────────── */
+.seo-route-guide {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 64px 0 48px;
+}
+.seo-route-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  color: #334155;
+  font-size: .97rem;
+  line-height: 1.75;
+}
+.seo-route-inner h2 {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 18px;
+}
+.seo-route-inner h3 {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin: 32px 0 8px;
+}
+.seo-route-inner p {
+  margin: 0 0 12px;
+}
+@media (max-width: 600px) {
+  .seo-route-guide { padding: 40px 0 32px; }
+  .seo-route-inner h2 { font-size: 1.25rem; }
 }

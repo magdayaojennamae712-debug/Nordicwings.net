@@ -7,7 +7,8 @@
 require('dotenv').config();
 const express    = require('express');
 const cors       = require('cors');
-const helmet     = require('helmet');
+const helmet      = require('helmet');
+const compression = require('compression');
 const rateLimit  = require('express-rate-limit');
 const stripe     = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
@@ -95,9 +96,28 @@ const searchLimiter = rateLimit({
 
 app.use(generalLimiter);
 
+// ── Performance: Gzip compression (improves page speed & SEO) ──
+app.use(compression());
+
 // ── Middleware ───────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' })); // Limit body size to prevent attacks
-app.use(express.static('public'));
+
+// Static files with Cache-Control headers
+app.use(express.static('public', {
+  etag: true,
+  lastModified: true,
+  setHeaders: function(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+    if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', isProd ? 'public, max-age=604800' : 'no-cache');
+    }
+    if (/\.(png|jpg|jpeg|gif|svg|webp|ico)$/.test(filePath)) {
+      res.setHeader('Cache-Control', isProd ? 'public, max-age=2592000' : 'no-cache');
+    }
+  }
+}));
 
 // ── Security: Input Sanitizer ─────────────────────────────────
 // Strips dangerous characters from inputs

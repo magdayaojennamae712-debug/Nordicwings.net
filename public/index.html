@@ -204,8 +204,11 @@
   }
   </script>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Google Fonts — non-blocking so it never freezes the page on slow mobile connections -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" /></noscript>
 
   <!-- Travelpayouts Content Analytics — deferred, loads after page is ready -->
   <script>
@@ -502,7 +505,7 @@
             </select>
           </div>
 
-          <button class="btn-search" onclick="searchFlights()">
+          <button type="button" class="btn-search" id="search-btn" onclick="searchFlights()">
             <span id="search-btn-text">🔍 Search Flights</span>
             <span id="search-btn-spinner" class="spinner" style="display:none;"></span>
           </button>
@@ -906,6 +909,38 @@
           <button class="btn-cta-primary" onclick="openAuthModal('signup')">Create Free Account</button>
           <button class="btn-cta-ghost" onclick="document.getElementById('origin-input').focus(); window.scrollTo({top:0,behavior:'smooth'})">Search Flights</button>
         </div>
+      </div>
+    </section>
+
+    <!-- SEO: Route Guide (static text for Google indexing) -->
+    <section class="seo-route-guide" aria-label="Flight route guide">
+      <div class="seo-route-inner">
+        <h2>Cheap Flights from Finland – Compare Prices &amp; Book Now</h2>
+        <p>NordicWings is Finland's dedicated flight comparison service. We search hundreds of airlines and travel agencies in real time so you always find the best fare for your journey. Whether you are flying from Helsinki-Vantaa (HEL), Oulu (OUL), Tampere (TMP) or Turku (TKU), we compare every option and send you straight to the airline or booking partner to complete your purchase.</p>
+
+        <h3>Helsinki to Manila (HEL–MNL) – Flights to the Philippines</h3>
+        <p>The most popular long-haul route from Finland leads to Manila Ninoy Aquino International Airport (MNL). Most flights connect via Dubai, Doha, Singapore or Bangkok. Travel time is typically 14–18 hours depending on layover. Airlines frequently serving this route include Finnair, Emirates, Qatar Airways and Turkish Airlines. Search on NordicWings for the latest prices and compare multiple departure dates to find the cheapest window.</p>
+
+        <h3>Helsinki to Cebu (HEL–CEB) &amp; Helsinki to Davao (HEL–DVO)</h3>
+        <p>Travellers heading to the Visayas or Mindanao can fly into Mactan-Cebu International Airport (CEB) or Francisco Bangoy International Airport in Davao (DVO). These routes usually connect through Manila or a Middle Eastern hub. NordicWings searches all major and low-cost carriers so you can compare the full journey cost before choosing.</p>
+
+        <h3>Helsinki to Bangkok (HEL–BKK) – Flights to Thailand</h3>
+        <p>Bangkok Suvarnabhumi (BKK) is one of the busiest international airports in Southeast Asia and a popular stopover for onward connections within the region. Finnair operates a direct service from Helsinki; other carriers offer competitive one-stop options via Doha, Dubai or Amsterdam. Use our date-grid search to shift your travel window by a few days and save significantly on the fare.</p>
+
+        <h3>Helsinki to Singapore (HEL–SIN)</h3>
+        <p>Singapore Changi Airport (SIN) is a world-class hub and the gateway to Southeast Asia. Several airlines offer daily one-stop services from Helsinki with layovers ranging from 2 to 6 hours. Singapore is also a convenient base for side trips to Malaysia, Indonesia and Vietnam.</p>
+
+        <h3>Helsinki to Dubai (HEL–DXB)</h3>
+        <p>Dubai International Airport (DXB) is both a top leisure destination and a major connecting hub for onward flights to Asia, Africa and Australasia. Emirates, Finnair and several other carriers fly this route daily. If you are travelling onward to the Philippines, Manila is just a 5-hour second leg from Dubai.</p>
+
+        <h3>Nordic Cities to Southeast Asia</h3>
+        <p>Residents of Oulu, Tampere, Turku and Rovaniemi can search flights from their local airport and NordicWings will automatically include convenient domestic connection options. For Oulu to Manila (OUL–MNL) or Tampere to Bangkok (TMP–BKK), we show the full itinerary price including any domestic leg so there are no hidden surprises.</p>
+
+        <h3>How NordicWings Works</h3>
+        <p>NordicWings is a flight search and price comparison service. We do not sell tickets directly. When you click "View Deal", you are taken securely to the airline's own website or a trusted booking partner such as Kiwi.com, Skyscanner or Booking.com where you complete your purchase. This means you always book directly with an IATA-accredited agent and your payment is protected by the partner's terms and conditions. NordicWings is completely free to use.</p>
+
+        <h3>Tips for Finding Cheap Flights from Finland</h3>
+        <p>Book at least 6–8 weeks in advance for long-haul routes to Asia. Travelling mid-week (Tuesday to Thursday) is often cheaper than weekends. Being flexible by even one or two days can reduce the fare by 20–40 %. Shoulder seasons (April–May and September–October) typically offer the best combination of low prices and good weather at popular Asian destinations.</p>
       </div>
     </section>
 
