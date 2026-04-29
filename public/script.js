@@ -970,10 +970,21 @@ async function searchFlights() {
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
 
-  // Show affiliate results instantly — no API needed, customer books directly on airline
-  document.getElementById('results-loading').style.display = 'none';
-  document.getElementById('results-list').style.display    = 'block';
-  renderAffiliateResults(origin, dest, departDate, numAdults, numChildren, numInfants);
+  // Show loading state first — give browser 80ms to paint it before the heavy render
+  // This makes the page feel instant on Android instead of appearing frozen
+  const sbText = document.getElementById('search-btn-text');
+  const sbBtn  = document.getElementById('search-btn');
+  if (sbText) sbText.textContent = 'Searching…';
+  if (sbBtn)  sbBtn.disabled = true;
+
+  setTimeout(function() {
+    document.getElementById('results-loading').style.display = 'none';
+    document.getElementById('results-list').style.display    = 'block';
+    renderAffiliateResults(origin, dest, departDate, numAdults, numChildren, numInfants);
+    // Reset button
+    if (sbText) sbText.textContent = '🔍 Search Flights';
+    if (sbBtn)  sbBtn.disabled = false;
+  }, 80);
 }
 
 function renderAffiliateResults(orig, dest, date, adults, children, infants) {
@@ -1045,7 +1056,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            onerror="this.style.display='none'"/>
+            loading="lazy" onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1060,7 +1071,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            onerror="this.style.display='none'"/>
+            loading="lazy" onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1075,7 +1086,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            onerror="this.style.display='none'"/>
+            loading="lazy" onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1090,7 +1101,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            onerror="this.style.display='none'"/>
+            loading="lazy" onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -3145,16 +3156,4 @@ function renderAdminTable(bookings) {
   const emptyEl  = document.getElementById('admin-empty');
   if (!tableEl) return;
   if (!filtered.length) {
-    tableEl.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = 'flex';
-    return;
-  }
-  if (emptyEl) emptyEl.style.display = 'none';
-  tableEl.style.display = 'table';
-
-  document.getElementById('admin-table-body').innerHTML = filtered.map(b => `
-    <tr>
-      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
-      <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
-  
+    tableEl.style.display = 'non
