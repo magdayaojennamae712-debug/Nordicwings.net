@@ -1917,7 +1917,7 @@ async function setupBookingPage() {
       if (isBiz) rows.push('✓ Priority boarding');
       // Always true for every NordicWings booking
       rows.push('✓ Real e-ticket issued');
-      rows.push('✓ Secure Stripe payment');
+      rows.push('✓ Secure payment on partner site');
       rows.push('✓ 24/7 booking support');
       const cells = rows.map(r => `<div>${r}</div>`).join('');
       return `<div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
