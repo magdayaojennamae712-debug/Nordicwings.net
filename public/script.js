@@ -813,9 +813,9 @@ async function searchFlights() {
   const errorEl     = document.getElementById('search-error');
 
   // Read passenger counts from picker
-  const numAdults   = parseInt(document.getElementById('pax-adults-val')?.value)   || paxCounts.adults   || 1;
-  const numChildren = parseInt(document.getElementById('pax-children-val')?.value) || paxCounts.children || 0;
-  const numInfants  = parseInt(document.getElementById('pax-infants-val')?.value)  || paxCounts.infants  || 0;
+  const numAdults   = parseInt((document.getElementById('pax-adults-val')||{}).value)   || paxCounts.adults   || 1;
+  const numChildren = parseInt((document.getElementById('pax-children-val')||{}).value) || paxCounts.children || 0;
+  const numInfants  = parseInt((document.getElementById('pax-infants-val')||{}).value)  || paxCounts.infants  || 0;
   const passengers  = numAdults + numChildren + numInfants; // total for display
 
   // Validate: children/infants require at least 1 adult
@@ -928,8 +928,8 @@ async function searchFlights() {
 
   // Capture trip type and return date
   const activeTab = document.querySelector('.tab-btn.active');
-  isRoundTrip = activeTab?.dataset.type === 'round-trip';
-  searchReturnDate = document.getElementById('return-input')?.value || '';
+  isRoundTrip = (activeTab && activeTab.dataset && activeTab.dataset.type) === 'round-trip';
+  searchReturnDate = (document.getElementById('return-input')||{}).value || '';
   if (isRoundTrip && !searchReturnDate) {
     return setError(errorEl, 'Please select a return date.');
   }
@@ -941,7 +941,7 @@ async function searchFlights() {
   outboundFlight = null;
   selectedReturnFlight = null;
 
-  const cabinClass = document.getElementById('cabin-class-input')?.value || 'economy';
+  const cabinClass = (document.getElementById('cabin-class-input')||{}).value || 'economy';
   searchParams = { origin, dest, departDate, returnDate: searchReturnDate, passengers,
                    numAdults, numChildren, numInfants, isRoundTrip, cabinClass };
 
@@ -1256,7 +1256,7 @@ function renderFlightList(flights) {
     const price    = parseFloat(flight.price.grandTotal).toFixed(0);
     const currency = flight.price.currency;
     const seats    = flight.numberOfBookableSeats;
-    const cabin    = flight.travelerPricings?.[0]?.fareDetailsBySegment?.[0]?.cabin || 'ECONOMY';
+    const cabin    = (((((flight.travelerPricings||[])[0])||{}).fareDetailsBySegment||[])[0]||{}).cabin || 'ECONOMY';
     const code     = seg.carrierCode;
     const name     = AIRLINE_NAMES[code] || code;
     const sym      = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
@@ -1280,11 +1280,11 @@ function renderFlightList(flights) {
     const isBudget = BUDGET_AIRLINES.has(code);
     const isBiz = cabin === 'BUSINESS';
     // Use real Duffel checked-bag quantity (stored at flight.baggage by server.js)
-    const checkedBagQty = flight.baggage?.checkedQty || 0;
-    const cabinBagQty   = flight.baggage?.cabinQty   || 0;
+    const checkedBagQty = (flight.baggage && flight.baggage.checkedQty) || 0;
+    const cabinBagQty   = (flight.baggage && flight.baggage.cabinQty)   || 0;
     // Meal: only claim what is certain — never guess per airline
     const _durStr = flight.itineraries[0].duration || 'PT0H';
-    const _durH = (parseInt(_durStr.match(/(\d+)H/)?.[1] || 0)) + (parseInt(_durStr.match(/(\d+)M/)?.[1] || 0) / 60);
+    const _durH = (parseInt((_durStr.match(/(\d+)H/)||[])[1] || 0)) + (parseInt((_durStr.match(/(\d+)M/)||[])[1] || 0) / 60);
     const isLongHaul = _durH >= 6;
     const baggage = isBudget
       ? '🎒 Cabin bag only · Checked bag: paid add-on'
@@ -1339,10 +1339,10 @@ function renderFlightList(flights) {
           <div class="fc-baggage">${baggage}</div>
           <div class="fc-meal">${meal}</div>
           <div class="fc-conditions" style="margin-top:6px;font-size:.72rem;display:flex;gap:6px;flex-wrap:wrap;">
-            ${flight.conditions?.refundable
+            ${(flight.conditions && flight.conditions.refundable)
               ? '<span style="background:#dcfce7;color:#166534;padding:2px 7px;border-radius:20px;">✓ Refundable</span>'
               : '<span style="background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:20px;">✗ Non-refundable</span>'}
-            ${flight.conditions?.changeable
+            ${(flight.conditions && flight.conditions.changeable)
               ? '<span style="background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:20px;">✓ Changes allowed</span>'
               : '<span style="background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:20px;">✗ No changes</span>'}
           </div>
@@ -1378,7 +1378,7 @@ function sortFlights(by, btn) {
   if (by === 'cheapest') {
     arr.sort((a,b) => parseFloat(a.price.grandTotal) - parseFloat(b.price.grandTotal));
   } else if (by === 'fastest') {
-    const durMs = d => { const m = (d||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?/); return ((+m?.[1]||0)*60+(+m?.[2]||0)); };
+    const durMs = d => { const m = (d||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?/); return ((+(m||[])[1]||0)*60+(+(m||[])[2]||0)); };
     arr.sort((a,b) => durMs(a.itineraries[0].duration) - durMs(b.itineraries[0].duration));
   }
   window._flights = arr;
@@ -1826,7 +1826,7 @@ async function setupBookingPage() {
     'BT':'Airbus A220-300',
   };
   const aircraft = iataAircraftMap[seg.aircraft] || airlineAircraftMap[seg.carrierCode] || 'Airbus A320';
-  const cabin    = selectedFlight.travelerPricings[0]?.fareDetailsBySegment[0]?.cabin || 'ECONOMY';
+  const cabin    = ((((selectedFlight.travelerPricings[0])||{}).fareDetailsBySegment||[])[0]||{}).cabin || 'ECONOMY';
   const isBiz    = cabin === 'BUSINESS';
 
   document.getElementById('booking-flight-summary').innerHTML = `
@@ -1860,11 +1860,11 @@ async function setupBookingPage() {
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Checked Baggage</div>
-        <div style="font-weight:700;color:#1a2b4a;">${(selectedFlight.baggage?.checkedQty > 0) ? selectedFlight.baggage.checkedQty + ' × bag included' : (isBiz ? '2 × bag included' : 'Not included — check airline')}</div>
+        <div style="font-weight:700;color:#1a2b4a;">${((selectedFlight.baggage && selectedFlight.baggage.checkedQty) > 0) ? selectedFlight.baggage.checkedQty + ' × bag included' : (isBiz ? '2 × bag included' : 'Not included — check airline')}</div>
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Carry-on</div>
-        <div style="font-weight:700;color:#1a2b4a;">${(selectedFlight.baggage?.cabinQty > 0) ? selectedFlight.baggage.cabinQty + ' × bag included' : '1 × personal item'}</div>
+        <div style="font-weight:700;color:#1a2b4a;">${((selectedFlight.baggage && selectedFlight.baggage.cabinQty) > 0) ? selectedFlight.baggage.cabinQty + ' × bag included' : '1 × personal item'}</div>
       </div>
       <div style="font-size:.8rem;">
         <div style="color:#6b7280;font-weight:600;text-transform:uppercase;font-size:.7rem;margin-bottom:2px;">Meal Service</div>
@@ -1933,9 +1933,9 @@ async function setupBookingPage() {
       const _bCode = selectedFlight.itineraries[0].segments[0].carrierCode;
       const _isBudg = BUDGET_AIRLINES.has(_bCode);
       const _bd = selectedFlight.itineraries[0].duration || 'PT0H';
-      const _bh = (parseInt(_bd.match(/(\d+)H/)?.[1]||0)) + (parseInt(_bd.match(/(\d+)M/)?.[1]||0)/60);
+      const _bh = (parseInt((_bd.match(/(\d+)H/)||[])[1]||0)) + (parseInt((_bd.match(/(\d+)M/)||[])[1]||0)/60);
       const _isLongHaul = _bh >= 6;
-      const _hasChecked = selectedFlight.baggage?.checkedQty > 0;
+      const _hasChecked = (selectedFlight.baggage && selectedFlight.baggage.checkedQty) > 0;
       const rows = [];
       // Baggage — use Duffel data, fall back to long-haul hint
       rows.push(_hasChecked
@@ -1973,7 +1973,7 @@ async function setupBookingPage() {
     const rStopLabel = rStops === 0
       ? '<span style="color:#16a34a;font-size:.8rem;font-weight:600;">✅ Nonstop</span>'
       : `<span style="color:#d97706;font-size:.8rem;font-weight:600;">🔄 ${rStops} stop via ${rSegs.slice(0,-1).map(s=>s.arrival.iataCode).join(', ')}</span>`;
-    const rAircraft = iataAircraftMap[rSeg.aircraft?.code] || airlineAircraftMap[rSeg.carrierCode] || 'Airbus A320neo';
+    const rAircraft = iataAircraftMap[rSeg.aircraf(t||{}).code] || airlineAircraftMap[rSeg.carrierCode] || 'Airbus A320neo';
 
     const returnHtml = `
     <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #e5e7eb;">
@@ -2050,8 +2050,8 @@ async function setupBookingPage() {
     ${nAdults2   > 0 ? `<div class="price-row"><span>👤 Adults × ${nAdults2}</span><span>€${adultTotal.toFixed(2)}</span></div>` : ''}
     ${nChildren2 > 0 ? `<div class="price-row" style="color:#92400e;"><span>🧒 Children × ${nChildren2} <span style="font-size:.75rem;">(−25%)</span></span><span>€${(baseFlightPrice * 0.75 * nChildren2).toFixed(2)}</span></div>` : ''}
     ${nInfants2  > 0 ? `<div class="price-row" style="color:#166534;"><span>👶 Infants × ${nInfants2} <span style="font-size:.75rem;">(−90%)</span></span><span>€${(baseFlightPrice * 0.10 * nInfants2).toFixed(2)}</span></div>` : ''}
-    ${(selectedFlight.baggage?.checkedQty > 0) ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Checked baggage included</span><span>€0.00</span></div>' : ''}
-    ${(() => { const _d = selectedFlight.itineraries[0].duration || 'PT0H'; const _h = (parseInt(_d.match(/(\d+)H/)?.[1]||0)) + (parseInt(_d.match(/(\d+)M/)?.[1]||0)/60); return _h >= 4 || isBiz ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Meals included</span><span>€0.00</span></div>' : ''; })()}
+    ${((selectedFlight.baggage && selectedFlight.baggage.checkedQty) > 0) ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Checked baggage included</span><span>€0.00</span></div>' : ''}
+    ${(() => { const _d = selectedFlight.itineraries[0].duration || 'PT0H'; const _h = (parseInt((_d.match(/(\d+)H/)||[])[1]||0)) + (parseInt((_d.match(/(\d+)M/)||[])[1]||0)/60); return _h >= 4 || isBiz ? '<div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ Meals included</span><span>€0.00</span></div>' : ''; })()}
     <div class="price-row" style="font-size:.82rem;color:#16a34a;"><span>  ✓ 24/7 booking support</span><span>€0.00</span></div>
     <div class="price-row total"><span>Total</span><span>€${grandTotal.toFixed(2)}</span></div>
     <div style="font-size:.75rem;color:#6b7280;margin-top:6px;text-align:center;">🔒 Transparent pricing · No surprise charges at checkout</div>
@@ -2166,7 +2166,7 @@ async function submitBooking() {
     }
 
     // Capture Stripe PaymentIntent ID for future refunds
-    const paymentIntentId = paymentIntent?.id || null;
+    const paymentIntentId = paymentInten(t||{}).id || null;
 
     // Payment succeeded — now issue the real ticket via Duffel (if Duffel flight)
     const seg     = selectedFlight.itineraries[0].segments[0];
@@ -2413,8 +2413,8 @@ function showConfirmationPage(booking) {
   showPage('confirmation');
 
   // Auto-search hotels for destination
-  const destCode = booking.flight?.to;
-  const departDate = booking.flight?.departTime?.substring(0, 10);
+  const destCode = booking.fligh(t||{}).to;
+  const departDate = ((booking.flightDepartTime||'').substring(0, 10));
   if (destCode && departDate) {
     const checkIn  = departDate;
     const checkOut = new Date(new Date(departDate).getTime() + 7 * 86400000).toISOString().substring(0, 10);
@@ -2449,8 +2449,8 @@ async function searchHotelsForConfirmation(destination, checkIn, checkOut, adult
 
     results.innerHTML = hotels.slice(0, 4).map(h => {
       const stars = '⭐'.repeat(Math.min(parseInt(h.stars) || 3, 5));
-      const price = h.rooms?.[0]?.rate ? `from €${parseFloat(h.rooms[0].rate).toFixed(0)}/night` : '';
-      const board = h.rooms?.[0]?.boardName || '';
+      const price = ((h.rooms && h.rooms[0] && h.rooms[0].rate)) ? `from €${parseFloat(h.rooms[0].rate).toFixed(0)}/night` : '';
+      const board = ((h.rooms && h.rooms[0] && h.rooms[0].boardName)) || '';
       return `
         <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div style="flex:1;min-width:180px;">
@@ -2861,7 +2861,7 @@ function renderAdminStats(bookings) {
   // This month
   const now = new Date();
   const thisMonth = confirmed.filter(b => {
-    const d = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+    const d = b.createdA(t||{}).toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
   const monthRevenue = thisMonth.reduce((s,b) => s + parseFloat(b.totalPrice||0), 0);
@@ -2889,7 +2889,7 @@ function renderCRMOverview(bookings) {
     months.push({ label: d.toLocaleString('en', {month:'short'}), year: d.getFullYear(), month: d.getMonth(), rev: 0, profit: 0 });
   }
   bookings.filter(b => b.status === 'confirmed').forEach(b => {
-    const d = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+    const d = b.createdA(t||{}).toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
     const m = months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
     if (m) { m.rev += parseFloat(b.totalPrice||0); m.profit += parseFloat(b.nordicwingsFee||0); }
   });
@@ -2911,7 +2911,7 @@ function renderCRMOverview(bookings) {
   // Top routes
   const routeCounts = {};
   bookings.filter(b=>b.status==='confirmed').forEach(b => {
-    const r = (b.flight?.from||'?') + '→' + (b.flight?.to||'?');
+    const r = (b.fligh(t||{}).from||'?') + '→' + (b.fligh(t||{}).to||'?');
     routeCounts[r] = (routeCounts[r]||0) + 1;
   });
   const topRoutes = Object.entries(routeCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -2932,8 +2932,8 @@ function renderCRMOverview(bookings) {
     recentEl.innerHTML = recent.map(b => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9;gap:8px;flex-wrap:wrap;">
         <div>
-          <div style="font-weight:700;font-size:.85rem;color:#1e293b;">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
-          <div style="font-size:.75rem;color:#64748b;">${b.flight?.from||'?'} → ${b.flight?.to||'?'} · ${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</div>
+          <div style="font-weight:700;font-size:.85rem;color:#1e293b;">${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}</div>
+          <div style="font-size:.75rem;color:#64748b;">${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'} · ${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:800;color:#1e3a8a;">€${parseFloat(b.totalPrice||0).toFixed(2)}</div>
@@ -2951,8 +2951,8 @@ function renderCRMCustomers(bookings) {
   // Group by email
   const map = {};
   bookings.forEach(b => {
-    const email = b.contact?.email || b.userEmail || 'unknown';
-    if (!map[email]) map[email] = { email, name: `${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}`.trim(), phone: b.contact?.phone||'', bookings:[] };
+    const email = b.contac(t||{}).email || b.userEmail || 'unknown';
+    if (!map[email]) map[email] = { email, name: `${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}`.trim(), phone: (b.contact && b.contact.phone)||'', bookings:[] };
     map[email].bookings.push(b);
   });
   const customers = Object.values(map).sort((a,b) => b.bookings.length - a.bookings.length);
@@ -3003,9 +3003,9 @@ function renderCRMCustomers(bookings) {
           <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:.82rem;flex-wrap:wrap;gap:4px;">
             <div>
               <span style="font-family:monospace;background:#eff6ff;color:#1d4ed8;padding:1px 6px;border-radius:4px;font-size:.75rem;">${b.bookingRef||'—'}</span>
-              <strong style="margin-left:8px;">${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong>
-              <span style="color:#64748b;margin-left:6px;">${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</span>
-              <span style="color:#64748b;margin-left:6px;">${b.passengers?.length||1} pax</span>
+              <strong style="margin-left:8px;">${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'}</strong>
+              <span style="color:#64748b;margin-left:6px;">${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</span>
+              <span style="color:#64748b;margin-left:6px;">${b.passenger(s||{}).length||1} pax</span>
             </div>
             <div style="display:flex;gap:10px;align-items:center;">
               <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
@@ -3132,9 +3132,9 @@ function renderAffiliateTab() {
 }
 
 function calcAffiliate() {
-  const platform = document.getElementById('calc-platform')?.value;
-  const val      = parseFloat(document.getElementById('calc-value')?.value) || 0;
-  const count    = parseInt(document.getElementById('calc-count')?.value) || 0;
+  const platform = (document.getElementById('calc-platform')||{}).value;
+  const val      = parseFloat((document.getElementById('calc-value')||{}).value) || 0;
+  const count    = parseInt((document.getElementById('calc-count')||{}).value) || 0;
   const rates    = { 'trip-flight':0.015, 'trip-hotel':0.05, 'kiwi':0.018, 'booking':0.04 };
   const rate     = rates[platform] || 0.015;
   const monthly  = val * rate * count;
@@ -3162,19 +3162,19 @@ function renderAdminTable(bookings) {
     <tr>
       <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
       <td>
-        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
-        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+        <div class="admin-customer-name">${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}</div>
+        <div class="admin-customer-email">${b.contac(t||{}).email || b.userEmail || ''}</div>
       </td>
-      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
-      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td style="text-align:center;">${b.passengers?.length||1}</td>
+      <td><strong>${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'}</strong></td>
+      <td>${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passenger(s||{}).length||1}</td>
       <td>
         <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
         <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
       </td>
       <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
       <td>
-        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+        <a href="mailto:${b.contac(t||{}).email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
            style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
       </td>
     </tr>
