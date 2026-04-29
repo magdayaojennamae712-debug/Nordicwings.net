@@ -21,8 +21,9 @@ const FIREBASE_CONFIG = {
 const STRIPE_PUBLISHABLE_KEY = "pk_live_51TLzx6A2y3gkkjexteIatqrlYXOzr0czlPkEN4F2faog5HqFSQM574swwi0HVrsMt4kr6gYdiyeZvvC0jS9tPuDH00KmkEAZry";
 
 // ─────────────────────────────────────────────────────────────
-// FIREBASE INIT — fully deferred, never blocks page or search
+// FIREBASE INIT
 // ─────────────────────────────────────────────────────────────
+// Firebase + Stripe init — deferred safely, never blocks search/UI
 let auth = null;
 let db   = null;
 let stripe = null;
@@ -30,7 +31,7 @@ let stripe = null;
 function initFirebaseSafe() {
   try {
     if (typeof firebase === 'undefined') return;
-    if (firebase.apps && firebase.apps.length) return; // already inited
+    if (firebase.apps && firebase.apps.length > 0) return;
     firebase.initializeApp(FIREBASE_CONFIG);
     auth = firebase.auth();
     db   = firebase.firestore();
@@ -39,16 +40,10 @@ function initFirebaseSafe() {
       if (typeof updateNavForAuth === 'function') updateNavForAuth(user);
     });
   } catch(e) {
-    console.warn('Firebase unavailable:', e.message);
+    console.warn('Firebase init skipped:', e.message);
   }
 }
-
-// Try to init firebase after everything loads — never blocks search/UI
-if (document.readyState === 'complete') {
-  initFirebaseSafe();
-} else {
-  window.addEventListener('load', initFirebaseSafe);
-}
+window.addEventListener('load', initFirebaseSafe);
 
 // ─────────────────────────────────────────────────────────────
 // STATE — app-level variables
@@ -231,7 +226,7 @@ function formatDuration(pt) {
 // AUTH STATE LISTENER
 // Fires whenever login state changes (on load, login, logout)
 // ─────────────────────────────────────────────────────────────
-// auth state handled in safe init block above
+// auth state handled in initFirebaseSafe()
 
 const OWNER_EMAIL = 'magdayaojennamae712@gmail.com';
 
@@ -960,128 +955,216 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const toName   = ROUTE_NAMES[dest] || dest;
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
-  const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affiliate_id=nordicwings`;
+  const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
   const aviaUrl  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
   const tripUrl  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
-  // Helper to build an airline card with real logo
-  function airlineCard(flag, name, code, desc) {
-    const logoUrl = `https://images.kiwi.com/airlines/64/${code}.png`;
-    return `<a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
-      style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s,border-color .15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(37,99,235,.15)';this.style.borderColor='#93c5fd'" onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.05)';this.style.borderColor='#e2e8f0'">
-      <img src="${logoUrl}" alt="${name}" width="40" height="40"
-        style="border-radius:8px;object-fit:contain;flex-shrink:0;background:#f8fafc;padding:2px;"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <span style="display:none;font-size:1.4rem;width:40px;height:40px;align-items:center;justify-content:center;flex-shrink:0;">${flag}</span>
-      <div style="min-width:0;">
-        <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;">${name}</div>
-        <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
-      </div>
-    </a>`;
-  }
-
   const list = document.getElementById('results-list');
   list.style.display = 'block';
   list.innerHTML = `
-    <div style="max-width:720px;margin:0 auto;padding:8px 0;">
-
-      <!-- Header -->
-      <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:16px;padding:20px 24px;margin-bottom:20px;color:#fff;">
-        <div style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">✈ Find the best price for ${label}</div>
-        <div style="font-size:.83rem;opacity:.85;">${formatDate(date)} &nbsp;·&nbsp; ${pax} Adult${pax>1?'s':''}</div>
-        <div style="font-size:.75rem;opacity:.7;margin-top:5px;">Click any option — you book directly on the airline or site. Real tickets, secure payment.</div>
+    <div style="max-width:700px;margin:0 auto;padding:8px 0;">
+      <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:16px;padding:22px 24px;margin-bottom:20px;color:#fff;">
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">✈ Find the best price for ${label}</div>
+        <div style="font-size:.85rem;opacity:.85;">${formatDate(date)} · ${pax} Adult${pax>1?'s':''}</div>
+        <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Click any option below — you'll be taken directly to the airline or booking site to complete your purchase securely.</div>
       </div>
 
-      <!-- Aggregators -->
-      <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🌍 Compare all airlines at once</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
         <a href="${kiwiUrl}" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #bae6fd;border-radius:12px;padding:14px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #bae6fd;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:1.7rem;">🥝</span>
-            <div><div style="font-weight:800;color:#0284c7;font-size:.92rem;">Kiwi.com</div><div style="font-size:.75rem;color:#475569;">Mix &amp; match airlines — cheapest combos</div></div>
+            <span style="font-size:1.8rem;">🥝</span>
+            <div>
+              <div style="font-weight:800;color:#0284c7;font-size:.95rem;">Kiwi.com</div>
+              <div style="font-size:.78rem;color:#475569;">Mix &amp; match airlines — often finds cheapest combos</div>
+            </div>
           </div>
-          <span style="background:#0284c7;color:#fff;padding:7px 14px;border-radius:8px;font-weight:700;font-size:.82rem;white-space:nowrap;flex-shrink:0;">Search →</span>
+          <span style="background:#0284c7;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
         <a href="${aviaUrl}" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:1.7rem;">🔍</span>
-            <div><div style="font-weight:800;color:#1a2b4a;font-size:.92rem;">Aviasales</div><div style="font-size:.75rem;color:#475569;">Compare 728 airlines worldwide</div></div>
+            <span style="font-size:1.8rem;">🔍</span>
+            <div>
+              <div style="font-weight:800;color:#1a2b4a;font-size:.95rem;">Aviasales</div>
+              <div style="font-size:.78rem;color:#475569;">Compare 728 airlines worldwide</div>
+            </div>
           </div>
-          <span style="background:#1a2b4a;color:#fff;padding:7px 14px;border-radius:8px;font-weight:700;font-size:.82rem;white-space:nowrap;flex-shrink:0;">Search →</span>
+          <span style="background:#1a2b4a;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
         <a href="${tripUrl}" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:1.7rem;">✈️</span>
-            <div><div style="font-weight:800;color:#e53e3e;font-size:.92rem;">Trip.com</div><div style="font-size:.75rem;color:#475569;">Flights + hotels + packages</div></div>
+            <span style="font-size:1.8rem;">✈️</span>
+            <div>
+              <div style="font-weight:800;color:#e53e3e;font-size:.95rem;">Trip.com</div>
+              <div style="font-size:.78rem;color:#475569;">Flights + hotels + packages worldwide</div>
+            </div>
           </div>
-          <span style="background:#e53e3e;color:#fff;padding:7px 14px;border-radius:8px;font-weight:700;font-size:.82rem;white-space:nowrap;flex-shrink:0;">Search →</span>
+          <span style="background:#e53e3e;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
       </div>
 
-      <!-- Nordic & European -->
-      <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🇪🇺 Nordic &amp; European Airlines</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;">
-        ${airlineCard('🇫🇮','Finnair','AY','Europe &amp; Asia from Helsinki')}
-        ${airlineCard('🇳🇴','Norwegian','DY','Budget — Nordic &amp; Europe')}
-        ${airlineCard('🇸🇪','SAS','SK','Scandinavian domestic &amp; Europe')}
-        ${airlineCard('🇩🇪','Lufthansa','LH','Global via Frankfurt/Munich')}
-        ${airlineCard('🇳🇱','KLM','KL','Worldwide via Amsterdam')}
-        ${airlineCard('🇫🇷','Air France','AF','Worldwide via Paris CDG')}
-        ${airlineCard('🇬🇧','British Airways','BA','Worldwide via London Heathrow')}
-        ${airlineCard('🇹🇷','Turkish Airlines','TK','Worldwide via Istanbul')}
-        ${airlineCard('🍊','Ryanair','FR','Cheapest European budget')}
-        ${airlineCard('🟡','easyJet','U2','European budget routes')}
-        ${airlineCard('💜','Wizz Air','W6','Eastern Europe budget')}
-        ${airlineCard('🇧🇪','Brussels Airlines','SN','Europe &amp; Africa')}
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">✈ Book directly with airline</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <a href="${jBase}&airline=WY" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇴🇲</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Oman Air</div><div style="font-size:.72rem;color:#64748b;">Gulf &amp; Asia routes</div></div>
+        </a>
+        <a href="${jBase}&airline=EK" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇦🇪</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Emirates</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Dubai</div></div>
+        </a>
+        <a href="${jBase}&airline=AY" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇫🇮</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Finnair</div><div style="font-size:.72rem;color:#64748b;">Europe &amp; Asia from HEL</div></div>
+        </a>
+        <a href="${jBase}&airline=QR" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+          <span style="font-size:1.6rem;">🇶🇦</span>
+          <div><div style="font-weight:800;color:#1a2b4a;font-size:.88rem;">Qatar Airways</div><div style="font-size:.72rem;color:#64748b;">Worldwide via Doha</div></div>
+        </a>
       </div>
 
-      <!-- Gulf & Middle East -->
-      <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🌙 Gulf &amp; Middle East Airlines</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;">
-        ${airlineCard('🇦🇪','Emirates','EK','Worldwide via Dubai')}
-        ${airlineCard('🇶🇦','Qatar Airways','QR','Worldwide via Doha')}
-        ${airlineCard('🇴🇲','Oman Air','WY','Gulf, Asia &amp; Europe')}
-        ${airlineCard('🇦🇪','flydubai','FZ','Budget Gulf &amp; beyond')}
-        ${airlineCard('🇸🇦','Saudia','SV','Middle East &amp; worldwide')}
-        ${airlineCard('🇦🇪','Air Arabia','G9','Budget Middle East')}
-      </div>
-
-      <!-- Asia & Pacific -->
-      <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🌏 Asia &amp; Pacific Airlines</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;">
-        ${airlineCard('🇸🇬','Singapore Airlines','SQ','World class — via Singapore')}
-        ${airlineCard('🇹🇭','Thai Airways','TG','Asia via Bangkok')}
-        ${airlineCard('🇲🇾','Malaysia Airlines','MH','Asia via Kuala Lumpur')}
-        ${airlineCard('🇭🇰','Cathay Pacific','CX','Asia via Hong Kong')}
-        ${airlineCard('🇯🇵','Japan Airlines','JL','Japan &amp; Asia')}
-        ${airlineCard('🇯🇵','ANA','NH','Japan domestic &amp; worldwide')}
-        ${airlineCard('🇰🇷','Korean Air','KE','Asia via Seoul')}
-        ${airlineCard('🇻🇳','Vietnam Airlines','VN','Vietnam domestic &amp; Asia')}
-        ${airlineCard('🇮🇩','Garuda Indonesia','GA','Indonesia domestic &amp; Asia')}
-        ${airlineCard('🇲🇾','AirAsia','AK','Budget Asia routes')}
-      </div>
-
-      <!-- Philippines Domestic -->
-      <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🇵🇭 Philippines Airlines (Domestic &amp; International)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;">
-        ${airlineCard('🇵🇭','Philippine Airlines','PR','Full service — MNL hub')}
-        ${airlineCard('🟠','Cebu Pacific','5J','Budget — all PH domestic')}
-        ${airlineCard('🔴','Philippines AirAsia','Z2','Budget domestic &amp; Asia')}
-        ${airlineCard('🔵','AirSWIFT','T6','Philippine island routes')}
-      </div>
-
-      <!-- Trust badge -->
-      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;font-size:.76rem;color:#166534;text-align:center;line-height:1.6;">
-        ✓ All real airlines &amp; trusted sites &nbsp;·&nbsp; ✓ Secure payment directly on their website &nbsp;·&nbsp; ✓ Real ticket issued instantly
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;font-size:.78rem;color:#166534;text-align:center;">
+        ✓ All links are real airlines &amp; trusted booking sites &nbsp;·&nbsp; ✓ Secure payment on their website &nbsp;·&nbsp; ✓ Real ticket issued instantly
       </div>
     </div>
   `;
 }
 
+// Airline code → full name map
+const AIRLINE_NAMES = {
+  // Finnish / Nordic
+  'AY':'Finnair','SK':'SAS','DY':'Norwegian','BT':'airBaltic','TF':'Braathens Regional',
+  'FC':'Finncomm Airlines','6H':'Nordic Regional Airlines','OHY':'Nordic Regional Airlines',
+  // European full-service
+  'EK':'Emirates','QR':'Qatar Airways','BA':'British Airways','LH':'Lufthansa',
+  'TK':'Turkish Airlines','AF':'Air France','KL':'KLM','IB':'Iberia',
+  'TP':'TAP Air Portugal','LX':'Swiss','OS':'Austrian Airlines','SN':'Brussels Airlines',
+  'EI':'Aer Lingus','AZ':'ITA Airways','LO':'LOT Polish Airlines','OK':'Czech Airlines',
+  'RO':'TAROM','SU':'Aeroflot','PS':'Ukraine International','A3':'Aegean Airlines',
+  'EW':'Eurowings','BT':'airBaltic','WY':'Oman Air','SV':'Saudia','MS':'EgyptAir',
+  'ET':'Ethiopian Airlines','KQ':'Kenya Airways','SA':'South African Airways',
+  // Budget European
+  'FR':'Ryanair','U2':'easyJet','W6':'Wizz Air','VY':'Vueling','TO':'Transavia France',
+  'HV':'Transavia','I2':'Iberia Express','LS':'Jet2','BY':'TUI Airways',
+  'BE':'Flybe','PC':'Pegasus Airlines','V7':'Volotea',
+  // Middle East / Asia full-service
+  'FZ':'flydubai','G9':'Air Arabia','TG':'Thai Airways','SQ':'Singapore Airlines',
+  'MH':'Malaysia Airlines','CX':'Cathay Pacific','JL':'Japan Airlines','NH':'ANA',
+  'OZ':'Asiana Airlines','KE':'Korean Air','GA':'Garuda Indonesia',
+  'CI':'China Airlines','BR':'EVA Air','TG':'Thai Airways','VN':'Vietnam Airlines',
+  'MU':'China Eastern','CA':'Air China','CZ':'China Southern',
+  // Philippines
+  'PR':'Philippine Airlines','5J':'Cebu Pacific','Z2':'Philippines AirAsia',
+  // Southeast Asia budget
+  'QZ':'Indonesia AirAsia','JT':'Lion Air','FD':'Thai AirAsia','AK':'AirAsia',
+  'XW':'NokScoot','ID':'Batik Air','SJ':'Sriwijaya Air','OD':'Batik Air Malaysia',
+  // Oceania
+  'QF':'Qantas','NZ':'Air New Zealand','VA':'Virgin Australia',
+  // Americas
+  'AC':'Air Canada','WS':'WestJet','AA':'American Airlines','UA':'United Airlines',
+  'DL':'Delta Air Lines','WN':'Southwest Airlines','B6':'JetBlue','AS':'Alaska Airlines',
+  'F9':'Frontier Airlines','LA':'LATAM','G3':'Gol','AD':'Azul','CM':'Copa Airlines',
+};
+
+// Budget carriers — no free checked bag, buy-on-board food
+const BUDGET_AIRLINES = new Set([
+  'FR','U2','W6','DY','PC','XW','VY','FD','AK','QZ','JT','ID','SJ', // Europe/Asia budget
+  '5J','Z2','OD',                          // Philippines/Malaysia budget
+  'FZ','G9',                               // Middle East LCC
+  'TO','HV','I2','LS','BY','V7',           // European budget (Transavia, Jet2, TUI, Volotea)
+  'F9','WN','G3','AD'                      // Americas budget
+]);
+
+// Render flight result cards (Skyscanner-style)
+function renderFlightCards(flights) {
+  window._flights = flights;
+  window._flightsAll = flights; // Keep original for sorting/filtering
+
+  const list = document.getElementById('results-list');
+  list.style.display = 'flex';
+
+  // Build sort/filter bar
+  const hasNonstop = flights.some(f => f.itineraries[0].segments.length === 1);
+  const sortBarHtml = `
+    <div class="results-sort-bar">
+      <div class="sort-label">Sort by:</div>
+      <button class="sort-btn active" onclick="sortFlights('cheapest', this)">💰 Cheapest</button>
+      <button class="sort-btn" onclick="sortFlights('fastest', this)">⚡ Fastest</button>
+      ${hasNonstop ? '<button class="filter-btn" onclick="filterNonstop(this)">✅ Nonstop only</button>' : ''}
+      <div class="results-count">${flights.length} flights found</div>
+    </div>
+  `;
+
+  const kiwiOrigin = searchParams.origin || '';
+  const kiwiDest   = searchParams.dest   || '';
+  const kiwiDate   = searchParams.departDate || '';
+  const kiwiPass   = searchParams.numAdults || 1;
+
+  // Pre-filled deep links — route + date + passengers passed directly
+  const kiwiUrl = (kiwiOrigin && kiwiDest && kiwiDate)
+    ? `https://www.kiwi.com/en/search/results/${kiwiOrigin}/${kiwiDest}/${kiwiDate}?adults=${kiwiPass}&affilid=kiwi_affiliates`
+    : `https://kiwi.tpk.mx/Imxir0ir`;
+
+  const tripUrl = (kiwiOrigin && kiwiDest && kiwiDate)
+    ? `https://www.trip.com/flights/list?dcity=${kiwiOrigin}&acity=${kiwiDest}&ddate=${kiwiDate}&adult=${kiwiPass}&Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`
+    : `https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585`;
+
+  const fromName = ROUTE_NAMES[kiwiOrigin] || kiwiOrigin;
+  const toName   = ROUTE_NAMES[kiwiDest]   || kiwiDest;
+  const routeLabel = (kiwiOrigin && kiwiDest) ? `${fromName} → ${toName}` : 'your route';
+
+  const kiwiBanner = `
+    <div style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4);border:1.5px solid #bae6fd;border-radius:12px;
+      padding:12px 16px;margin-bottom:12px;">
+      <div style="font-weight:700;color:#0c4a6e;font-size:.88rem;margin-bottom:6px;">💡 Also compare prices for <strong>${routeLabel}</strong> on other platforms:</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:.78rem;color:#0369a1;margin-bottom:6px;">🌍 Kiwi.com — mix &amp; match airlines, find cheaper combos</div>
+          <a href="${kiwiUrl}" target="_blank" rel="noopener"
+            style="background:#0284c7;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
+            Compare on Kiwi.com →
+          </a>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:.78rem;color:#1d4ed8;margin-bottom:6px;">✈️ Trip.com — flights, hotels &amp; packages worldwide</div>
+          <a href="${tripUrl}" target="_blank" rel="noopener"
+            style="background:#1d4ed8;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
+            Compare on Trip.com →
+          </a>
+        </div>
+      </div>
+    </div>`;
+
+  list.innerHTML = kiwiBanner + sortBarHtml + '<div id="flights-container"></div>';
+  renderFlightList(flights);
+
+  // ── Show airline direct links (always on results page) ──────
+  const TP = '719573';
+  const airlineSection = document.getElementById('airline-direct-section');
+  if (airlineSection) {
+    airlineSection.style.display = 'block';
+    const o = kiwiOrigin, d = kiwiDest, dt = kiwiDate, p = kiwiPass;
+    const base = `https://jetradar.com/flights/?marker=${TP}&origin=${o}&destination=${d}&depart_date=${dt}&adults=${p}`;
+    const oa = document.getElementById('results-omanair-link');
+    const ek = document.getElementById('results-emirates-link');
+    const ay = document.getElementById('results-finnair-link');
+    const qr = document.getElementById('results-qatar-link');
+    if (o && d && dt) {
+      if (oa) oa.href = base + '&airline=WY';
+      if (ek) ek.href = base + '&airline=EK';
+      if (ay) ay.href = base + '&airline=AY';
+      if (qr) qr.href = base + '&airline=QR';
+    }
+  }
+}
 
 function renderFlightList(flights) {
   const container = document.getElementById('flights-container');
@@ -2575,7 +2658,7 @@ async function signInUser() {
   toggleBtnLoading('login-btn-text', 'login-btn-spinner', true);
 
   try {
-    if (!auth) throw new Error("Login unavailable"); await auth.signInWithEmailAndPassword(email, password);
+    await auth.signInWithEmailAndPassword(email, password);
     document.getElementById('auth-overlay').style.display = 'none';
 
     // If they were on the agencies page, go back there
@@ -2603,7 +2686,7 @@ async function signUpUser() {
   toggleBtnLoading('signup-btn-text', 'signup-btn-spinner', true);
 
   try {
-    if (!auth) throw new Error("Signup unavailable"); const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName: name });
     document.getElementById('auth-overlay').style.display = 'none';
 
@@ -2619,7 +2702,7 @@ async function signUpUser() {
 
 // Sign Out
 async function signOutUser() {
-  if (auth) await auth.signOut();
+  await auth.signOut();
   showPage('home');
 }
 
@@ -2996,4 +3079,14 @@ function renderAdminTable(bookings) {
       <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
       <td style="text-align:center;">${b.passengers?.length||1}</td>
       <td>
-        <stron
+        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+      </td>
+      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
+      <td>
+        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
+      </td>
+    </tr>
+  `).join('');
+}
