@@ -275,6 +275,7 @@
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('home')">Home</a>
         <a href="#how-it-works" class="nav-link">How it Works</a>
         <a href="#destinations" class="nav-link">Destinations</a>
+        <a href="javascript:void(0)" class="nav-link" onclick="showPage('book')" style="color:#1d4ed8;font-weight:700;">✈️ Book Now</a>
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('support')">Support</a>
         <button class="btn-ghost" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none;">My Bookings</button>
         <button class="btn-ghost" id="nav-admin" onclick="showPage('admin')" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">📊 Business</button>
@@ -1940,6 +1941,89 @@
             <p class="contact-method-detail">Connect with us professionally on LinkedIn</p>
           </div>
         </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE: BOOK NOW (Searadar white-label flight search)
+  ════════════════════════════════════════════════════════ -->
+  <main id="page-book" class="page">
+    <div class="page-inner" style="max-width:1100px;padding:0 16px 40px;">
+
+      <!-- Back button -->
+      <button class="back-btn" onclick="showPage('home')" style="margin:20px 0 10px;">← Back to Home</button>
+
+      <!-- Hero heading -->
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:#fff;font-size:.78rem;font-weight:700;letter-spacing:1px;padding:5px 16px;border-radius:20px;text-transform:uppercase;margin-bottom:10px;">
+          ✈️ Powered by Travelpayouts
+        </div>
+        <h1 style="margin:0 0 8px;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;color:#1a2b4a;">Find &amp; Book Your Flight</h1>
+        <p style="margin:0;color:#64748b;font-size:1rem;">Compare hundreds of airlines — best price guaranteed, free to use</p>
+      </div>
+
+      <!-- Destination photo strip -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;border-radius:16px;overflow:hidden;">
+        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London"
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇬🇧 London</div>
+        </div>
+        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris"
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇫🇷 Paris</div>
+        </div>
+        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai"
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇦🇪 Dubai</div>
+        </div>
+        <div style="position:relative;height:140px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
+          <img src="https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=400&q=80" alt="Tokyo"
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🇯🇵 Tokyo</div>
+        </div>
+      </div>
+
+      <!-- Trust badges row -->
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#15803d;">✅ Free to use — no hidden fees</div>
+        <div style="display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#1d4ed8;">🔒 Secure booking via trusted partners</div>
+        <div style="display:flex;align-items:center;gap:6px;background:#fef3c7;border:1px solid #fde68a;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:#b45309;">✈️ 500+ airlines compared</div>
+      </div>
+
+      <!-- Searadar white-label iframe -->
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;border:1px solid #e2e8f0;">
+        <div style="background:linear-gradient(135deg,#1d4ed8,#0ea5e9);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">✈️</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:1rem;">NordicWings Flight Search</div>
+            <div style="color:rgba(255,255,255,.8);font-size:.78rem;">Search, compare &amp; book — powered by Travelpayouts</div>
+          </div>
+        </div>
+        <iframe
+          id="searadar-frame"
+          src="https://searadar.tpk.mx/XaNzHXVR"
+          width="100%"
+          height="700"
+          frameborder="0"
+          scrolling="yes"
+          allow="payment"
+          style="display:block;min-height:700px;"
+          loading="lazy"
+          title="NordicWings Flight Search">
+        </iframe>
+      </div>
+
+      <!-- Bottom info -->
+      <div style="text-align:center;margin-top:20px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:.82rem;color:#64748b;">
+          🔍 Flights are compared across <strong>hundreds of airlines</strong> including Finnair, SAS, Norwegian, Emirates, Qatar Airways, Ryanair and more.<br/>
+          When you book, you pay directly to the airline or travel agency — NordicWings is free to use.
+        </p>
       </div>
 
     </div>
