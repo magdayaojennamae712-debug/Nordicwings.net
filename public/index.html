@@ -10,9 +10,16 @@
   <meta name="ferryscanner-verification" content="nordicwings-jennamae-saarela-owner" />
   <!-- Tradedoubler site ownership verification -->
   <meta name="tdv" content="3482055" />
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8747570105267051"
-       crossorigin="anonymous"></script>
+  <!-- Google AdSense — deferred so it never blocks page interaction -->
+  <script>
+  window.addEventListener('load', function() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8747570105267051';
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+  });
+  </script>
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
@@ -200,14 +207,14 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Travelpayouts Content Analytics — tracks which pages lead to bookings -->
+  <!-- Travelpayouts Content Analytics — deferred, loads after page is ready -->
   <script>
-  (function () {
+  window.addEventListener('load', function() {
     var script = document.createElement("script");
     script.async = 1;
     script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
     document.head.appendChild(script);
-  })();
+  });
   </script>
 
   <!-- Google Analytics (tracks visitors, revenue, conversions) -->
@@ -280,7 +287,7 @@
   <header id="site-header">
     <div class="header-inner">
       <a href="javascript:void(0)" class="logo" onclick="showPage('home')">
-        <img src="/nordicwings-official-logo.svg" alt="NordicWings" style="height:48px;width:auto;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'"/><span style="display:none">NordicWings</span>
+        <img src="/nordicwings-official-logo.svg" alt="NordicWings" style="height:48px;width:auto;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'" loading="lazy"/><span style="display:none">NordicWings</span>
       </a>
       <nav class="header-nav">
         <a href="javascript:void(0)" class="nav-link" onclick="showPage('home')">Home</a>
@@ -323,6 +330,8 @@
       <a href="javascript:void(0)" onclick="showPage('home');toggleMobileMenu()">Home</a>
       <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
       <a href="#destinations" onclick="toggleMobileMenu()">Destinations</a>
+      <a href="javascript:void(0)" onclick="showPage('book');toggleMobileMenu()" style="color:#0369a1;font-weight:700;">⚓ Sea Travel</a>
+      <a href="javascript:void(0)" onclick="showPage('support');toggleMobileMenu()">Support</a>
       <button onclick="openAuthModal('login');toggleMobileMenu()">Sign In</button>
       <button onclick="openAuthModal('signup');toggleMobileMenu()">Sign Up Free</button>
       <!-- Language selector in mobile menu -->
@@ -341,7 +350,7 @@
     <!-- HERO SECTION -->
     <section class="hero">
       <div class="hero-bg">
-        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=80" alt="Airplane flying above clouds" class="hero-img" />
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=70&auto=format&fit=crop" alt="Airplane flying above clouds" class="hero-img" fetchpriority="high" />
         <div class="hero-overlay"></div>
       </div>
       <div class="hero-content">
@@ -580,105 +589,105 @@
         <div class="destinations-grid" id="destinations-grid">
           <!-- Europe -->
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','LHR')">
-            <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" />
+            <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → London</h3><p>HEL → LHR · 3h 15m</p><span class="dest-price" data-eur="130" data-php="8060">From €130</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','CDG')">
-            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" />
+            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Paris</h3><p>HEL → CDG · 3h 30m</p><span class="dest-price" data-eur="138" data-php="8556">From €138</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','BCN')">
-            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" />
+            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Barcelona</h3><p>HEL → BCN · ~8h (1 stop)</p><span class="dest-price" data-eur="145" data-php="8990">From €145</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','AMS')">
-            <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" />
+            <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Amsterdam</h3><p>HEL → AMS · ~3h 0m</p><span class="dest-price" data-eur="125" data-php="7750">From €125</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','FCO')">
-            <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" />
+            <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Rome</h3><p>HEL → FCO · ~3h 45m</p><span class="dest-price" data-eur="142" data-php="8804">From €142</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','WAW')">
-            <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" />
+            <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Warsaw</h3><p>HEL → WAW · ~2h 0m</p><span class="dest-price" data-eur="98" data-php="6076">From €98</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','MAD')">
-            <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400&q=80" alt="Madrid" />
+            <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400&q=80" alt="Madrid" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Madrid</h3><p>HEL → MAD · ~7h 30m (1 stop)</p><span class="dest-price" data-eur="148" data-php="9176">From €148</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','ATH')">
-            <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&q=80" alt="Athens" />
+            <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&q=80" alt="Athens" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Athens</h3><p>HEL → ATH · ~5h 55m (1 stop)</p><span class="dest-price" data-eur="155" data-php="9610">From €155</span></div>
           </div>
 
           <!-- Asia -->
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','BKK')">
-            <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" />
+            <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=400&q=80" alt="Bangkok" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Bangkok</h3><p>HEL → BKK · ~13h (1 stop)</p><span class="dest-price" data-eur="390" data-php="24180">From €390</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','MNL')">
-            <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Manila" />
+            <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&q=80" alt="Manila" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Manila</h3><p>HEL → MNL · ~16h (1-2 stops)</p><span class="dest-price" data-eur="450" data-php="27900">From €450</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','SIN')">
-            <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&q=80" alt="Singapore" />
+            <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&q=80" alt="Singapore" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Singapore</h3><p>HEL → SIN · ~14h (1 stop)</p><span class="dest-price" data-eur="420" data-php="26040">From €420</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','NRT')">
-            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&q=80" alt="Tokyo" />
+            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&q=80" alt="Tokyo" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Tokyo</h3><p>HEL → NRT · ~14h (1 stop)</p><span class="dest-price" data-eur="480" data-php="29760">From €480</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','DPS')">
-            <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80" alt="Bali" />
+            <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80" alt="Bali" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Bali</h3><p>HEL → DPS · ~16h (1-2 stops)</p><span class="dest-price" data-eur="510" data-php="31620">From €510</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('HEL','KUL')">
-            <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400&q=80" alt="Kuala Lumpur" />
+            <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400&q=80" alt="Kuala Lumpur" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Kuala Lumpur</h3><p>HEL → KUL · ~13h (1 stop)</p><span class="dest-price" data-eur="400" data-php="24800">From €400</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','DVO')">
-            <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" alt="Davao City" />
+            <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" alt="Davao City" loading="lazy" />
             <div class="dest-info"><h3>Manila → Davao</h3><p>MNL → DVO · 1h 55m</p><span class="dest-price" data-eur="110" data-php="6820">From €110</span></div>
           </div>
           <div class="dest-card" data-region="asia" onclick="quickSearch('MNL','CEB')">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80" alt="Cebu Beach" />
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80" alt="Cebu Beach" loading="lazy" />
             <div class="dest-info"><h3>Manila → Cebu</h3><p>MNL → CEB · 1h 10m</p><span class="dest-price" data-eur="95" data-php="5890">From €95</span></div>
           </div>
 
           <!-- Americas -->
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','JFK')">
-            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" />
+            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → New York</h3><p>HEL → JFK · ~9h 30m (1 stop)</p><span class="dest-price" data-eur="480" data-php="29760">From €480</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','LAX')">
-            <img src="https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=400&q=80" alt="Los Angeles" />
+            <img src="https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=400&q=80" alt="Los Angeles" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Los Angeles</h3><p>HEL → LAX · ~13h (1 stop)</p><span class="dest-price" data-eur="540" data-php="33480">From €540</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','MIA')">
-            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80" alt="Miami" />
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80" alt="Miami" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Miami</h3><p>HEL → MIA · ~12h (1 stop)</p><span class="dest-price" data-eur="520" data-php="32240">From €520</span></div>
           </div>
           <div class="dest-card" data-region="americas" onclick="quickSearch('HEL','CUN')">
-            <img src="https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=400&q=80" alt="Cancun" />
+            <img src="https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=400&q=80" alt="Cancun" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Cancun</h3><p>HEL → CUN · 13h 0m</p><span class="dest-price" data-eur="580" data-php="35960">From €580</span></div>
           </div>
 
           <!-- Middle East -->
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DXB')">
-            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" />
+            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Dubai</h3><p>HEL → DXB · ~6h 30m</p><span class="dest-price" data-eur="310" data-php="19220">From €310</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','DOH')">
-            <img src="https://images.unsplash.com/photo-1546412414-e1885259563a?w=400&q=80" alt="Doha" />
+            <img src="https://images.unsplash.com/photo-1546412414-e1885259563a?w=400&q=80" alt="Doha" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Doha</h3><p>HEL → DOH · ~6h 0m</p><span class="dest-price" data-eur="290" data-php="17980">From €290</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','IST')">
-            <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&q=80" alt="Istanbul" />
+            <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&q=80" alt="Istanbul" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Istanbul</h3><p>HEL → IST · ~3h 45m</p><span class="dest-price" data-eur="160" data-php="9920">From €160</span></div>
           </div>
           <div class="dest-card" data-region="mideast" onclick="quickSearch('HEL','TLV')">
-            <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=400&q=80" alt="Tel Aviv" />
+            <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=400&q=80" alt="Tel Aviv" loading="lazy" />
             <div class="dest-info"><h3>Helsinki → Tel Aviv</h3><p>HEL → TLV · 4h 0m</p><span class="dest-price" data-eur="220" data-php="13640">From €220</span></div>
           </div>
         </div>
@@ -760,7 +769,7 @@
           </button>
         </div>
         <div class="features-image">
-          <img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80" alt="Happy travelers at airport" />
+          <img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80" alt="Happy travelers at airport" loading="lazy" />
         </div>
       </div>
     </section>
@@ -1981,22 +1990,22 @@
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;border-radius:16px;overflow:hidden;">
         <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
           <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80" alt="Mediterranean Sea"
-            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'" loading="lazy"/>
           <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🌊 Mediterranean</div>
         </div>
         <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
           <img src="https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=400&q=80" alt="Baltic Sea"
-            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'" loading="lazy"/>
           <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">⚓ Baltic Sea</div>
         </div>
         <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
           <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&q=80" alt="Yacht Charter"
-            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'" loading="lazy"/>
           <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">⛵ Yacht Charter</div>
         </div>
         <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('searadar-frame').scrollIntoView({behavior:'smooth'})">
           <img src="https://images.unsplash.com/photo-1548574505-5e239809ee19?w=400&q=80" alt="Sailing"
-            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'"/>
+            style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'" loading="lazy"/>
           <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:10px 10px 8px;color:#fff;font-weight:700;font-size:.82rem;">🏝 Island Hopping</div>
         </div>
       </div>
@@ -2822,3 +2831,4 @@
 
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
