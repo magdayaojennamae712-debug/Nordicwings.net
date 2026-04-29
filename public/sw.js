@@ -1,7 +1,7 @@
 // NordicWings Service Worker
 // Caches app files so it works offline and loads faster
 
-const CACHE_NAME = 'nordicwings-v5';
+const CACHE_NAME = 'nordicwings-v6';
 const ASSETS = [
   '/',
   '/index.html',
