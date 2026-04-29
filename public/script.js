@@ -341,6 +341,7 @@ function filterRoutes(region, btn) {
 }
 
 function quickSearch(orig, dest) {
+  // Fill origin input
   const originInput = document.getElementById('origin-input');
   const destInput   = document.getElementById('dest-input');
   const dateInput   = document.getElementById('depart-input');
@@ -350,12 +351,14 @@ function quickSearch(orig, dest) {
   destInput.value   = dest;
   destInput.dataset.code = dest;
 
+  // Set date to 30 days from today if not already set
   if (!dateInput.value) {
     const d = new Date();
     d.setDate(d.getDate() + 30);
     dateInput.value = d.toISOString().split('T')[0];
   }
 
+  // Scroll to search form and trigger search
   showPage('home');
   setTimeout(() => {
     document.querySelector('.search-box') && document.querySelector('.search-box').scrollIntoView({ behavior: 'smooth' });
@@ -363,32 +366,20 @@ function quickSearch(orig, dest) {
   }, 100);
 }
 
-// quickFill — called from quick-route buttons with full city names
-// usage: quickFill('HEL','Helsinki','LHR','London')
+// quickFill — called from popular route buttons e.g. quickFill('HEL','Helsinki','LHR','London')
 function quickFill(origCode, origName, destCode, destName) {
-  const originInput = document.getElementById('origin-input');
-  const destInput   = document.getElementById('dest-input');
-  const dateInput   = document.getElementById('depart-input');
-
-  originInput.value = origCode + ' — ' + origName;
-  originInput.dataset.code = origCode;
-  destInput.value   = destCode + ' — ' + destName;
-  destInput.dataset.code = destCode;
-
-  if (!dateInput.value) {
-    const d = new Date();
-    d.setDate(d.getDate() + 30);
+  var originInput = document.getElementById('origin-input');
+  var destInput   = document.getElementById('dest-input');
+  var dateInput   = document.getElementById('depart-input');
+  if (originInput) { originInput.value = origCode + ' — ' + origName; originInput.dataset.code = origCode; }
+  if (destInput)   { destInput.value   = destCode + ' — ' + destName;   destInput.dataset.code = destCode; }
+  if (dateInput && !dateInput.value) {
+    var d = new Date(); d.setDate(d.getDate() + 30);
     dateInput.value = d.toISOString().split('T')[0];
   }
-
-  // Reset any stuck search state
-  _searchInProgress = false;
-
+  _lastSearchTs = 0;
   showPage('home');
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => searchFlights(), 300);
-  }, 80);
+  setTimeout(function() { window.scrollTo({top:0,behavior:'smooth'}); setTimeout(searchFlights, 300); }, 80);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -803,14 +794,18 @@ function generateClientFlights(orig, dest, date, numAdults) {
   });
 }
 
-let _searchInProgress = false;
-// Safety reset — if something went wrong previously, always allow new search
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) _searchInProgress = false;
+// Pre-fill date to 30 days from today so it's never empty on mobile
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('depart-input');
+  if (el && !el.value) { var d=new Date(); d.setDate(d.getDate()+30); el.value=d.toISOString().split('T')[0]; }
 });
+
+let _lastSearchTs = 0;
 async function searchFlights() {
-  // Prevent double-clicks / multiple simultaneous searches
-  if (_searchInProgress) { _searchInProgress = false; return; }
+  // Debounce 600ms — prevents touchend+onclick double-fire on Android
+  var now = Date.now();
+  if (now - _lastSearchTs < 600) return;
+  _lastSearchTs = now;
 
   const originInput = document.getElementById('origin-input');
   const destInput   = document.getElementById('dest-input');
@@ -907,11 +902,19 @@ async function searchFlights() {
   };
 
   function resolveCode(input) {
-    const ds = input.dataset.code;
-    if (ds) return ds;
-    const raw = input.value.split('—')[0].trim().toUpperCase();
+    var ds = input.dataset.code;
+    if (ds && ds.length === 3) return ds;
+    // Handle "HEL — Helsinki" autocomplete format (em dash or hyphen)
+    var raw = input.value.replace(/\s*[\u2014\-].*$/, '').trim().toUpperCase().replace(/[^A-Z ]/g, '');
     if (/^[A-Z]{3}$/.test(raw)) return raw;
-    return cityToCode[raw] || null; // null = not found, will show error
+    if (cityToCode[raw]) return cityToCode[raw];
+    // Fuzzy partial match: "HELSIN" → "HELSINKI"
+    var keys = Object.keys(cityToCode);
+    var partial = keys.find(function(k){ return k.startsWith(raw); });
+    if (partial) return cityToCode[partial];
+    var partial2 = keys.find(function(k){ return raw.startsWith(k) && k.length >= 4; });
+    if (partial2) return cityToCode[partial2];
+    return null;
   }
 
   const origin = resolveCode(originInput);
@@ -970,20 +973,12 @@ async function searchFlights() {
   if (originEntityId) qs.set('originEntityId', originEntityId);
   if (destEntityId)   qs.set('destinationEntityId', destEntityId);
 
-  // Show loading state first — give browser 80ms to paint it before the heavy render
-  // This makes the page feel instant on Android instead of appearing frozen
-  const sbText = document.getElementById('search-btn-text');
-  const sbBtn  = document.getElementById('search-btn');
-  if (sbText) sbText.textContent = 'Searching…';
-  if (sbBtn)  sbBtn.disabled = true;
-
+  // Defer results render 80ms — lets browser paint the loading spinner first (critical on Android)
+  var _orig=origin, _dest=dest, _date=departDate, _ad=numAdults, _ch=numChildren, _in=numInfants;
   setTimeout(function() {
     document.getElementById('results-loading').style.display = 'none';
     document.getElementById('results-list').style.display    = 'block';
-    renderAffiliateResults(origin, dest, departDate, numAdults, numChildren, numInfants);
-    // Reset button
-    if (sbText) sbText.textContent = '🔍 Search Flights';
-    if (sbBtn)  sbBtn.disabled = false;
+    renderAffiliateResults(_orig, _dest, _date, _ad, _ch, _in);
   }, 80);
 }
 
@@ -1055,8 +1050,8 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
-            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            loading="lazy" onerror="this.style.display='none'"/>
+            loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1070,8 +1065,8 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
-            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            loading="lazy" onerror="this.style.display='none'"/>
+            loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1085,8 +1080,8 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
-            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            loading="lazy" onerror="this.style.display='none'"/>
+            loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -1100,8 +1095,8 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
-            style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
-            loading="lazy" onerror="this.style.display='none'"/>
+            loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
+            onerror="this.style.display='none'"/>
           <div style="min-width:0;">
             <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
             <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -3156,4 +3151,32 @@ function renderAdminTable(bookings) {
   const emptyEl  = document.getElementById('admin-empty');
   if (!tableEl) return;
   if (!filtered.length) {
-    tableEl.style.display = 'non
+    tableEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'flex';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  tableEl.style.display = 'table';
+
+  document.getElementById('admin-table-body').innerHTML = filtered.map(b => `
+    <tr>
+      <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
+      <td>
+        <div class="admin-customer-name">${b.passengers?.[0]?.firstName||''} ${b.passengers?.[0]?.lastName||''}</div>
+        <div class="admin-customer-email">${b.contact?.email || b.userEmail || ''}</div>
+      </td>
+      <td><strong>${b.flight?.from||'?'} → ${b.flight?.to||'?'}</strong></td>
+      <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passengers?.length||1}</td>
+      <td>
+        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
+        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
+      </td>
+      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
+      <td>
+        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
+      </td>
+    </tr>
+  `).join('');
+}
