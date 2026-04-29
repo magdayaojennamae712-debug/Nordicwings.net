@@ -21,17 +21,26 @@ const FIREBASE_CONFIG = {
 const STRIPE_PUBLISHABLE_KEY = "pk_live_51TLzx6A2y3gkkjexteIatqrlYXOzr0czlPkEN4F2faog5HqFSQM574swwi0HVrsMt4kr6gYdiyeZvvC0jS9tPuDH00KmkEAZry";
 
 // ─────────────────────────────────────────────────────────────
-// FIREBASE INIT
+// FIREBASE INIT — wrapped safely so any failure never freezes the page
 // ─────────────────────────────────────────────────────────────
-firebase.initializeApp(FIREBASE_CONFIG);
-const auth = firebase.auth();
-const db   = firebase.firestore();
+let auth = null;
+let db   = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    auth = firebase.auth();
+    db   = firebase.firestore();
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      updateNavForAuth(user);
+    });
+  }
+} catch(e) {
+  console.warn('Firebase init skipped:', e.message);
+}
 
-// Stripe instance — lazy init after page loads (Stripe.js has defer)
+// Stripe — not used in affiliate mode, kept for legacy compatibility
 let stripe = null;
-window.addEventListener('load', function() {
-  if (typeof Stripe !== 'undefined') stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-});
 
 // ─────────────────────────────────────────────────────────────
 // STATE — app-level variables
@@ -214,10 +223,7 @@ function formatDuration(pt) {
 // AUTH STATE LISTENER
 // Fires whenever login state changes (on load, login, logout)
 // ─────────────────────────────────────────────────────────────
-auth.onAuthStateChanged(user => {
-  currentUser = user;
-  updateNavForAuth(user);
-});
+// auth state handled in safe init block above
 
 const OWNER_EMAIL = 'magdayaojennamae712@gmail.com';
 
@@ -946,7 +952,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const toName   = ROUTE_NAMES[dest] || dest;
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
-  const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
+  const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affiliate_id=nordicwings`;
   const aviaUrl  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
   const tripUrl  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
@@ -2561,7 +2567,7 @@ async function signInUser() {
   toggleBtnLoading('login-btn-text', 'login-btn-spinner', true);
 
   try {
-    await auth.signInWithEmailAndPassword(email, password);
+    if (!auth) throw new Error("Login unavailable"); await auth.signInWithEmailAndPassword(email, password);
     document.getElementById('auth-overlay').style.display = 'none';
 
     // If they were on the agencies page, go back there
@@ -2589,7 +2595,7 @@ async function signUpUser() {
   toggleBtnLoading('signup-btn-text', 'signup-btn-spinner', true);
 
   try {
-    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    if (!auth) throw new Error("Signup unavailable"); const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName: name });
     document.getElementById('auth-overlay').style.display = 'none';
 
@@ -2605,7 +2611,7 @@ async function signUpUser() {
 
 // Sign Out
 async function signOutUser() {
-  await auth.signOut();
+  if (auth) await auth.signOut();
   showPage('home');
 }
 
