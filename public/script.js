@@ -1005,7 +1005,10 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Click any option below — you'll be taken directly to the airline or booking site to complete your purchase securely.</div>
       </div>
 
-      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines</div>
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines — 3 options below</div>
+      <div style="background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:#713f12;font-weight:600;text-align:center;">
+        👇 Scroll down to see all partners &amp; airlines
+      </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
         <a href="${kiwiUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Kiwi.com: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #bae6fd;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
