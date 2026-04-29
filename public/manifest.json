@@ -1,5 +1,5 @@
 {
-  "name": "NordicWings \u2014 Find & Book Flights",
+  "name": "NordicWings — Find & Book Flights",
   "short_name": "NordicWings",
   "description": "Search and book cheap flights from Finland to Philippines, Asia, Europe and worldwide.",
   "start_url": "/",
@@ -45,18 +45,18 @@
   ],
   "screenshots": [
     {
-      "src": "/skybook_facebook_banner.png",
+      "src": "/nordicwings-banner.png",
       "sizes": "1200x630",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "NordicWings Flight Search"
+      "label": "NordicWings flight search"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "NordicWings App"
+      "label": "NordicWings mobile search"
     }
   ],
   "lang": "en",
