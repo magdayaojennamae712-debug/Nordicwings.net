@@ -1007,7 +1007,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
 
       <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
-        <a href="${kiwiUrl}" target="_blank" rel="noopener"
+        <a href="${kiwiUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Kiwi.com: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #bae6fd;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:1.8rem;">🥝</span>
@@ -1018,7 +1018,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           </div>
           <span style="background:#0284c7;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
-        <a href="${aviaUrl}" target="_blank" rel="noopener"
+        <a href="${aviaUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Aviasales: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:1.8rem;">🔍</span>
@@ -1029,7 +1029,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
           </div>
           <span style="background:#1a2b4a;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
-        <a href="${tripUrl}" target="_blank" rel="noopener"
+        <a href="${tripUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Trip.com: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
           <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:1.8rem;">✈️</span>
@@ -1047,7 +1047,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
       <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌿 NORDIC & EUROPEAN</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
         ${[['AY','Finnair','Europe & Asia from HEL'],['DY','Norwegian','Budget Nordic & Europe'],['SK','SAS','Scandinavian & Europe'],['LH','Lufthansa','Global via Frankfurt'],['KL','KLM','Worldwide via Amsterdam'],['AF','Air France','Worldwide via Paris'],['BA','British Airways','Via London Heathrow'],['TK','Turkish Airlines','Worldwide via Istanbul'],['FR','Ryanair','Cheapest European budget'],['U2','easyJet','European budget routes'],['W6','Wizz Air','Eastern Europe budget'],['SN','Brussels Airlines','Europe & Africa']].map(([code,name,desc])=>`
-        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Jetradar: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
@@ -1062,7 +1062,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
       <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌙 GULF & MIDDLE EAST</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
         ${[['EK','Emirates','Worldwide via Dubai'],['QR','Qatar Airways','Worldwide via Doha'],['WY','Oman Air','Gulf, Asia & Europe'],['FZ','flydubai','Budget Gulf & beyond'],['SV','Saudia','Middle East & worldwide'],['G9','Air Arabia','Budget Middle East']].map(([code,name,desc])=>`
-        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Jetradar: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
@@ -1077,7 +1077,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
       <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🌏 ASIA & PACIFIC</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
         ${[['SQ','Singapore Airlines','World class via Singapore'],['TG','Thai Airways','Asia via Bangkok'],['MH','Malaysia Airlines','Asia via Kuala Lumpur'],['CX','Cathay Pacific','Asia via Hong Kong'],['JL','Japan Airlines','Japan & Asia'],['NH','ANA','Japan & worldwide'],['KE','Korean Air','Asia via Seoul'],['VN','Vietnam Airlines','Vietnam & Asia'],['GA','Garuda Indonesia','Indonesia & Asia'],['AK','AirAsia','Budget Asia routes']].map(([code,name,desc])=>`
-        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Jetradar: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
@@ -1092,7 +1092,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
       <div style="font-size:.7rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;margin:0 0 8px;">🇵🇭 PHILIPPINES AIRLINES</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
         ${[['PR','Philippine Airlines','Full service MNL hub'],['5J','Cebu Pacific','Budget all PH domestic'],['Z2','Philippines AirAsia','Budget domestic & Asia']].map(([code,name,desc])=>`
-        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
+        <a href="${jBase}&airline=${code}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Jetradar: '+orig+' → '+dest,value:1})"
           style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
           <img src="https://images.kiwi.com/airlines/64/${code}.png" alt="${name}" width="38" height="38"
             loading="lazy" style="border-radius:8px;object-fit:contain;background:#f8fafc;padding:2px;flex-shrink:0;"
@@ -1201,14 +1201,14 @@ function renderFlightCards(flights) {
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <div style="flex:1;min-width:200px;">
           <div style="font-size:.78rem;color:#0369a1;margin-bottom:6px;">🌍 Kiwi.com — mix &amp; match airlines, find cheaper combos</div>
-          <a href="${kiwiUrl}" target="_blank" rel="noopener"
+          <a href="${kiwiUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Kiwi Banner: '+kiwiOrigin+' → '+kiwiDest,value:1})"
             style="background:#0284c7;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
             Compare on Kiwi.com →
           </a>
         </div>
         <div style="flex:1;min-width:200px;">
           <div style="font-size:.78rem;color:#1d4ed8;margin-bottom:6px;">✈️ Trip.com — flights, hotels &amp; packages worldwide</div>
-          <a href="${tripUrl}" target="_blank" rel="noopener"
+          <a href="${tripUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Trip.com Banner: '+kiwiOrigin+' → '+kiwiDest,value:1})"
             style="background:#1d4ed8;color:#fff;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-block;">
             Compare on Trip.com →
           </a>
@@ -1353,7 +1353,7 @@ function renderFlightList(flights) {
           ${seatsBadge}
           <div class="fc-price">${sym}${price}</div>
           <div class="fc-per">per person</div>
-          <a class="fc-select-btn" href="https://jetradar.com/flights/?marker=719573&origin=${searchParams.origin||''}&destination=${searchParams.dest||''}&depart_date=${searchParams.departDate||''}&adults=${searchParams.numAdults||1}&airline=${code}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">Book →</a>
+          <a class="fc-select-btn" href="https://jetradar.com/flights/?marker=719573&origin=${searchParams.origin||''}&destination=${searchParams.dest||''}&depart_date=${searchParams.departDate||''}&adults=${searchParams.numAdults||1}&airline=${code}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Flight card: '+(searchParams&&searchParams.origin||'')+' → '+(searchParams&&searchParams.dest||'')+',value:1})" style="text-decoration:none;display:inline-block;">Book →</a>
         </div>
       </div>
     `;
@@ -1543,6 +1543,15 @@ function showAgencyPage() {
 function proceedToBooking() {
   // Tequila/Kiwi flight — open the real booking link directly
   if (selectedFlight && selectedFlight.tequilaDeepLink) {
+    if (typeof gtag === 'function') {
+      var _orig = (searchParams && searchParams.origin) || '';
+      var _dest = (searchParams && searchParams.dest)   || '';
+      gtag('event', 'affiliate_click', {
+        event_category: 'Revenue',
+        event_label: 'Direct flight: ' + _orig + ' → ' + _dest,
+        value: 1
+      });
+    }
     window.open(selectedFlight.tequilaDeepLink, '_blank');
     return;
   }
@@ -1580,6 +1589,15 @@ function openPartnerLink(agencyName) {
   // Fallback to Kiwi.com (affiliate)
   const fallback = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
   const url = links[agencyName] || fallback;
+
+  // Track affiliate click in Google Analytics
+  if (typeof gtag === 'function') {
+    gtag('event', 'affiliate_click', {
+      event_category: 'Revenue',
+      event_label: agencyName + ': ' + orig + ' → ' + dest,
+      value: 1
+    });
+  }
 
   window.open(url, '_blank');
 }
