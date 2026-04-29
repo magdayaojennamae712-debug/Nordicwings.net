@@ -4,9 +4,57 @@
   "description": "Search and book cheap flights from Finland to Philippines, Asia, Europe and worldwide.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "browser"
+  ],
+  "background_color": "#1a2040",
   "theme_color": "#1a2b4a",
   "orientation": "portrait-primary",
+  "iarc_rating_id": "",
+  "scope": "/",
+  "id": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "travel",
+    "lifestyle"
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=net.nordicwings.app",
+      "id": "net.nordicwings.app"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Search flights",
+      "short_name": "Search",
+      "description": "Search for cheap flights",
+      "url": "/?action=search",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Philippines flights",
+      "short_name": "Philippines",
+      "description": "Flights from Finland to Philippines",
+      "url": "/?origin=HEL&dest=MNL",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -39,10 +87,6 @@
       "purpose": "any"
     }
   ],
-  "categories": [
-    "travel",
-    "lifestyle"
-  ],
   "screenshots": [
     {
       "src": "/nordicwings-banner.png",
@@ -58,9 +102,5 @@
       "form_factor": "narrow",
       "label": "NordicWings mobile search"
     }
-  ],
-  "lang": "en",
-  "dir": "ltr",
-  "scope": "/",
-  "id": "/"
+  ]
 }
