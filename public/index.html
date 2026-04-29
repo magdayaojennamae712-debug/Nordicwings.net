@@ -2405,9 +2405,12 @@
     <div id="nw-chat-messages"></div>
     <div id="nw-chat-suggestions">
       <button class="nw-suggestion" onclick="nwQuickAsk(this)">How do I book?</button>
-      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Can I cancel?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Which airlines?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Philippines flights 🇵🇭</button>
       <button class="nw-suggestion" onclick="nwQuickAsk(this)">Baggage policy</button>
-      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Payment methods</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Cancel my booking</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Is it free to use?</button>
+      <button class="nw-suggestion" onclick="nwQuickAsk(this)">Contact support</button>
       <button class="nw-suggestion" onclick="nwQuickAsk(this)">Talk to human</button>
     </div>
     <div id="nw-chat-input-row">
@@ -2423,34 +2426,38 @@
     var greeted = false;
 
     var KB = [
-      { k:["cancel","refund","money back","cancelled","was cancel","been cancel"],
-        a:"To check if your booking was cancelled: go to <b>My Bookings</b> in the menu. If the booking shows as Cancelled, you will also receive a cancellation confirmation email. Refunds are processed within 5-10 business days back to your original payment method." },
-      { k:["book","start","search","find flight","how do i","how to book"],
-        a:"To book a flight: enter your origin and destination, choose dates, click Search Flights, pick a flight, fill in passenger details and pay. You will receive a confirmation email instantly!" },
+      { k:["how do i book","how to book","start","search","find flight","how do i"],
+        a:"✈️ <b>Booking on NordicWings is easy and free!</b><br>1. Enter your origin, destination and dates<br>2. Click <b>Search Flights</b><br>3. Browse results and click the airline or site you want<br>4. You are taken directly to their website to complete booking securely.<br><br>No account needed — just search and click!" },
+      { k:["which airline","what airline","airlines","carriers"],
+        a:"🌍 <b>We show links to 20+ airlines including:</b><br>🇫🇮 Finnair · 🇦🇪 Emirates · 🇶🇦 Qatar Airways · 🇴🇲 Oman Air<br>🇳🇴 Norwegian · 🇸🇪 SAS · 🇩🇪 Lufthansa · 🇬🇧 British Airways<br>🇵🇭 Philippine Airlines · 🟠 Cebu Pacific<br>Plus aggregators Kiwi.com, Aviasales and Trip.com to compare all airlines at once!" },
+      { k:["philippine","manila","mnl","dvo","ceb","cebu","davao","domestic","ph flight","philippines flight"],
+        a:"🇵🇭 <b>Philippines flights — we cover them all!</b><br><b>International:</b> Helsinki → Manila, Dubai → Manila and more<br><b>Domestic Philippines:</b> Manila (MNL) → Davao (DVO), Manila → Cebu (CEB), and all island routes<br><br>Airlines: Philippine Airlines (PR), Cebu Pacific (5J), AirAsia Philippines (Z2), AirSWIFT<br><br>Just search your route on the homepage!" },
+      { k:["cancel","refund","money back","cancelled"],
+        a:"❗ <b>Since you book directly on the airline or partner site</b>, all cancellations and refunds are handled by them.<br><br>👉 <b>Contact your booking provider:</b><br>• Kiwi.com → kiwi.com/en/pages/contact<br>• Trip.com → trip.com/support<br>• Emirates → emirates.com/help<br>• Finnair → finnair.com/help<br>• Philippine Airlines → philippineairlines.com/help<br>• Cebu Pacific → cebupacificair.com/contact<br><br>For general help: <b>hello@nordicwings.net</b>" },
       { k:["baggage","luggage","bag","suitcase","kg","kilo"],
-        a:"Flights via NordicWings include <b>1x checked bag (23kg)</b> and a carry-on bag. Exact details are shown on your booking confirmation." },
-      { k:["payment","pay","card","klarna","visa","mastercard","paypal"],
-        a:"We accept: Visa, Mastercard, Amex, Klarna (buy now pay later), PayPal, Google Pay and Apple Pay. All payments are secured by Stripe." },
-      { k:["price","cost","cheap","expensive","how much"],
-        a:"Prices vary by route and date. We show real-time fares from hundreds of airlines with no hidden markups. Search your route to see live prices!" },
-      { k:["real","legit","safe","trust","scam","fake"],
-        a:"NordicWings is 100% legitimate. Real flights via Duffel (official airline GDS). Payments secured by Stripe. Registered in Finland. GDPR compliant." },
-      { k:["confirm","ticket","email","receipt"],
-        a:"After booking you will get a confirmation email with your booking reference and itinerary. Not received within 15 minutes? Check spam or contact hello@nordicwings.net." },
-      { k:["change","modify","update","name","date"],
-        a:"Flight changes depend on your ticket type and airline policy. Email us at <b>hello@nordicwings.net</b> and we will assist with any changes." },
+        a:"🧳 <b>Baggage policy depends on the airline and fare you choose.</b><br><br>• Budget airlines (Ryanair, Cebu Pacific, easyJet) — usually cabin bag only, checked bag is paid extra<br>• Full-service airlines (Emirates, Finnair, Qatar) — usually 1x 23kg checked bag included<br><br>The exact baggage info is shown on the airline's booking page before you pay. Always check before completing your booking!" },
+      { k:["payment","pay","card","visa","mastercard","cost","free","charge"],
+        a:"💳 <b>NordicWings is completely FREE to use!</b> We do not charge any fees.<br><br>Payment is made directly on the airline or booking site (Kiwi.com, Emirates, Finnair, etc.). Each site accepts:<br>• Visa, Mastercard, Amex<br>• PayPal, Google Pay, Apple Pay<br>• Some offer Klarna (pay later)<br><br>All payments are secured by the airline/partner site directly." },
+      { k:["is it free","free to use","how much","cost","price","commission","earn"],
+        a:"✅ <b>Yes, NordicWings is 100% free to use!</b><br><br>We are a flight search platform. When you click through to an airline or booking site and complete your booking, we earn a small affiliate commission from them — this costs you <b>nothing extra</b>. The price you see is the same as booking directly with the airline." },
+      { k:["real","legit","safe","trust","scam","fake","legitimate"],
+        a:"✅ <b>NordicWings is 100% legitimate and safe.</b><br><br>• We link directly to official airline websites and trusted booking platforms<br>• All partner sites (Emirates, Kiwi.com, Trip.com etc.) are globally trusted<br>• We are registered in Finland and operate under EU consumer law<br>• We do not store any payment information — all payments go directly to the airline" },
+      { k:["confirm","ticket","email","receipt","booking reference"],
+        a:"📧 <b>Your confirmation comes directly from the airline or booking site.</b><br><br>After completing your booking on their website, you will receive a confirmation email with your ticket and booking reference. Check your spam folder if you don't see it within 15 minutes.<br><br>Still no email? Contact the provider you booked with, or email us at <b>hello@nordicwings.net</b>" },
+      { k:["change","modify","update","name","date","reschedule"],
+        a:"✏️ <b>Flight changes are handled by the airline or site where you booked.</b><br><br>Log in to your account on their website using your booking reference and follow their change process. Change fees depend on your fare type — most promotional fares cannot be changed.<br><br>Need help finding the right contact? Email us: <b>hello@nordicwings.net</b>" },
       { k:["contact","email","reach","support","help"],
-        a:"Reach us at <b>hello@nordicwings.net</b> - we typically reply within a few hours. You can also visit our Support page for FAQs." },
-      { k:["human","agent","person","talk","speak","owner"],
-        a:"Of course! Email us at <b>hello@nordicwings.net</b> and our team will get back to you as soon as possible!" },
-      { k:["return","round trip","roundtrip","back"],
-        a:"Yes! Select <b>Round Trip</b> on the search page, add your return date, and we will show both outbound and return options." },
-      { k:["passport","document","id","visa"],
-        a:"You need a valid passport for international flights - valid for at least 6 months beyond your travel date. Visa requirements depend on your nationality and destination." },
-      { k:["klarna","pay later","installment"],
-        a:"Yes, Klarna is available at checkout! Split your flight payment into installments - just select Klarna when paying." },
-      { k:["finland","helsinki","hel","oulu","tampere","turku"],
-        a:"We specialise in flights from Finland! Routes from Helsinki (HEL), Oulu, Tampere and Turku to the Philippines, Asia, Europe, Middle East and more." },
+        a:"📩 <b>We are here to help!</b><br><br>For general questions: <b>hello@nordicwings.net</b><br>Response time: within 24 hours<br><br>For booking-specific issues, contact your airline or booking site directly — they can help faster with your specific reservation." },
+      { k:["human","agent","person","talk","speak","owner","real person"],
+        a:"👋 Of course! Email us at <b>hello@nordicwings.net</b> and our team will reply within 24 hours. We are happy to help with any questions about finding flights on NordicWings!" },
+      { k:["return","round trip","roundtrip","back","two way"],
+        a:"🔄 <b>Yes, round trips are supported!</b><br><br>On the search page, select the <b>Round Trip</b> tab, add your return date, and search. Results will show outbound flights — pick one, then pick your return flight." },
+      { k:["passport","document","id","visa","entry","requirement"],
+        a:"🛂 <b>Travel documents needed:</b><br><br>• Valid passport — at least 6 months validity beyond your travel date<br>• <b>Philippines:</b> EU/Finnish citizens do not need a visa for stays up to 30 days<br>• <b>Middle East/Asia:</b> Check visa requirements based on your nationality<br><br>Always verify with the destination country's embassy before travelling." },
+      { k:["finland","helsinki","hel","oulu","tampere","turku","nordic","scandinavia"],
+        a:"🇫🇮 <b>We specialise in flights from Finland!</b><br><br>Popular routes:<br>• Helsinki (HEL) → Manila (MNL) — ~€600-800<br>• Helsinki → Dubai (DXB) — ~€280-400<br>• Helsinki → Bangkok (BKK) — ~€450-600<br>• Helsinki → London, Paris, Rome, Amsterdam and all Europe<br><br>Search your route on the homepage for live prices!" },
+      { k:["nordic wings","nordicwings","about","who are","what is"],
+        a:"✈️ <b>About NordicWings</b><br><br>NordicWings (nordicwings.net) is a free Finnish flight search platform. We help travellers find and compare flights from 20+ airlines worldwide — especially popular Finland–Philippines routes and all European destinations.<br><br>We connect you directly to the airline to book. Free to use, no hidden fees." },
     ];
 
     function getBotReply(msg) {
@@ -2499,7 +2506,7 @@
       if (opened && !greeted) {
         greeted = true;
         setTimeout(function(){
-          addMsg("&#128075; Hi! I am the <b>NordicWings Assistant</b>. I can help with booking flights, cancellations, baggage, payments and more! How can I help you today?", "bot");
+          addMsg("&#128075; Hi! I'm the <b>NordicWings Assistant</b>. I can help you find flights, answer questions about airlines, baggage, cancellations and more!<br><br>Try one of the quick questions below or type your own! ✈️", "bot");
         }, 300);
       }
       if (opened) {
