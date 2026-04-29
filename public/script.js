@@ -951,11 +951,15 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const tripUrl  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
-  // Helper to build an airline card
+  // Helper to build an airline card with real logo
   function airlineCard(flag, name, code, desc) {
+    const logoUrl = `https://images.kiwi.com/airlines/64/${code}.png`;
     return `<a href="${jBase}&airline=${code}" target="_blank" rel="noopener"
-      style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);">
-      <span style="font-size:1.5rem;flex-shrink:0;">${flag}</span>
+      style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:box-shadow .15s,border-color .15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(37,99,235,.15)';this.style.borderColor='#93c5fd'" onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.05)';this.style.borderColor='#e2e8f0'">
+      <img src="${logoUrl}" alt="${name}" width="40" height="40"
+        style="border-radius:8px;object-fit:contain;flex-shrink:0;background:#f8fafc;padding:2px;"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <span style="display:none;font-size:1.4rem;width:40px;height:40px;align-items:center;justify-content:center;flex-shrink:0;">${flag}</span>
       <div style="min-width:0;">
         <div style="font-weight:800;color:#1a2b4a;font-size:.85rem;">${name}</div>
         <div style="font-size:.7rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>
@@ -2978,14 +2982,4 @@ function renderAdminTable(bookings) {
       <td>${b.flight?.departTime ? formatDate(b.flight.departTime) : '—'}</td>
       <td style="text-align:center;">${b.passengers?.length||1}</td>
       <td>
-        <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
-        <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
-      </td>
-      <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
-      <td>
-        <a href="mailto:${b.contact?.email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
-           style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
-      </td>
-    </tr>
-  `).join('');
-}
+        <stron
