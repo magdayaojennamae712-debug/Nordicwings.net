@@ -2657,12 +2657,12 @@ async function confirmCancelBooking() {
         const data = await res.json();
         refundMessage = data.success
           ? (data.message || 'Refund processed successfully.')
-          : (data.error   || 'Contact hello@nordicwings.net for your refund.');
+          : (data.error   || 'Contact support@nordicwings.net for your refund.');
       } catch {
-        refundMessage = 'Automatic refund unavailable. Email hello@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId);
+        refundMessage = 'Automatic refund unavailable. Email support@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId);
       }
     } else {
-      refundMessage = 'Booking cancelled. Email hello@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId) + ' to request your refund.';
+      refundMessage = 'Booking cancelled. Email support@nordicwings.net with ref: ' + (booking.bookingRef || cancelBookingId) + ' to request your refund.';
     }
 
     // Mark as cancelled in Firestore
@@ -2694,7 +2694,7 @@ async function confirmCancelBooking() {
   } catch (err) {
     if (resultEl) {
       resultEl.style.cssText = 'display:block;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;color:#dc2626;';
-      resultEl.innerHTML = '❌ ' + (err.message || 'Could not cancel. Please contact hello@nordicwings.net');
+      resultEl.innerHTML = '❌ ' + (err.message || 'Could not cancel. Please contact support@nordicwings.net');
     }
   } finally {
     btn.disabled    = false;

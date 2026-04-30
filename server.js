@@ -1064,7 +1064,7 @@ app.post('/api/bookings/cancel', paymentLimiter, async (req, res) => {
   const { paymentIntentId, duffelOrderId, totalPrice, bookingRef } = req.body;
 
   if (!paymentIntentId) {
-    return res.status(400).json({ error: 'Missing payment information. Contact support at hello@nordicwings.net.' });
+    return res.status(400).json({ error: 'Missing payment information. Contact support at support@nordicwings.net.' });
   }
 
   let stripeRefundId   = null;
@@ -1338,7 +1338,7 @@ function buildConfirmationEmail(data) {
     </div>
 
     <p class="support">
-      Need help? Email us at <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a><br>
+      Need help? Email us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a><br>
       or visit <a href="https://nordicwings.net">nordicwings.net</a>
     </p>
   </div>
@@ -1346,7 +1346,7 @@ function buildConfirmationEmail(data) {
   <div class="footer">
     <div class="brand">NordicWings</div>
     <p>Making affordable flights easy for everyone.</p>
-    <p>nordicwings.net | hello@nordicwings.net</p>
+    <p>nordicwings.net | support@nordicwings.net</p>
     <p style="margin-top:14px;font-size:11px;color:#475a8a;">
       You're receiving this because you booked a flight with NordicWings.<br>
       © 2026 NordicWings — nordicwings.net
@@ -1466,14 +1466,14 @@ function buildThankYouEmail(data) {
     </div>
 
     <p class="support">
-      Had an issue? We're here to help — <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a>
+      Had an issue? We're here to help — <a href="mailto:support@nordicwings.net">support@nordicwings.net</a>
     </p>
   </div>
 
   <div class="footer">
     <div class="brand">NordicWings</div>
     <p>Making affordable flights easy for everyone.</p>
-    <p>nordicwings.net | hello@nordicwings.net</p>
+    <p>nordicwings.net | support@nordicwings.net</p>
     <p style="margin-top:14px;font-size:11px;color:#475a8a;">
       Booking reference: ${bookingRef || 'N/A'}<br>
       © 2026 NordicWings — nordicwings.net
@@ -1661,7 +1661,7 @@ function buildReminderEmail(data) {
     </div>
 
     <p class="support">
-      Questions? Email us at <a href="mailto:hello@nordicwings.net">hello@nordicwings.net</a><br>
+      Questions? Email us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a><br>
       or visit <a href="https://nordicwings.net">nordicwings.net</a>
     </p>
   </div>
@@ -1670,7 +1670,7 @@ function buildReminderEmail(data) {
   <div class="footer">
     <div class="brand">NordicWings</div>
     <p>Making affordable flights easy for everyone.</p>
-    <p>nordicwings.net | hello@nordicwings.net</p>
+    <p>nordicwings.net | support@nordicwings.net</p>
     <div class="social-links">
       <a href="https://x.com/nordicwingx3j6">X (Twitter)</a>
       <a href="https://www.linkedin.com/company/115854101">LinkedIn</a>
