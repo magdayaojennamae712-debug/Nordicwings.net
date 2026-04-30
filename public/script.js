@@ -488,6 +488,28 @@ const POPULAR_AIRPORTS = [
   {iataCode:'MNL',name:'Ninoy Aquino International Airport',cityName:'Manila',countryName:'Philippines'},
   {iataCode:'CEB',name:'Mactan-Cebu International Airport',cityName:'Cebu',countryName:'Philippines'},
   {iataCode:'DVO',name:'Francisco Bangoy International Airport',cityName:'Davao',countryName:'Philippines'},
+  {iataCode:'ILO',name:'Iloilo International Airport',cityName:'Iloilo',countryName:'Philippines'},
+  {iataCode:'BCD',name:'Bacolod-Silay Airport',cityName:'Bacolod',countryName:'Philippines'},
+  {iataCode:'KLO',name:'Kalibo International Airport',cityName:'Kalibo (Boracay)',countryName:'Philippines'},
+  {iataCode:'MPH',name:'Godofredo P. Ramos Airport',cityName:'Caticlan (Boracay)',countryName:'Philippines'},
+  {iataCode:'PPS',name:'Puerto Princesa Airport',cityName:'Puerto Princesa (Palawan)',countryName:'Philippines'},
+  {iataCode:'ENI',name:'El Nido Airport',cityName:'El Nido (Palawan)',countryName:'Philippines'},
+  {iataCode:'USU',name:'Francisco B. Reyes Airport',cityName:'Coron / Busuanga',countryName:'Philippines'},
+  {iataCode:'TAG',name:'Bohol-Panglao International Airport',cityName:'Tagbilaran (Bohol)',countryName:'Philippines'},
+  {iataCode:'ZAM',name:'Zamboanga International Airport',cityName:'Zamboanga',countryName:'Philippines'},
+  {iataCode:'CGY',name:'Laguindingan Airport',cityName:'Cagayan de Oro',countryName:'Philippines'},
+  {iataCode:'GES',name:'General Santos Airport',cityName:'General Santos',countryName:'Philippines'},
+  {iataCode:'DGT',name:'Sibulan Airport',cityName:'Dumaguete',countryName:'Philippines'},
+  {iataCode:'TAC',name:'Daniel Z. Romualdez Airport',cityName:'Tacloban',countryName:'Philippines'},
+  {iataCode:'CRK',name:'Clark International Airport',cityName:'Clark (Angeles)',countryName:'Philippines'},
+  {iataCode:'LGP',name:'Legazpi Airport',cityName:'Legazpi',countryName:'Philippines'},
+  {iataCode:'BXU',name:'Bancasi Airport',cityName:'Butuan',countryName:'Philippines'},
+  {iataCode:'OZC',name:'Labo Airport',cityName:'Ozamiz',countryName:'Philippines'},
+  {iataCode:'LAO',name:'Laoag International Airport',cityName:'Laoag',countryName:'Philippines'},
+  {iataCode:'TUG',name:'Tuguegarao Airport',cityName:'Tuguegarao',countryName:'Philippines'},
+  {iataCode:'RXS',name:'Roxas Airport',cityName:'Roxas City',countryName:'Philippines'},
+  {iataCode:'SUG',name:'Surigao Airport',cityName:'Surigao',countryName:'Philippines'},
+  {iataCode:'DPL',name:'Dipolog Airport',cityName:'Dipolog',countryName:'Philippines'},
   {iataCode:'NRT',name:'Tokyo Narita International Airport',cityName:'Tokyo',countryName:'Japan'},
   {iataCode:'HND',name:'Tokyo Haneda Airport',cityName:'Tokyo',countryName:'Japan'},
   {iataCode:'KIX',name:'Kansai International Airport',cityName:'Osaka',countryName:'Japan'},
@@ -729,7 +751,7 @@ function generateClientFlights(orig, dest, date, numAdults) {
   if (!route) {
     // Detect region by airport prefix patterns
     const finlandAirports = ['HEL','OUL','TMP','TKU','JYV','KUO','JOE','RVN','KEM','IVL','KAJ','VAA','MHQ'];
-    const phAirports      = ['MNL','DVO','CEB','ILO','BCD','KLO','ZAM','GES','DGT','MPH','PPS','TAG'];
+    const phAirports      = ['MNL','DVO','CEB','ILO','BCD','KLO','ZAM','GES','DGT','MPH','PPS','TAG','ENI','USU','CGY','TAC','CRK','LGP','BXU','OZC','LAO','TUG','RXS','SUG','DPL','SJI','NWP','CBO'];
     const euAirports      = ['LHR','LGW','CDG','AMS','FRA','MUC','BER','MAD','BCN','FCO','MXP','ARN','CPH','OSL','WAW','VIE','ZRH','ATH','IST','BRU','DUB'];
     const usAirports      = ['JFK','LAX','ORD','ATL','DFW','DEN','SFO','SEA','MIA','BOS','LAS'];
     const asiaAirports    = ['BKK','SIN','KUL','NRT','HND','ICN','PEK','PVG','HKG','TPE','DEL','BOM'];
@@ -864,6 +886,16 @@ async function searchFlights() {
     'SINGAPORE':'SIN','KUALA LUMPUR':'KUL','MALAYSIA':'KUL','PENANG':'PEN',
     'JAKARTA':'CGK','INDONESIA':'CGK','BALI':'DPS','SURABAYA':'SUB',
     'MANILA':'MNL','PHILIPPINES':'MNL','CEBU':'CEB','DAVAO':'DVO',
+    'ILOILO':'ILO','BACOLOD':'BCD','KALIBO':'KLO','ZAMBOANGA':'ZAM',
+    'CAGAYAN DE ORO':'CGY','GENERAL SANTOS':'GES','DUMAGUETE':'DGT',
+    'CATICLAN':'MPH','BORACAY':'MPH','PUERTO PRINCESA':'PPS','PALAWAN':'PPS',
+    'TAGBILARAN':'TAG','BOHOL':'TAG','BUTUAN':'BXU','LEGAZPI':'LGP',
+    'NAGA':'WNP','TACLOBAN':'TAC','OZAMIZ':'OZC','PAGADIAN':'PAG',
+    'EL NIDO':'ENI','BUSUANGA':'USU','CORON':'USU','SAN JOSE':'SJI',
+    'LAOAG':'LAO','VIGAN':'VIG','TUGUEGARAO':'TUG','CAUAYAN':'CYZ',
+    'ROXAS':'RXS','CATARMAN':'CRM','CALBAYOG':'CYP','SURIGAO':'SUG',
+    'DIPOLOG':'DPL','COTABATO':'CBO','JOLO':'JOL','TAWI TAWI':'TWT',
+    'CLARK':'CRK','ANGELES':'CRK','SUBIC':'SFS',
     'TOKYO':'NRT','JAPAN':'NRT','OSAKA':'KIX','NAGOYA':'NGO','SAPPORO':'CTS','FUKUOKA':'FUK',
     'SEOUL':'ICN','SOUTH KOREA':'ICN','BUSAN':'PUS',
     'BEIJING':'PEK','CHINA':'PEK','SHANGHAI':'PVG','GUANGZHOU':'CAN','SHENZHEN':'SZX','CHENGDU':'CTU',
