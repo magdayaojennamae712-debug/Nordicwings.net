@@ -1361,3 +1361,69 @@ img { max-width: 100%; display: block; }
   .seo-route-inner h2 { font-size: 1.3rem; }
   .seo-route-inner h3 { font-size: 1rem; }
 }
+
+/* ── Trustpilot Reviews Section ──────────────────────────── */
+.tp-reviews-section {
+  background: linear-gradient(135deg, #0d1f3c, #1a2b4a);
+  padding: 64px 0;
+  text-align: center;
+}
+.tp-reviews-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.tp-logo {
+  height: 32px;
+  margin-bottom: 14px;
+  filter: brightness(0) invert(1);
+}
+.tp-stars {
+  font-size: 2rem;
+  color: #00b67a;
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+.tp-tagline {
+  color: #94a3b8;
+  font-size: .92rem;
+  margin-bottom: 28px;
+}
+.tp-fallback {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.tp-fallback-stars {
+  font-size: 1.8rem;
+  color: #00b67a;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+.tp-fallback-text {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: .95rem;
+}
+.tp-leave-review {
+  display: inline-block;
+  margin-top: 20px;
+  background: #00b67a;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: .92rem;
+  text-decoration: none;
+  transition: background .2s;
+}
+.tp-leave-review:hover {
+  background: #009e6a;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .tp-reviews-section { padding: 40px 0; }
+  .tp-stars { font-size: 1.6rem; }
+}
