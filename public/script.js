@@ -1184,7 +1184,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
 
   const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
   const aviaUrl  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
-  const tripUrl  = `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
+  const tripUrl  = `https://www.trip.com/flights/?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pax}&${TC}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
   const list = document.getElementById('results-list');
@@ -1382,7 +1382,7 @@ function renderFlightCards(flights) {
     : `https://kiwi.tpk.mx/Imxir0ir`;
 
   const tripUrl = (kiwiOrigin && kiwiDest && kiwiDate)
-    ? `https://www.trip.com/flights/list?dcity=${kiwiOrigin}&acity=${kiwiDest}&ddate=${kiwiDate}&adult=${kiwiPass}&Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`
+    ? `https://www.trip.com/flights/?dcity=${kiwiOrigin}&acity=${kiwiDest}&ddate=${kiwiDate}&adult=${kiwiPass}&Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`
     : `https://www.trip.com/?Allianceid=8098413&SID=306552835&trip_sub1=&trip_sub3=D16144585`;
 
   const fromName = ROUTE_NAMES[kiwiOrigin] || kiwiOrigin;
@@ -1778,7 +1778,7 @@ function openPartnerLink(agencyName) {
     'Kiwi.com':   `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`,
     'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
     'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
-    'Trip.com':   `https://www.trip.com/flights/list?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
+    'Trip.com':   `https://www.trip.com/flights/?dcity=${orig}&acity=${dest}&ddate=${date}&adult=${pass}&${TC}`,
   };
 
   // Fallback to Kiwi.com (affiliate)
@@ -3393,3 +3393,4 @@ function renderAdminTable(bookings) {
     </tr>
   `).join('');
 }
+            
