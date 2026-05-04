@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NordicWings LinkedIn Banner – Download</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    h1 { color: #f1f5f9; font-size: 1.1rem; margin: 0 0 8px; font-weight: 600; }
+    p { color: #64748b; font-size: .85rem; margin: 0 0 24px; }
+    canvas { border-radius: 12px; max-width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,.5); }
+    .btn { margin-top: 20px; background: #0ea5e9; color: #fff; border: none; padding: 14px 36px; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: .3px; }
+    .btn:hover { background: #0284c7; }
+    .note { color: #475569; font-size: .78rem; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Your LinkedIn Banner — NordicWings CEO</h1>
+  <p>1584 × 396 px · Perfect for LinkedIn background photo</p>
+  <canvas id="banner" width="1584" height="396"></canvas>
+  <button class="btn" onclick="downloadBanner()">⬇ Download Banner PNG</button>
+  <p class="note">Then go to LinkedIn → your profile → pencil icon on background → upload this file</p>
+
+  <script>
+    const canvas = document.getElementById('banner');
+    const ctx = canvas.getContext('2d');
+    const W = 1584, H = 396;
+
+    // Background gradient
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#0c1f3a');
+    bg.addColorStop(0.5, '#1a2b4a');
+    bg.addColorStop(1, '#0c4a6e');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Decorative circles
+    function drawCircle(x, y, r, alpha) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(56,189,248,${alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    drawCircle(W * 0.82, -60, 220, 0.12);
+    drawCircle(W * 0.82, -60, 160, 0.09);
+    drawCircle(W * 0.82, -60, 100, 0.06);
+    drawCircle(W * 0.35, H + 100, 280, 0.05);
+
+    // Left accent bar
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.roundRect(72, H/2 - 48, 5, 96, 3);
+    ctx.fill();
+
+    // Name
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 52px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.fillText('Jennamae Saarela', 96, H/2 - 4);
+
+    // Title
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = '600 22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.fillText('FOUNDER & CEO', 96, H/2 + 32);
+
+    // Subtitle
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '400 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.fillText('✈  Flight & Travel Comparison Platform  ·  Oulu, Finland', 96, H/2 + 62);
+
+    // Center logo
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 56px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.fillText('Nordic', W/2 - 62, H/2 + 18);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('Wings', W/2 + 68, H/2 + 18);
+
+    // Website
+    ctx.fillStyle = '#475569';
+    ctx.font = '500 16px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('nordicwings.net', W/2, H/2 + 50);
+
+    // Right tags
+    ctx.textAlign = 'left';
+    const tags = ['✈  Cheap Flights', '🏨  Hotels', '🚢  Baltic Ferry', '🌍  Finland → World'];
+    const tagX = W - 260;
+    tags.forEach((tag, i) => {
+      const y = H/2 - 52 + i * 38;
+      // Pill background
+      ctx.fillStyle = 'rgba(56,189,248,0.12)';
+      ctx.beginPath();
+      ctx.roundRect(tagX, y, 220, 28, 14);
+      ctx.fill();
+      // Pill border
+      ctx.strokeStyle = 'rgba(56,189,248,0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(tagX, y, 220, 28, 14);
+      ctx.stroke();
+      // Tag text
+      ctx.fillStyle = '#7dd3fc';
+      ctx.font = '600 14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+      ctx.fillText(tag, tagX + 16, y + 19);
+    });
+
+    function downloadBanner() {
+      const link = document.createElement('a');
+      link.download = 'NordicWings-LinkedIn-Banner.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
