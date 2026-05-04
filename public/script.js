@@ -3124,7 +3124,7 @@ function renderCRMOverview(bookings) {
   // Top routes
   const routeCounts = {};
   bookings.filter(b=>b.status==='confirmed').forEach(b => {
-    const r = (b.fligh(t||{}).from||'?') + '→' + (b.fligh(t||{}).to||'?');
+    const r = (b.flight||{}.from||'?') + '→' + (b.flight||{}.to||'?');
     routeCounts[r] = (routeCounts[r]||0) + 1;
   });
   const topRoutes = Object.entries(routeCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -3146,7 +3146,7 @@ function renderCRMOverview(bookings) {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9;gap:8px;flex-wrap:wrap;">
         <div>
           <div style="font-weight:700;font-size:.85rem;color:#1e293b;">${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}</div>
-          <div style="font-size:.75rem;color:#64748b;">${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'} · ${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</div>
+          <div style="font-size:.75rem;color:#64748b;">${b.flight||{}.from||'?'} → ${b.flight||{}.to||'?'} · ${b.flight||{}.departTime ? formatDate(b.flight.departTime) : '—'}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:800;color:#1e3a8a;">€${parseFloat(b.totalPrice||0).toFixed(2)}</div>
@@ -3164,7 +3164,7 @@ function renderCRMCustomers(bookings) {
   // Group by email
   const map = {};
   bookings.forEach(b => {
-    const email = b.contac(t||{}).email || b.userEmail || 'unknown';
+    const email = b.contact||{}.email || b.userEmail || 'unknown';
     if (!map[email]) map[email] = { email, name: `${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}`.trim(), phone: (b.contact && b.contact.phone)||'', bookings:[] };
     map[email].bookings.push(b);
   });
@@ -3216,9 +3216,9 @@ function renderCRMCustomers(bookings) {
           <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:.82rem;flex-wrap:wrap;gap:4px;">
             <div>
               <span style="font-family:monospace;background:#eff6ff;color:#1d4ed8;padding:1px 6px;border-radius:4px;font-size:.75rem;">${b.bookingRef||'—'}</span>
-              <strong style="margin-left:8px;">${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'}</strong>
-              <span style="color:#64748b;margin-left:6px;">${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</span>
-              <span style="color:#64748b;margin-left:6px;">${b.passenger(s||{}).length||1} pax</span>
+              <strong style="margin-left:8px;">${b.flight||{}.from||'?'} → ${b.flight||{}.to||'?'}</strong>
+              <span style="color:#64748b;margin-left:6px;">${b.flight||{}.departTime ? formatDate(b.flight.departTime) : '—'}</span>
+              <span style="color:#64748b;margin-left:6px;">${b.passengers||[].length||1} pax</span>
             </div>
             <div style="display:flex;gap:10px;align-items:center;">
               <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
@@ -3376,21 +3376,20 @@ function renderAdminTable(bookings) {
       <td><span class="admin-ref">${b.bookingRef || '—'}</span></td>
       <td>
         <div class="admin-customer-name">${((b.passengers && b.passengers[0] && b.passengers[0].firstName)||'')||''} ${((b.passengers && b.passengers[0] && b.passengers[0].lastName)||'')||''}</div>
-        <div class="admin-customer-email">${b.contac(t||{}).email || b.userEmail || ''}</div>
+        <div class="admin-customer-email">${b.contact||{}.email || b.userEmail || ''}</div>
       </td>
-      <td><strong>${b.fligh(t||{}).from||'?'} → ${b.fligh(t||{}).to||'?'}</strong></td>
-      <td>${b.fligh(t||{}).departTime ? formatDate(b.flight.departTime) : '—'}</td>
-      <td style="text-align:center;">${b.passenger(s||{}).length||1}</td>
+      <td><strong>${b.flight||{}.from||'?'} → ${b.flight||{}.to||'?'}</strong></td>
+      <td>${b.flight||{}.departTime ? formatDate(b.flight.departTime) : '—'}</td>
+      <td style="text-align:center;">${b.passengers||[].length||1}</td>
       <td>
         <strong>€${parseFloat(b.totalPrice||0).toFixed(2)}</strong>
         <div style="font-size:.72rem;color:#16a34a;font-weight:600;">+€${parseFloat(b.nordicwingsFee||0).toFixed(2)} profit</div>
       </td>
       <td><span class="booking-status ${b.status==='confirmed'?'status-confirmed':'status-cancelled'}">${b.status||'unknown'}</span></td>
       <td>
-        <a href="mailto:${b.contac(t||{}).email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
+        <a href="mailto:${(b.contact||{}).email||b.userEmail||''}?subject=Your NordicWings Booking ${b.bookingRef||''}"
            style="background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;text-decoration:none;display:inline-block;">✉ Email</a>
       </td>
     </tr>
   `).join('');
 }
-            
