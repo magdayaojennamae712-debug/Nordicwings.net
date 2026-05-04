@@ -383,16 +383,18 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         </div>
 
         <div class="search-form">
-          <div class="input-group autocomplete-wrap" id="origin-wrap">
+          <div class="input-group autocomplete-wrap" id="origin-wrap" style="position:relative;">
             <label>From</label>
             <input type="text" id="origin-input" placeholder="City or airport" autocomplete="off" oninput="airportSearch('origin')" />
+            <ul id="origin-list" class="autocomplete-list" style="display:none;position:absolute;top:100%;left:0;width:100%;background:#fff;border:1.5px solid #bae6fd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:99999;max-height:260px;overflow-y:auto;list-style:none;margin:4px 0 0;padding:0;"></ul>
           </div>
 
           <button class="swap-btn" onclick="swapAirports()" title="Swap airports">⇄</button>
 
-          <div class="input-group autocomplete-wrap" id="dest-wrap">
+          <div class="input-group autocomplete-wrap" id="dest-wrap" style="position:relative;">
             <label>To</label>
             <input type="text" id="dest-input" placeholder="City or airport" autocomplete="off" oninput="airportSearch('dest')" />
+            <ul id="dest-list" class="autocomplete-list" style="display:none;position:absolute;top:100%;left:0;width:100%;background:#fff;border:1.5px solid #bae6fd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:99999;max-height:260px;overflow-y:auto;list-style:none;margin:4px 0 0;padding:0;"></ul>
           </div>
 
           <div class="input-group">
@@ -2789,4 +2791,4 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       },
       cancellation: {
         title: '&#8617; Cancellation &amp; Refund Policy',
-        html: '<p><em>Last updated: April 2026</em></p><p>NordicWings is a <strong>free flight comparison and affiliate platform</strong>. We do not process payments or hold bookings &mdash; all bookings are made directly with the airline or partner site you choose.</p><h3>How to Cancel Your Flight</h3><p>Contact the airline or booking partner you booked with directly. Your booking confirmation email will have their cancellation link and contact details.</p><h3>Contact Your Booking Provider</h3><ul><li><strong>Kiwi.com</strong> &rarr; kiwi.com/en/pages/contact</li><li><strong>Expedia</strong> &rarr; expedia.com/service</li><li><strong>Finnair</strong> &rarr; finnair.com/help</li><li><strong>Emirates</strong> &rarr; emirates.com/help</li><li
+        html: '<p><em>Last updated: April 2026</em></p><p>
