@@ -523,16 +523,74 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         </p>
 
         <!-- Quick Route Buttons -->
-        <div class="quick-routes">
-          <span class="quick-label">✈ Popular routes:</span>
-          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','LHR','London')">Helsinki → London</button>
-          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','DXB','Dubai')">Helsinki → Dubai</button>
-          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BKK','Bangkok')">Helsinki → Bangkok</button>
-          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','JFK','New York')">Helsinki → New York</button>
-          <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BCN','Barcelona')">Helsinki → Barcelona</button>
-          <button class="quick-btn" onclick="quickFill('LHR','London','DXB','Dubai')">London → Dubai</button>
-          <button class="quick-btn" onclick="quickFill('MNL','Manila','HEL','Helsinki')">Manila → Helsinki</button>
-          <button class="quick-btn" onclick="quickFill('DVO','Davao','MNL','Manila')">Davao → Manila</button>
+        <div class="quick-routes" style="display:block;">
+
+          <div style="margin-bottom:6px;">
+            <span style="font-size:.68rem;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;">🇫🇮 Finland → Europe</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','LHR','London')">HEL → London</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BCN','Barcelona')">HEL → Barcelona</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','CDG','Paris')">HEL → Paris</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','FCO','Rome')">HEL → Rome</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','AMS','Amsterdam')">HEL → Amsterdam</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','ATH','Athens')">HEL → Athens</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','LIS','Lisbon')">HEL → Lisbon</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','PRG','Prague')">HEL → Prague</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','TLL','Tallinn')">HEL → Tallinn</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','WAW','Warsaw')">HEL → Warsaw</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','MAD','Madrid')">HEL → Madrid</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','VIE','Vienna')">HEL → Vienna</button>
+          </div>
+
+          <div style="margin-bottom:6px;">
+            <span style="font-size:.68rem;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;">🌏 Finland → Asia & Middle East</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','BKK','Bangkok')">HEL → Bangkok</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','DXB','Dubai')">HEL → Dubai</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','NRT','Tokyo')">HEL → Tokyo</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','SIN','Singapore')">HEL → Singapore</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','MNL','Manila')">HEL → Manila</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','KUL','Kuala Lumpur')">HEL → KL</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','ICN','Seoul')">HEL → Seoul</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','HKT','Phuket')">HEL → Phuket</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','DPS','Bali')">HEL → Bali</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','DOH','Doha')">HEL → Doha</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','HAN','Hanoi')">HEL → Hanoi</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','SGN','Ho Chi Minh')">HEL → HCMC</button>
+          </div>
+
+          <div style="margin-bottom:6px;">
+            <span style="font-size:.68rem;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;">🇵🇭 Philippines — Domestic & International</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','DVO','Davao')">MNL → Davao</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','CEB','Cebu')">MNL → Cebu</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','ILO','Iloilo')">MNL → Iloilo</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','BCD','Bacolod')">MNL → Bacolod</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','ZAM','Zamboanga')">MNL → Zamboanga</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','GEN','General Santos')">MNL → GenSan</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','CYP','Calbayog')">MNL → Calbayog</button>
+            <button class="quick-btn" onclick="quickFill('CEB','Cebu','MNL','Manila')">CEB → Manila</button>
+            <button class="quick-btn" onclick="quickFill('DVO','Davao','MNL','Manila')">DVO → Manila</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','HEL','Helsinki')">MNL → Helsinki</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','DXB','Dubai')">MNL → Dubai</button>
+            <button class="quick-btn" onclick="quickFill('MNL','Manila','SIN','Singapore')">MNL → Singapore</button>
+          </div>
+
+          <div style="margin-bottom:6px;">
+            <span style="font-size:.68rem;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;">🌍 Other Popular Routes</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','JFK','New York')">HEL → New York</button>
+            <button class="quick-btn" onclick="quickFill('LHR','London','DXB','Dubai')">London → Dubai</button>
+            <button class="quick-btn" onclick="quickFill('DXB','Dubai','MNL','Manila')">Dubai → Manila</button>
+            <button class="quick-btn" onclick="quickFill('SIN','Singapore','MNL','Manila')">Singapore → MNL</button>
+            <button class="quick-btn" onclick="quickFill('BKK','Bangkok','MNL','Manila')">Bangkok → MNL</button>
+            <button class="quick-btn" onclick="quickFill('HEL','Helsinki','SYD','Sydney')">HEL → Sydney</button>
+          </div>
+
         </div>
       </div>
     </section>
@@ -2731,36 +2789,4 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       },
       cancellation: {
         title: '&#8617; Cancellation &amp; Refund Policy',
-        html: '<p><em>Last updated: April 2026</em></p><p>NordicWings is a <strong>free flight comparison and affiliate platform</strong>. We do not process payments or hold bookings &mdash; all bookings are made directly with the airline or partner site you choose.</p><h3>How to Cancel Your Flight</h3><p>Contact the airline or booking partner you booked with directly. Your booking confirmation email will have their cancellation link and contact details.</p><h3>Contact Your Booking Provider</h3><ul><li><strong>Kiwi.com</strong> &rarr; kiwi.com/en/pages/contact</li><li><strong>Expedia</strong> &rarr; expedia.com/service</li><li><strong>Finnair</strong> &rarr; finnair.com/help</li><li><strong>Emirates</strong> &rarr; emirates.com/help</li><li><strong>Qatar Airways</strong> &rarr; qatarairways.com/help</li><li><strong>Jetradar / Aviasales</strong> &rarr; support.aviasales.com</li></ul><h3>Refunds</h3><p>Refund eligibility depends entirely on the fare rules of the airline or partner you booked with. Common rules:</p><ul><li><strong>Flexible fares:</strong> Full refund per airline policy</li><li><strong>Standard fares:</strong> Subject to airline fare conditions</li><li><strong>Non-refundable fares:</strong> Airport taxes only may be refunded</li></ul><h3>EU Passenger Rights</h3><p>If your flight is cancelled or significantly delayed by the airline, you may be entitled to compensation under <strong>EU Regulation 261/2004</strong> regardless of where you booked.</p><div class=\'policy-contact-box\'><p>&#128231; Need help finding the right contact? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p></div>'
-      },
-      help: {
-        title: '&#10067; Help Center',
-        html: '<h3>How do I search for flights?</h3><p>Enter your departure city, destination, and travel date in the search box on the homepage. Click <strong>Search Flights</strong> and browse available options.</p><h3>How do I book a flight?</h3><p>Select your preferred flight and click the airline or partner link. You will be taken directly to their site to complete the booking &mdash; NordicWings charges no fees.</p><h3>Do I need an account to book?</h3><p>No &mdash; NordicWings is free to use without an account. Creating an account lets you save favourite routes and track deals.</p><h3>Is my payment secure?</h3><p>Yes. Payment is made directly on the airline or partner site (Kiwi.com, Expedia, Emirates, etc.). NordicWings never sees or stores your payment details.</p><h3>How do I cancel a booking?</h3><p>Contact the airline or partner site directly where you completed your booking. Check your confirmation email for their cancellation link.</p><h3>I did not receive a confirmation email</h3><p>Check your spam/junk folder first. If it is not there, email us with your booking reference number.</p><h3>What airlines does NordicWings cover?</h3><p>500+ airlines including Emirates, British Airways, Lufthansa, Qatar Airways, Finnair, Philippine Airlines, Ryanair, EasyJet, and many more worldwide.</p><div class=\'policy-contact-box\'><p>&#128231; Still need help? <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">Response time: within 24 hours, Mon&ndash;Fri.</p></div>'
-      },
-      contact: {
-        title: '&#128231; Contact Us',
-        html: '<p>We are here to help! Whether you have a question about a booking, need support, or want to give feedback &mdash; get in touch and we will respond promptly.</p><h3>Customer Support</h3><p>&#128231; <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p>For booking enquiries, cancellations, or general questions. Please include your <strong>booking reference number</strong> if your query relates to a specific booking.</p><h3>Response Times</h3><ul><li><strong>Weekdays (Mon&ndash;Fri):</strong> Within 24 hours</li><li><strong>Weekends:</strong> Within 48 hours</li><li><strong>Urgent issues:</strong> Mark subject as <strong>URGENT</strong></li></ul><h3>Business &amp; Partnership Enquiries</h3><p>For advertising, partnerships, or affiliate opportunities, email us at <a href="mailto:support@nordicwings.net">support@nordicwings.net</a>.</p><div class=\'policy-contact-box\'><p>&#128231; <a href="mailto:support@nordicwings.net"><strong>support@nordicwings.net</strong></a></p><p style="margin-top:6px;font-size:.85rem;color:#374151;">nordicwings.net &middot; Secure &amp; Trusted Flight Booking</p></div>'
-      }
-    };
-
-    function openPolicyModal(type) {
-      var c = POLICY_CONTENT[type];
-      if (!c) return;
-      document.getElementById('policy-modal-title').textContent = c.title;
-      document.getElementById('policy-modal-body').innerHTML = c.html;
-      document.getElementById('policy-modal-overlay').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-    function closePolicyModal(e) {
-      var o = document.getElementById('policy-modal-overlay');
-      if (e && e.target !== o) return;
-      o.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-
-    /* COOKIE CONSENT */
-    function acceptCookies() {
-      try { localStorage.setItem('nordicwings_cookies','all'); } catch(ex){}
-      document.getElementById('cookie-banner').style.display = 'none';
-    }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+        html: '<p><em>Last updated: April 2026</em></p><p>NordicWings is a <strong>free flight comparison and affiliate platform</strong>. We do not process payments or hold bookings &mdash; all bookings are made directly with the airline or partner site you choose.</p><h3>How to Cancel Your Flight</h3><p>Contact the airline or booking partner you booked with directly. Your booking confirmation email will have their cancellation link and contact details.</p><h3>Contact Your Booking Provider</h3><ul><li><strong>Kiwi.com</strong> &rarr; kiwi.com/en/pages/contact</li><li><strong>Expedia</strong> &rarr; expedia.com/service</li><li><strong>Finnair</strong> &rarr; finnair.com/help</li><li><strong>Emirates</strong> &rarr; emirates.com/help</li><li
