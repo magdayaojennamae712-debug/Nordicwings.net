@@ -676,6 +676,39 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
             </div>
           </a>
 
+          <!-- Hotels Europe -->
+          <a href="https://www.trip.com/hotels/europe/?Allianceid=8098413&SID=306552835&trip_sub3=D16144585" target="_blank" rel="noopener"
+             style="background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #bae6fd;display:block;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="height:100px;background:linear-gradient(135deg,#1e40af,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:2.5rem;">🌍</div>
+            <div style="padding:12px 14px;">
+              <div style="font-weight:800;color:#0c2340;font-size:.9rem;margin-bottom:3px;">Hotels Europe</div>
+              <div style="font-size:.75rem;color:#475569;margin-bottom:8px;">Paris, Rome, Barcelona, London…</div>
+              <div style="background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;padding:7px 12px;border-radius:8px;font-weight:700;font-size:.78rem;text-align:center;">Search Hotels →</div>
+            </div>
+          </a>
+
+          <!-- Hotels Asia -->
+          <a href="https://www.trip.com/hotels/asia/?Allianceid=8098413&SID=306552835&trip_sub3=D16144585" target="_blank" rel="noopener"
+             style="background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #bae6fd;display:block;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="height:100px;background:linear-gradient(135deg,#065f46,#10b981);display:flex;align-items:center;justify-content:center;font-size:2.5rem;">🌏</div>
+            <div style="padding:12px 14px;">
+              <div style="font-weight:800;color:#0c2340;font-size:.9rem;margin-bottom:3px;">Hotels Asia</div>
+              <div style="font-size:.75rem;color:#475569;margin-bottom:8px;">Bangkok, Tokyo, Bali, Singapore…</div>
+              <div style="background:linear-gradient(135deg,#065f46,#10b981);color:#fff;padding:7px 12px;border-radius:8px;font-weight:700;font-size:.78rem;text-align:center;">Search Hotels →</div>
+            </div>
+          </a>
+
+          <!-- Hotels Middle East -->
+          <a href="https://www.trip.com/hotels/dubai-hotel/?Allianceid=8098413&SID=306552835&trip_sub3=D16144585" target="_blank" rel="noopener"
+             style="background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #bae6fd;display:block;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="height:100px;background:linear-gradient(135deg,#78350f,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:2.5rem;">🕌</div>
+            <div style="padding:12px 14px;">
+              <div style="font-weight:800;color:#0c2340;font-size:.9rem;margin-bottom:3px;">Hotels Middle East</div>
+              <div style="font-size:.75rem;color:#475569;margin-bottom:8px;">Dubai, Abu Dhabi, Doha…</div>
+              <div style="background:linear-gradient(135deg,#78350f,#f59e0b);color:#fff;padding:7px 12px;border-radius:8px;font-weight:700;font-size:.78rem;text-align:center;">Search Hotels →</div>
+            </div>
+          </a>
+
           <!-- Hotels Philippines -->
           <a href="https://www.jdoqocy.com/click-101737492-13852728?url=https%3A%2F%2Fwww.expedia.fi%2FFilippiinat-Hotellit.d602.Travel-Guide-Hotels" target="_blank" rel="noopener"
              style="background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #bae6fd;display:block;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -2855,73 +2888,4 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
     }
     function declineCookies() {
       try { localStorage.setItem('nordicwings_cookies','essential'); } catch(ex){}
-      document.getElementById('cookie-banner').style.display = 'none';
-    }
-    (function(){
-      try {
-        if (!localStorage.getItem('nordicwings_cookies')) {
-          setTimeout(function(){
-            var b = document.getElementById('cookie-banner');
-            if (b) b.style.display = 'block';
-          }, 1500);
-        }
-      } catch(ex){}
-    })();
-
-    /* SERVICE WORKER */
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-          .then(function(){ console.log('NordicWings PWA ready'); })
-          .catch(function(e){ console.log('SW error', e); });
-      });
-    }
-  </script>
-  <!-- Autocomplete dropdowns live at body level to avoid overflow:hidden clipping -->
-  <ul class="autocomplete-list" id="origin-list" style="display:none;"></ul>
-  <ul class="autocomplete-list" id="dest-list" style="display:none;"></ul>
-  <!-- Native datalist for airport suggestions -->
-  <datalist id="airports-datalist">
-    <option value="HEL">Helsinki, Finland</option>
-    <option value="LHR">London Heathrow, UK</option>
-    <option value="DXB">Dubai International, UAE</option>
-    <option value="BKK">Bangkok Suvarnabhumi, Thailand</option>
-    <option value="JFK">New York JFK, USA</option>
-    <option value="MNL">Manila Ninoy Aquino, Philippines</option>
-    <option value="NRT">Tokyo Narita, Japan</option>
-    <option value="BCN">Barcelona El Prat, Spain</option>
-    <option value="CDG">Paris Charles de Gaulle, France</option>
-    <option value="AMS">Amsterdam Schiphol, Netherlands</option>
-    <option value="SIN">Singapore Changi, Singapore</option>
-    <option value="SYD">Sydney Kingsford Smith, Australia</option>
-    <option value="YYZ">Toronto Pearson, Canada</option>
-    <option value="FRA">Frankfurt Airport, Germany</option>
-    <option value="MAD">Madrid Barajas, Spain</option>
-    <option value="ICN">Seoul Incheon, South Korea</option>
-    <option value="IST">Istanbul Airport, Turkey</option>
-    <option value="DEL">New Delhi Indira Gandhi, India</option>
-    <option value="HKG">Hong Kong International, China</option>
-    <option value="DOH">Doha Hamad International, Qatar</option>
-    <option value="KUL">Kuala Lumpur International, Malaysia</option>
-    <option value="CGK">Jakarta Soekarno-Hatta, Indonesia</option>
-    <option value="LAX">Los Angeles International, USA</option>
-    <option value="ORD">Chicago OHare, USA</option>
-    <option value="MIA">Miami International, USA</option>
-    <option value="DAV">Davao Francisco Bangoy, Philippines</option>
-    <option value="CEB">Cebu Mactan, Philippines</option>
-    <option value="BKI">Kota Kinabalu, Malaysia</option>
-    <option value="CGP">Chittagong, Bangladesh</option>
-    <option value="CMB">Colombo Bandaranaike, Sri Lanka</option>
-  </datalist>
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       NORDICWINGS AI CHAT WIDGET
-  ════════════════════════════════════════════════════════ -->
-  <style>
-    #nw-chat-bubble {
-      position:fixed; bottom:24px; right:24px; z-index:9999;
-      width:60px; height:60px; border-radius:50%;
-      background:linear-gradient(135deg,#1e40af,#2563eb);
-      box-shadow:0 4px 20px rgba(37,99,235,.5);
- 
+   
