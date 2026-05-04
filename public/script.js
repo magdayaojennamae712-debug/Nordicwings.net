@@ -1182,9 +1182,10 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const toName   = ROUTE_NAMES[dest] || dest;
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
+  const tripDate = date ? date.replace(/-/g, '') : '';
   const kiwiUrl  = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
   const aviaUrl  = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
-  const tripUrl  = `https://www.trip.com/flights/?Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`;
+  const tripUrl  = `https://www.trip.com/flights/show?dcity=${orig}&acity=${dest}&ddate=${tripDate}&adult=${pax}&child=0&infant=0&tripType=1&class=1&${TC}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
   const list = document.getElementById('results-list');
@@ -1381,7 +1382,10 @@ function renderFlightCards(flights) {
     ? `https://www.kiwi.com/en/search/results/${kiwiOrigin}/${kiwiDest}/${kiwiDate}?adults=${kiwiPass}&affilid=kiwi_affiliates`
     : `https://kiwi.tpk.mx/Imxir0ir`;
 
-  const tripUrl = `https://www.trip.com/flights/?Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`;
+  const kiwiDateTrip = kiwiDate ? kiwiDate.replace(/-/g, '') : '';
+  const tripUrl = (kiwiOrigin && kiwiDest && kiwiDateTrip)
+    ? `https://www.trip.com/flights/show?dcity=${kiwiOrigin}&acity=${kiwiDest}&ddate=${kiwiDateTrip}&adult=${kiwiPass}&child=0&infant=0&tripType=1&class=1&Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`
+    : `https://www.trip.com/flights/?Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`;
 
   const fromName = ROUTE_NAMES[kiwiOrigin] || kiwiOrigin;
   const toName   = ROUTE_NAMES[kiwiDest]   || kiwiDest;
@@ -1776,7 +1780,7 @@ function openPartnerLink(agencyName) {
     'Kiwi.com':   `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`,
     'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
     'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
-    'Trip.com':   `https://www.trip.com/flights/?Allianceid=8098413&SID=306552835&trip_sub1=flights&trip_sub3=D16144585`,
+    'Trip.com':   `https://www.trip.com/flights/show?dcity=${orig}&acity=${dest}&ddate=${date.replace(/-/g,'')}&adult=${pass}&child=0&infant=0&tripType=1&class=1&${TC}`,
   };
 
   // Fallback to Kiwi.com (affiliate)
