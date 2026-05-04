@@ -1132,6 +1132,31 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       </div>
     </section>
 
+    <!-- ABOUT THE FOUNDER SECTION -->
+    <section style="background:#fff;padding:48px 16px;border-top:1px solid #e2e8f0;">
+      <div style="max-width:760px;margin:0 auto;">
+        <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1a2b4a,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#fff;flex-shrink:0;">JS</div>
+          <div style="flex:1;min-width:220px;">
+            <span style="display:inline-block;background:#e0f2fe;color:#0369a1;font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">About the Founder</span>
+            <h2 style="font-size:1.2rem;font-weight:900;color:#0c2340;margin:0 0 4px;">Jennamae Saarela</h2>
+            <p style="font-size:.85rem;color:#0ea5e9;font-weight:700;margin:0 0 12px;">Founder & CEO · NordicWings · Oulu, Finland</p>
+            <p style="font-size:.9rem;color:#475569;line-height:1.8;margin:0 0 16px;">I started NordicWings because I know firsthand how hard it is to find affordable flights from Finland — especially to the Philippines. NordicWings is a free flight and travel comparison platform helping Finnish and Nordic travellers find cheap flights to Asia, Europe and worldwide — with no booking fees.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <a href="https://www.linkedin.com/in/jennamae-saarela-23970b318/" target="_blank" rel="noopener"
+                 style="display:inline-flex;align-items:center;gap:8px;background:#0a66c2;color:#fff;padding:9px 18px;border-radius:20px;font-size:.82rem;font-weight:700;text-decoration:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                Connect on LinkedIn
+              </a>
+              <a href="https://nordicwings.net" style="display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;color:#0c2340;padding:9px 18px;border-radius:20px;font-size:.82rem;font-weight:700;text-decoration:none;">
+                🌐 nordicwings.net
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-inner">
@@ -3064,55 +3089,4 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       {code:'nl',    label:'Nederlands', flag:'🇳🇱'},
     ];
 
-    // ── Build desktop dropdown list ───────────────────────────
-    var list = document.getElementById('nw-lang-list');
-    if (list) {
-      LANGS.forEach(function(l){
-        var item = document.createElement('button');
-        item.style.cssText = 'width:100%;background:transparent;border:none;padding:10px 14px;' +
-          'text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;' +
-          'font-size:.85rem;color:#1e293b;transition:background .12s;font-family:inherit;border-bottom:1px solid #f1f5f9;';
-        item.innerHTML = '<span style="font-size:1.2rem;line-height:1;">' + l.flag + '</span>' +
-          '<span style="font-weight:500;">' + l.label + '</span>';
-        item.onmouseover = function(){ this.style.background='#f0f7ff'; };
-        item.onmouseout  = function(){ this.style.background='transparent'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          document.getElementById('nw-lang-dropdown').style.display = 'none';
-        };
-        list.appendChild(item);
-      });
-    }
-
-    // ── Build mobile language grid ────────────────────────────
-    var mlist = document.getElementById('nw-lang-list-mobile');
-    if (mlist) {
-      LANGS.forEach(function(l){
-        var item = document.createElement('button');
-        item.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;' +
-          'padding:8px 6px;cursor:pointer;display:flex;align-items:center;gap:6px;' +
-          'font-size:.78rem;color:#1e293b;font-family:inherit;font-weight:500;width:100%;' +
-          'transition:background .12s;';
-        item.innerHTML = '<span style="font-size:1.1rem;line-height:1;">' + l.flag + '</span>' +
-          '<span>' + l.label + '</span>';
-        item.onmouseover = function(){ this.style.background='#e0f0ff'; };
-        item.onmouseout  = function(){ this.style.background='#f8fafc'; };
-        item.onclick = function(){
-          nwSetLang(l.code, l.label);
-          // Close mobile menu after selecting language
-          var mm = document.getElementById('mobile-menu');
-          if (mm) mm.classList.remove('open');
-        };
-        mlist.appendChild(item);
-      });
-    }
-
-    // ── Toggle desktop dropdown ───────────────────────────────
-    window.nwToggleLang = function(e) {
-      e.stopPropagation();
-      var dd = document.getElementById('nw-lang-dropdown');
-      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-    };
-    document.addEventListener('click', function(){
-      var dd = document.getElementById('nw-lang-dropdown');
-      if 
+    // ── Buil
