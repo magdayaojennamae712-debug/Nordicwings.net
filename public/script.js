@@ -4143,3 +4143,22 @@ function rejectCashbackClaim(docId, btn) {
     .then(function() { loadAdminCashbackClaims(); })
     .catch(function(e) { alert('Error: '+e.message); if (btn) { btn.disabled=false; btn.textContent='✗ Reject'; } });
 }
+
+// ── FAQ toggle ────────────────────────────────────────────────────────────────
+function toggleFaq(btn) {
+  var item = btn.closest('.faq-item');
+  if (!item) return;
+  var answer = item.querySelector('.faq-answer');
+  var icon   = btn.querySelector('.faq-icon');
+  var isOpen = answer && answer.classList.contains('open');
+  // Close all open items
+  document.querySelectorAll('.faq-answer.open').forEach(function(a) {
+    a.classList.remove('open');
+    var i = a.closest('.faq-item') && a.closest('.faq-item').querySelector('.faq-icon');
+    if (i) i.textContent = '+';
+  });
+  if (!isOpen && answer) {
+    answer.classList.add('open');
+    if (icon) icon.textContent = '−';
+  }
+}
