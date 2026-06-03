@@ -20,6 +20,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Blog – summer 2026 guide -->
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-summer-flights-helsinki-2026.html</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Blog articles – long-haul Asia/Pacific -->
   <url>
     <loc>https://nordicwings.net/blog/cheapest-time-fly-helsinki-manila.html</loc>
