@@ -244,24 +244,14 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" /></noscript>
 
-  <!-- Ad monetisation — loads only after first user interaction to avoid scroll freeze -->
+  <!-- Ad monetisation — loads 10 seconds after page load to never compete with scrolling -->
   <script>
-  (function() {
-    var _adLoaded = false;
-    function _loadAd() {
-      if (_adLoaded) return;
-      _adLoaded = true;
-      var script = document.createElement("script");
-      script.async = 1;
-      script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
-      document.head.appendChild(script);
-    }
-    // Wait for first scroll or click before loading — keeps initial page snappy
-    window.addEventListener('scroll', _loadAd, { once: true, passive: true });
-    window.addEventListener('click', _loadAd, { once: true });
-    // Fallback: load after 5 seconds anyway
-    setTimeout(_loadAd, 5000);
-  })();
+  setTimeout(function() {
+    var script = document.createElement("script");
+    script.async = 1;
+    script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
+    document.head.appendChild(script);
+  }, 10000);
   </script>
 
   <!-- Google Analytics (tracks visitors, revenue, conversions) -->
@@ -767,27 +757,27 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         <div class="destinations-grid" id="destinations-grid">
           <!-- Europe -->
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','LHR')">
-            <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&q=80" alt="London" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → London</h3><p>HEL → LHR · 3h 15m</p><span class="dest-price" data-eur="130" data-php="8060">From €130</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','CDG')">
-            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80" alt="Paris" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → Paris</h3><p>HEL → CDG · 3h 30m</p><span class="dest-price" data-eur="138" data-php="8556">From €138</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','BCN')">
-            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&q=80" alt="Barcelona" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → Barcelona</h3><p>HEL → BCN · ~8h (1 stop)</p><span class="dest-price" data-eur="145" data-php="8990">From €145</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','AMS')">
-            <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400&q=80" alt="Amsterdam" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → Amsterdam</h3><p>HEL → AMS · ~3h 0m</p><span class="dest-price" data-eur="125" data-php="7750">From €125</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','FCO')">
-            <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=80" alt="Rome" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → Rome</h3><p>HEL → FCO · ~3h 45m</p><span class="dest-price" data-eur="142" data-php="8804">From €142</span></div>
           </div>
           <div class="dest-card" data-region="europe" onclick="quickSearch('HEL','WAW')">
-            <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=400&q=80" alt="Warsaw" loading="lazy" decoding="async" width="400" height="240" />
             <div class="dest-info"><h3>Helsinki → Warsaw</h3><p>HEL → WAW · ~2h 0m</p><span class="dest-price" data-eur="98" data-php="6076">From €98</span></div>
           </div>
           
@@ -1181,7 +1171,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
           </button>
         </div>
         <div class="features-image">
-          <img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80" alt="Happy travelers at airport" loading="lazy" />
+          <img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80" alt="Happy travelers at airport" loading="lazy" decoding="async" width="600" height="400" />
         </div>
       </div>
     </section>
@@ -3941,4 +3931,5 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       var c = POLICY_CONTENT[type];
       if (!c) return;
       document.getElementById('policy-modal-title').textContent = c.title;
-   
+      document.getElementById('policy-modal-body').innerHTML = c.html;
+      var overlay = document.getElementBy
