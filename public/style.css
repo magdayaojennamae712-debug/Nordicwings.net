@@ -84,10 +84,8 @@ img { max-width: 100%; display: block; }
   top: 0;
   z-index: 1000;
   box-shadow: var(--shadow-sm);
-  -webkit-transform: translate3d(0,0,0);
-  transform: translate3d(0,0,0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  /* transform+backface removed — they conflict with sticky and cause scroll freeze */
+  will-change: auto;
 }
 /* iOS Safari: ensure header elements receive touch events */
 #site-header * {
@@ -1711,4 +1709,4 @@ img { max-width: 100%; display: block; }
 }
 @media (max-width: 600px) {
   .tp-reviews-section { padding: 28px 0; }
-  .tp-fa
+  .tp-fa                                  
