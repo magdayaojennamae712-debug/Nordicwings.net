@@ -244,14 +244,24 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" /></noscript>
 
-  <!-- Travelpayouts Content Analytics — deferred, loads after page is ready -->
+  <!-- Ad monetisation — loads only after first user interaction to avoid scroll freeze -->
   <script>
-  window.addEventListener('load', function() {
-    var script = document.createElement("script");
-    script.async = 1;
-    script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
-    document.head.appendChild(script);
-  });
+  (function() {
+    var _adLoaded = false;
+    function _loadAd() {
+      if (_adLoaded) return;
+      _adLoaded = true;
+      var script = document.createElement("script");
+      script.async = 1;
+      script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
+      document.head.appendChild(script);
+    }
+    // Wait for first scroll or click before loading — keeps initial page snappy
+    window.addEventListener('scroll', _loadAd, { once: true, passive: true });
+    window.addEventListener('click', _loadAd, { once: true });
+    // Fallback: load after 5 seconds anyway
+    setTimeout(_loadAd, 5000);
+  })();
   </script>
 
   <!-- Google Analytics (tracks visitors, revenue, conversions) -->
@@ -1741,23 +1751,38 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         </div>
       </div>
 
-      <!-- ── Travelpayouts Ad Banner (earns commission) ── -->
-      <div class="ad-banner-wrap">
+      <!-- ── Travelpayouts Ad Banner (earns commission) — lazy-loads on scroll ── -->
+      <div class="ad-banner-wrap" id="tp-banner-container">
         <div class="ad-label">Sponsored</div>
-        <script async src="//widgets.travelpayouts.com/widget.js"
-          data-locale="en"
-          data-width="auto"
-          data-height="60"
-          data-type="banner"
-          data-marker="719573"
-          data-target-host="aviasales.com"
-          charset="utf-8"></script>
-        <noscript>
-          <a href="https://www.jetradar.com/?marker=719573" target="_blank">
-            <img src="https://images.aviasales.com/banners/600x90.gif" alt="Find cheap flights" style="width:100%;max-width:728px;border-radius:8px;" />
-          </a>
-        </noscript>
+        <div id="tp-banner-placeholder" style="height:60px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:.8rem;">Loading deals…</div>
       </div>
+      <script>
+      (function() {
+        var container = document.getElementById('tp-banner-container');
+        var loaded = false;
+        if (!container) return;
+        var io = new IntersectionObserver(function(entries) {
+          if (entries[0].isIntersecting && !loaded) {
+            loaded = true;
+            io.disconnect();
+            var placeholder = document.getElementById('tp-banner-placeholder');
+            if (placeholder) placeholder.remove();
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = '//widgets.travelpayouts.com/widget.js';
+            s.setAttribute('data-locale', 'en');
+            s.setAttribute('data-width', 'auto');
+            s.setAttribute('data-height', '60');
+            s.setAttribute('data-type', 'banner');
+            s.setAttribute('data-marker', '719573');
+            s.setAttribute('data-target-host', 'aviasales.com');
+            s.charset = 'utf-8';
+            container.appendChild(s);
+          }
+        }, { rootMargin: '200px' });
+        io.observe(container);
+      })();
+      </script>
     </div>
   </main>
 
@@ -3916,34 +3941,4 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       var c = POLICY_CONTENT[type];
       if (!c) return;
       document.getElementById('policy-modal-title').textContent = c.title;
-      document.getElementById('policy-modal-body').innerHTML = c.html;
-      var overlay = document.getElementById('policy-modal-overlay');
-      overlay.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closePolicyModal(e) {
-      if (e && e.target !== document.getElementById('policy-modal-overlay')) return;
-      var overlay = document.getElementById('policy-modal-overlay');
-      if (overlay) { overlay.style.display = 'none'; document.body.style.overflow = ''; }
-    }
-
-    // Language dropdown
-    var NW_LANGS = [
-      { code: 'en', label: '\ud83c\uddec\ud83c\udde7 English' },
-      { code: 'fi', label: '\ud83c\uddeb\ud83c\uddee Finnish' },
-      { code: 'tl', label: '\ud83c\uddf5\ud83c\udded Filipino' },
-      { code: 'de', label: '🇩🇪 German' },
-      { code: 'fr', label: '🇫🇷 French' },
-      { code: 'es', label: '🇪🇸 Spanish' },
-      { code: 'sv', label: '🇸🇪 Swedish' }
-    ];
-
-    function nwToggleLang(event) {
-      event.stopPropagation();
-      var dd = document.getElementById('lang-dropdown');
-      if (!dd) return;
-      dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
-    }
-
-    functio
+   
