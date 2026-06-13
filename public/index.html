@@ -596,9 +596,9 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
               style="flex:1;min-width:90px;display:flex;align-items:center;justify-content:center;gap:5px;background:#e53e3e;color:#fff;border-radius:8px;padding:8px 10px;font-size:.78rem;font-weight:700;text-decoration:none;text-align:center;">
               ⭐ Hotels.com
             </a>
-            <a href="https://www.hotels.com/?pos=HCOM_FI&locale=en_FI&affid=719573" target="_blank" rel="noopener sponsored"
+            <a href="https://www.booking.com/?aid=1522414" target="_blank" rel="noopener sponsored"
               style="flex:1;min-width:90px;display:flex;align-items:center;justify-content:center;gap:5px;background:#003580;color:#fff;border-radius:8px;padding:8px 10px;font-size:.78rem;font-weight:700;text-decoration:none;text-align:center;">
-              🛎️ Hotels.com
+              🏨 Booking.com
             </a>
           </div>
         </div>
@@ -1655,9 +1655,9 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
               style="display:inline-flex;align-items:center;gap:6px;background:#e53e3e;color:#fff;border-radius:10px;padding:10px 18px;font-size:.85rem;font-weight:700;text-decoration:none;">
               ⭐ Hotels.com
             </a>
-            <a href="https://www.hotels.com/?pos=HCOM_FI&locale=en_FI&affid=719573" target="_blank" rel="noopener sponsored"
+            <a href="https://www.booking.com/?aid=1522414" target="_blank" rel="noopener sponsored"
               style="display:inline-flex;align-items:center;gap:6px;background:#003580;color:#fff;border-radius:10px;padding:10px 18px;font-size:.85rem;font-weight:700;text-decoration:none;">
-              🛎️ Hotels.com
+              🏨 Booking.com
             </a>
             <a href="https://www.hostelworld.com/?utm_source=nordicwings&utm_medium=affiliate&utm_campaign=hotel_upsell" target="_blank" rel="noopener sponsored"
               style="display:inline-flex;align-items:center;gap:6px;background:#ff6600;color:#fff;border-radius:10px;padding:10px 18px;font-size:.85rem;font-weight:700;text-decoration:none;">
@@ -3932,4 +3932,34 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
       if (!c) return;
       document.getElementById('policy-modal-title').textContent = c.title;
       document.getElementById('policy-modal-body').innerHTML = c.html;
-      var overlay = document.getElementBy
+      var overlay = document.getElementById('policy-modal-overlay');
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePolicyModal(e) {
+      if (e && e.target !== document.getElementById('policy-modal-overlay')) return;
+      var overlay = document.getElementById('policy-modal-overlay');
+      if (overlay) { overlay.style.display = 'none'; document.body.style.overflow = ''; }
+    }
+
+    // Language dropdown
+    var NW_LANGS = [
+      { code: 'en', label: '\ud83c\uddec\ud83c\udde7 English' },
+      { code: 'fi', label: '\ud83c\uddeb\ud83c\uddee Finnish' },
+      { code: 'tl', label: '\ud83c\uddf5\ud83c\udded Filipino' },
+      { code: 'de', label: '🇩🇪 German' },
+      { code: 'fr', label: '🇫🇷 French' },
+      { code: 'es', label: '🇪🇸 Spanish' },
+      { code: 'sv', label: '🇸🇪 Swedish' }
+    ];
+
+    function nwToggleLang(event) {
+      event.stopPropagation();
+      var dd = document.getElementById('lang-dropdown');
+      if (!dd) return;
+      dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function nwSelectLang(code) {
+      var dd = document.getElem
