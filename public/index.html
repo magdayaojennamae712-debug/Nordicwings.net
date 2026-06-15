@@ -3962,4 +3962,18 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
     }
 
     function nwSelectLang(code) {
-      var dd = document.getElem
+      var dd = document.getElementById('lang-dropdown');
+      if (dd) dd.style.display = 'none';
+      var btn = document.getElementById('lang-btn-label');
+      var lang = NW_LANGS.find(function(l) { return l.code === code; });
+      if (btn && lang) btn.textContent = lang.label;
+    }
+
+    document.addEventListener('click', function() {
+      var dd = document.getElementById('lang-dropdown');
+      if (dd) dd.style.display = 'none';
+    });
+
+  </script>
+</body>
+</html>
