@@ -162,4 +162,25 @@
 
   <!-- Long-haul / Americas -->
 
+
+  <!-- Blog articles – Scandinavia (new July 2026) -->
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-helsinki-stockholm.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.88</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-helsinki-copenhagen.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.87</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-helsinki-amsterdam.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.86</priority>
+  </url>
+
 </urlset>
