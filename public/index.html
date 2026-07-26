@@ -28,15 +28,25 @@
 
 <!-- Tradedoubler site ownership verification -->
   <meta name="tdv" content="3481315" />
-  <!-- Google AdSense — deferred so it never blocks page interaction -->
+  <!-- Google AdSense — loads after first user interaction to prevent page freeze -->
   <script>
-  window.addEventListener('load', function() {
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8747570105267051';
-    s.crossOrigin = 'anonymous';
-    document.head.appendChild(s);
-  });
+  (function() {
+    var adsLoaded = false;
+    function loadAds() {
+      if (adsLoaded) return;
+      adsLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8747570105267051';
+      s.crossOrigin = 'anonymous';
+      document.head.appendChild(s);
+    }
+    ['click', 'touchstart', 'keydown'].forEach(function(e) {
+      window.addEventListener(e, loadAds, { once: true, passive: true });
+    });
+    // Fallback: load after 30 seconds even without interaction
+    setTimeout(loadAds, 30000);
+  })();
   </script>
 
   <!-- PWA -->
