@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nordicwings-v51';
+const CACHE_NAME = 'nordicwings-v52';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   '/icon-512.png',
   '/blog/',
   '/blog/index.html',
+  // Helsinki routes
   '/blog/cheapest-flights-helsinki-bangkok.html',
   '/blog/cheapest-time-fly-helsinki-manila.html',
   '/blog/cheapest-european-cities-from-helsinki.html',
@@ -24,7 +25,19 @@ const STATIC_ASSETS = [
   '/blog/cheapest-flights-helsinki-cancun.html',
   '/blog/cheapest-flights-helsinki-lisbon.html',
   '/blog/cheapest-flights-helsinki-barcelona.html',
-  '/blog/cheapest-summer-flights-helsinki-2026.html'
+  '/blog/cheapest-summer-flights-helsinki-2026.html',
+  '/blog/cheapest-flights-helsinki-athens.html',
+  '/blog/cheapest-flights-helsinki-istanbul.html',
+  '/blog/cheapest-flights-helsinki-malaga.html',
+  '/blog/cheapest-flights-helsinki-stockholm.html',
+  '/blog/cheapest-flights-helsinki-copenhagen.html',
+  '/blog/cheapest-flights-helsinki-amsterdam.html',
+  // London routes
+  '/blog/cheapest-flights-london-barcelona.html',
+  '/blog/cheapest-flights-london-rome.html',
+  '/blog/cheapest-flights-london-amsterdam.html',
+  '/blog/cheapest-flights-london-paris.html',
+  '/blog/cheapest-flights-london-madrid.html'
 ];
 
 // Install: cache static assets

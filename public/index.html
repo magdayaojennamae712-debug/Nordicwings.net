@@ -244,14 +244,22 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" /></noscript>
 
-  <!-- Ad monetisation — loads 10 seconds after page load to never compete with scrolling -->
+  <!-- Ad monetisation — loads only on first user interaction to prevent page freeze -->
   <script>
-  setTimeout(function() {
-    var script = document.createElement("script");
-    script.async = 1;
-    script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
-    document.head.appendChild(script);
-  }, 10000);
+  (function() {
+    var adLoaded = false;
+    function loadAd() {
+      if (adLoaded) return;
+      adLoaded = true;
+      var script = document.createElement("script");
+      script.async = 1;
+      script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
+      document.head.appendChild(script);
+    }
+    ['click','scroll','keydown','touchstart'].forEach(function(e) {
+      window.addEventListener(e, loadAd, { once: true, passive: true });
+    });
+  })();
   </script>
 
   <!-- Google Analytics (tracks visitors, revenue, conversions) -->
@@ -310,7 +318,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
   </script>
   <script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
 
-  <!-- Google Translate -->
+  <!-- Google Translate — loaded only on demand to prevent DOM jank -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -318,8 +326,14 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         autoDisplay: false
       }, 'google_translate_element');
     }
+    function loadGoogleTranslate() {
+      if (document.getElementById('gt-script')) return;
+      var s = document.createElement('script');
+      s.id = 'gt-script';
+      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      document.head.appendChild(s);
+    }
   </script>
-  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   <div id="google_translate_element" style="display:none;"></div>
 </head>
 <body onclick="void(0)">
