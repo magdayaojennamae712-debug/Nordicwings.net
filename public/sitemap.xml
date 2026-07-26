@@ -183,4 +183,36 @@
     <priority>0.86</priority>
   </url>
 
+  <!-- London routes (new July 2026) -->
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-london-barcelona.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-london-rome.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-london-amsterdam.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-london-paris.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://nordicwings.net/blog/cheapest-flights-london-madrid.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
 </urlset>
