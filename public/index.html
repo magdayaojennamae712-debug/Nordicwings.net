@@ -244,23 +244,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" /></noscript>
 
-  <!-- Ad monetisation — loads only on first user interaction to prevent page freeze -->
-  <script>
-  (function() {
-    var adLoaded = false;
-    function loadAd() {
-      if (adLoaded) return;
-      adLoaded = true;
-      var script = document.createElement("script");
-      script.async = 1;
-      script.src = 'https://emrldco.com/NTE5NjYz.js?t=519663';
-      document.head.appendChild(script);
-    }
-    ['click','scroll','keydown','touchstart'].forEach(function(e) {
-      window.addEventListener(e, loadAd, { once: true, passive: true });
-    });
-  })();
-  </script>
+  <!-- Ad monetisation removed — was causing page freeze -->
 
   <!-- Google Analytics (tracks visitors, revenue, conversions) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-WERWZ07J05"></script>
