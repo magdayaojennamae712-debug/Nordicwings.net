@@ -1304,10 +1304,12 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
   const tripDate   = date ? date.replace(/-/g, '') : '';
-  const kiwiUrl    = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pax}&affilid=kiwi_affiliates`;
+  const kiwiDeep   = encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pax}`);
+  const kiwiUrl    = `https://tp.media/r?marker=${TP}&p=4114&u=${kiwiDeep}`;
   const aviaUrl    = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
   const tripUrl    = `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pax}`;
-  const expediaUrl = `https://www.jdoqocy.com/click-101737492-13852728?url=https%3A%2F%2Fwww.expedia.fi%2FLennot`;
+  const expediaDeep = encodeURIComponent(`https://www.expedia.fi/Flights-Search?trip=oneway&leg1=from:${orig},to:${dest},departure:${date}TANYT&passengers=adults:${pax}`);
+  const expediaUrl = `https://www.jdoqocy.com/click-101737492-13852728?url=${expediaDeep}`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
   const list = document.getElementById('results-list');
@@ -1545,9 +1547,10 @@ function renderFlightCards(flights) {
   const kiwiPass   = searchParams.numAdults || 1;
 
   // Pre-filled deep links — route + date + passengers passed directly
-  const kiwiUrl = (kiwiOrigin && kiwiDest && kiwiDate)
-    ? `https://www.kiwi.com/en/search/results/${kiwiOrigin}/${kiwiDest}/${kiwiDate}?adults=${kiwiPass}&affilid=kiwi_affiliates`
-    : `https://kiwi.tpk.mx/Imxir0ir`;
+  const kiwiDeepBanner = (kiwiOrigin && kiwiDest && kiwiDate)
+    ? encodeURIComponent(`https://www.kiwi.com/en/search/results/${kiwiOrigin}/${kiwiDest}/${kiwiDate}/?adults=${kiwiPass}`)
+    : encodeURIComponent('https://www.kiwi.com/');
+  const kiwiUrl = `https://tp.media/r?marker=719573&p=4114&u=${kiwiDeepBanner}`;
 
   const kiwiDateTrip = kiwiDate ? kiwiDate.replace(/-/g, '') : '';
   const tripUrl = (kiwiOrigin && kiwiDest && kiwiDateTrip)
@@ -1954,14 +1957,14 @@ function openPartnerLink(agencyName) {
 
   // Affiliate deep links — confirmed partners only (earn real commission)
   const links = {
-    'Kiwi.com':   `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`,
+    'Kiwi.com':   `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pass}`)}`,
     'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
     'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
     'Trip.com':   `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pass}`,
   };
 
   // Fallback to Kiwi.com (affiliate)
-  const fallback = `https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}?adults=${pass}&affilid=kiwi_affiliates`;
+  const fallback = `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pass}`)}`;
   const url = links[agencyName] || fallback;
 
   // Track affiliate click in Google Analytics
