@@ -1310,6 +1310,8 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const tripUrl    = `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pax}`;
   const expediaDeep = encodeURIComponent(`https://www.expedia.fi/Flights-Search?trip=oneway&leg1=from:${orig},to:${dest},departure:${date}TANYT&passengers=adults:${pax}`);
   const expediaUrl = `https://www.jdoqocy.com/click-101737492-13852728?url=${expediaDeep}`;
+  const checkoutDate = date ? new Date(new Date(date).getTime() + 7*24*60*60*1000).toISOString().split('T')[0] : '';
+  const bookingUrl = `https://www.booking.com/searchresults.html?aid=1522414&label=affnetcj-7600950&ss=${encodeURIComponent(toName)}&checkin=${date}&checkout=${checkoutDate}&group_adults=${pax}&no_rooms=1`;
   const jBase    = `https://jetradar.com/flights/?marker=${TP}&origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pax}`;
 
   const list = document.getElementById('results-list');
@@ -1322,7 +1324,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
         <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Click any option below — you'll be taken directly to the airline or booking site to complete your purchase securely.</div>
       </div>
 
-      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines — 4 options below</div>
+      <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🌍 Compare all airlines — 5 options below</div>
       <div style="background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:#713f12;font-weight:600;text-align:center;">
         👇 Scroll down to see all partners &amp; airlines
       </div>
@@ -1370,6 +1372,17 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
             </div>
           </div>
           <span style="background:#d97706;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
+        </a>
+        <a href="${bookingUrl}" target="_blank" rel="noopener" onclick="typeof gtag==='function'&&gtag('event','affiliate_click',{event_category:'Revenue',event_label:'Booking.com: '+orig+' → '+dest,value:1})"
+          style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #c7d2fe;border-radius:12px;padding:16px 18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.8rem;">🏡</span>
+            <div>
+              <div style="font-weight:800;color:#1d4ed8;font-size:.95rem;">Booking.com</div>
+              <div style="font-size:.78rem;color:#475569;">Hotels &amp; stays near ${toName} — free cancellation</div>
+            </div>
+          </div>
+          <span style="background:#1d4ed8;color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;">Search →</span>
         </a>
       </div>
 
