@@ -338,8 +338,46 @@ const ROUTE_NAMES = {
   HKG:'Hong Kong', NRT:'Tokyo', ICN:'Seoul', CGK:'Jakarta',
   LHR:'London', CDG:'Paris', AMS:'Amsterdam', BCN:'Barcelona',
   FCO:'Rome', FRA:'Frankfurt', ARN:'Stockholm', CPH:'Copenhagen',
-  HEL:'Helsinki', OUL:'Oulu', TMP:'Tampere', TKU:'Turku'
+  HEL:'Helsinki', OUL:'Oulu', TMP:'Tampere', TKU:'Turku',
+  MAD:'Madrid', VIE:'Vienna', ATH:'Athens', IST:'Istanbul',
+  AGP:'Malaga', LIS:'Lisbon', TFS:'Tenerife', DPS:'Bali',
+  NRT:'Tokyo', JFK:'New York', CUN:'Cancun', CIA:'Rome',
+  DOH:'Doha', AUH:'Abu Dhabi', MXP:'Milan', NAP:'Naples',
+  PMI:'Palma', IBZ:'Ibiza', VLC:'Valencia', OPO:'Porto',
+  FAO:'Faro', PRG:'Prague', BUD:'Budapest', WAW:'Warsaw',
+  KEF:'Reykjavik', OSL:'Oslo', GOT:'Gothenburg',
+  RVN:'Rovaniemi', IVL:'Ivalo', KTT:'Kittila'
 };
+
+// Kiwi.com uses city-country slugs in URLs (not IATA codes)
+const KIWI_SLUGS = {
+  HEL:'helsinki-finland', OUL:'oulu-finland', TMP:'tampere-finland',
+  TKU:'turku-finland', RVN:'rovaniemi-finland', IVL:'ivalo-finland', KTT:'kittila-finland',
+  LHR:'london-united-kingdom', LGW:'london-gatwick-united-kingdom', STN:'london-stansted-united-kingdom',
+  CDG:'paris-france', ORY:'paris-orly-france',
+  AMS:'amsterdam-netherlands',
+  BCN:'barcelona-spain', MAD:'madrid-spain', AGP:'malaga-spain',
+  PMI:'palma-mallorca-spain', IBZ:'ibiza-spain', VLC:'valencia-spain',
+  FCO:'rome-italy', CIA:'rome-ciampino-italy', MXP:'milan-malpensa-italy', NAP:'naples-italy',
+  FRA:'frankfurt-germany', MUC:'munich-germany', BER:'berlin-germany',
+  ARN:'stockholm-sweden', GOT:'gothenburg-sweden',
+  CPH:'copenhagen-denmark',
+  OSL:'oslo-norway', KEF:'reykjavik-iceland',
+  VIE:'vienna-austria', PRG:'prague-czechia', BUD:'budapest-hungary', WAW:'warsaw-poland',
+  ATH:'athens-greece', IST:'istanbul-turkey', SAW:'istanbul-sabiha-turkey',
+  LIS:'lisbon-portugal', OPO:'porto-portugal', FAO:'faro-portugal',
+  TFS:'tenerife-south-spain', DPS:'bali-indonesia',
+  DXB:'dubai-united-arab-emirates', DOH:'doha-qatar', AUH:'abu-dhabi-united-arab-emirates',
+  BKK:'bangkok-thailand', SIN:'singapore-singapore', KUL:'kuala-lumpur-malaysia',
+  HKG:'hong-kong-hong-kong', NRT:'tokyo-japan', HND:'tokyo-haneda-japan',
+  ICN:'seoul-south-korea', MNL:'manila-philippines', CEB:'cebu-philippines',
+  DVO:'davao-philippines', CRK:'clark-philippines',
+  CGK:'jakarta-indonesia', KUL:'kuala-lumpur-malaysia',
+  JFK:'new-york-city-new-york', EWR:'newark-new-jersey',
+  CUN:'cancun-mexico', ZRH:'zurich-switzerland',
+  BRU:'brussels-belgium', DUB:'dublin-ireland'
+};
+function kiwiSlug(iata) { return KIWI_SLUGS[iata] || iata; }
 function updateSeoForRoute(from, to) {
   const fromName = ROUTE_NAMES[from] || from;
   const toName   = ROUTE_NAMES[to]   || to;
@@ -1304,7 +1342,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
   const tripDate   = date ? date.replace(/-/g, '') : '';
-  const kiwiDeep   = encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pax}`);
+  const kiwiDeep   = encodeURIComponent(`https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/`);
   const kiwiUrl    = `https://tp.media/r?marker=${TP}&p=4114&u=${kiwiDeep}`;
   const aviaUrl    = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
   const tripUrl    = `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pax}`;
@@ -1970,7 +2008,7 @@ function openPartnerLink(agencyName) {
 
   // Affiliate deep links — confirmed partners only (earn real commission)
   const links = {
-    'Kiwi.com':   `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pass}`)}`,
+    'Kiwi.com':   `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/`)}`,
     'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
     'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
     'Trip.com':   `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pass}`,
