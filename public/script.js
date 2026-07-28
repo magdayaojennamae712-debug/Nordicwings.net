@@ -1342,8 +1342,7 @@ function renderAffiliateResults(orig, dest, date, adults, children, infants) {
   const label    = (orig && dest) ? `${fromName} → ${toName}` : 'your route';
 
   const tripDate   = date ? date.replace(/-/g, '') : '';
-  const kiwiDeep   = encodeURIComponent(`https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/`);
-  const kiwiUrl    = `https://tp.media/r?marker=${TP}&p=4114&u=${kiwiDeep}`;
+  const kiwiUrl    = `https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/?marker=${TP}`;
   const aviaUrl    = `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pax}`;
   const tripUrl    = `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pax}`;
   const expediaDeep = encodeURIComponent(`https://www.expedia.fi/Flights-Search?trip=oneway&leg1=from:${orig},to:${dest},departure:${date}TANYT&passengers=adults:${pax}`);
@@ -2008,14 +2007,14 @@ function openPartnerLink(agencyName) {
 
   // Affiliate deep links — confirmed partners only (earn real commission)
   const links = {
-    'Kiwi.com':   `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/`)}`,
+    'Kiwi.com':   `https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/?marker=${TP}`,
     'Aviasales':  `https://aviasales.com/?marker=${TP}&origin=${orig}&destination=${dest}&departure_at=${date}&adults=${pass}`,
     'Jetradar':   `https://www.jetradar.com/flights/?origin=${orig}&destination=${dest}&depart_date=${date}&adults=${pass}&marker=${TP}`,
     'Trip.com':   `https://www.trip.com/flights/explore?Allianceid=8098413&SID=306552835&trip_sub1=flights&dcity=${orig.toLowerCase()}&acity=${dest.toLowerCase()}&ddate=${date}&triptype=ow&class=y&quantity=${pass}`,
   };
 
   // Fallback to Kiwi.com (affiliate)
-  const fallback = `https://tp.media/r?marker=${TP}&p=4114&u=${encodeURIComponent(`https://www.kiwi.com/en/search/results/${orig}/${dest}/${date}/?adults=${pass}`)}`;
+  const fallback = `https://www.kiwi.com/en/search/results/${kiwiSlug(orig)}/${kiwiSlug(dest)}/${date}/?marker=${TP}`;
   const url = links[agencyName] || fallback;
 
   // Track affiliate click in Google Analytics
