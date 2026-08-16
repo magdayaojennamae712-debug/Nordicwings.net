@@ -1519,6 +1519,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
             <div class="ftb">🏆 Trusted Business</div>
           </div>
           <div class="payment-logos">
+            <div style="font-size:.7rem;color:#9ca3af;margin-bottom:6px;width:100%;text-align:center;">Accepted by our booking partners:</div>
             <span class="pay-logo visa">VISA</span>
             <span class="pay-logo mc">MC</span>
             <span class="pay-logo amex">AMEX</span>
@@ -1839,7 +1840,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
           <h3>Payment</h3>
           <!-- Accepted payment methods -->
           <div style="margin-bottom:12px;">
-            <div style="font-size:.75rem;color:#6b7280;margin-bottom:8px;">Accepted payment methods:</div>
+            <div style="font-size:.75rem;color:#6b7280;margin-bottom:8px;">Secure payment via Stripe — accepted cards:</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
               <!-- Visa -->
               <div style="background:#1a1f71;color:#fff;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:5px;letter-spacing:.5px;">VISA</div>
@@ -1891,9 +1892,10 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
           </div>
 
           <button class="btn-book" id="pay-btn" onclick="submitBooking()">
-            <span id="pay-btn-text">Confirm & Pay</span>
+            <span id="pay-btn-text">Confirm & Pay Securely</span>
             <span id="pay-btn-spinner" class="spinner" style="display:none;"></span>
           </button>
+          <p style="font-size:.72rem;color:#6b7280;text-align:center;margin-top:8px;">🔒 Payment processed securely via Stripe. Your ticket will be sent by email within minutes.</p>
         </div>
         <div class="booking-summary-card">
           <h3>Your Flight</h3>
@@ -1912,8 +1914,8 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
     <div class="page-inner confirmation-inner">
       <div class="confirmation-card">
         <div class="confirmation-icon">✅</div>
-        <h2>Booking Confirmed!</h2>
-        <p class="confirmation-msg">Your flight has been booked successfully. Check your email for details.</p>
+        <h2>Booking Confirmed! ✈️</h2>
+        <p class="confirmation-msg">Your booking is confirmed and your e-ticket has been issued. Please check your email — your ticket and booking reference will arrive within a few minutes. Contact the airline directly for any changes or cancellations.</p>
         <div class="confirmation-details" id="confirmation-details"></div>
         <div class="confirmation-actions">
           <button class="btn-primary" onclick="showPage('dashboard')">View My Bookings</button>
@@ -3464,7 +3466,8 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
         <div style="position:absolute;bottom:-60px;left:-30px;width:280px;height:280px;background:rgba(255,255,255,.03);border-radius:50%;"></div>
         <div style="display:inline-block;background:rgba(255,255,255,.15);color:#fff;font-size:.78rem;font-weight:700;letter-spacing:1px;padding:5px 18px;border-radius:20px;text-transform:uppercase;margin-bottom:16px;">💰 NordicWings Cashback</div>
         <h1 style="color:#fff;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;margin:0 0 14px;line-height:1.15;">Earn Real Cash Back<br><span style="color:#7dd3fc;">Every Time You Travel</span></h1>
-        <p style="color:#bfdbfe;font-size:1.05rem;max-width:560px;margin:0 auto 28px;line-height:1.65;">Book flights, hotels, tours and ferries through NordicWings — <strong style="color:#fff;">earn cashback on every booking</strong>, paid straight to your PayPal. No credit card needed. No subscriptions.</p>
+        <p style="color:#bfdbfe;font-size:1.05rem;max-width:560px;margin:0 auto 16px;line-height:1.65;">Book flights, hotels, tours and ferries through NordicWings — <strong style="color:#fff;">earn cashback on qualifying bookings</strong>, credited to your account and paid via PayPal. No credit card needed. No subscriptions.</p>
+        <p style="color:rgba(191,219,254,0.7);font-size:.78rem;max-width:520px;margin:0 auto 20px;line-height:1.5;">⚠️ Cashback is paid from our affiliate commission. It is credited after the affiliate partner confirms the booking (typically 30–90 days after travel). Cancelled or refunded bookings do not qualify. Payouts require a minimum balance of €10.</p>
         <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
           <button id="cb-hero-signup-btn" onclick="openAuthModal('signup')" style="background:#3b82f6;color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Create Free Account →</button>
           <button id="cb-hero-claim-btn" onclick="document.getElementById('cb-claim-form').scrollIntoView({behavior:'smooth'})" style="display:none;background:#22c55e;color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">💰 Claim Your Cashback →</button>
@@ -3509,7 +3512,7 @@ Helsinki Tallinn ferry, Helsinki Stockholm ferry, Turku Stockholm ferry, Baltic 
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);">
             <div style="width:52px;height:52px;background:#fef9c3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;">3️⃣</div>
             <h3 style="font-size:1rem;font-weight:700;color:#0f172a;margin:0 0 8px;">Get Paid</h3>
-            <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin:0;">Once verified (usually within 30 days), your cashback is credited. Request a payout via PayPal once you reach €10.</p>
+            <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin:0;">Once the affiliate partner confirms your booking (typically 30–90 days after travel), your cashback is credited to your account. Request a PayPal payout once your balance reaches €10. Cancelled bookings do not qualify.</p>
           </div>
         </div>
       </div>
